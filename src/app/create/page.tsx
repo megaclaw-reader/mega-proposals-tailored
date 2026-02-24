@@ -148,6 +148,28 @@ export default function CreateProposal() {
         firefliesUrl: formData.firefliesUrl || undefined,
         firefliesInsights,
       });
+
+      // Save proposal with a clean slug and get the professional URL
+      try {
+        const saveRes = await fetch('/api/proposals/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            encodedProposal: encoded,
+            companyName: formData.companyName,
+          }),
+        });
+
+        if (saveRes.ok) {
+          const { slug } = await saveRes.json();
+          router.push(`/p/${slug}`);
+          return;
+        }
+      } catch (saveErr) {
+        console.warn('Failed to create clean URL, falling back:', saveErr);
+      }
+
+      // Fallback to encoded URL if save fails
       router.push(`/proposal/${encoded}`);
     } catch (error) {
       console.error('Error creating proposal:', error);
