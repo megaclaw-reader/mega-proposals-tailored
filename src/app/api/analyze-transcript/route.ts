@@ -3,55 +3,40 @@ import { FirefliesInsights } from '@/lib/types';
 
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
-interface AnalyzeRequest {
-  transcriptText: string;
-}
-
 export async function POST(request: NextRequest) {
   try {
-    const { transcriptText }: AnalyzeRequest = await request.json();
+    const { transcriptSummary, meetingTitle, companyName } = await request.json();
 
-    if (!transcriptText || transcriptText.trim().length === 0) {
+    if (!transcriptSummary || transcriptSummary.trim().length === 0) {
       return NextResponse.json(
-        { error: 'Transcript text is required' },
+        { error: 'Transcript summary is required' },
         { status: 400 }
       );
     }
 
     if (!ANTHROPIC_API_KEY) {
-      console.warn('ANTHROPIC_API_KEY not configured, using fallback analysis');
-      // Fallback analysis without AI
-      const insights: FirefliesInsights = {
-        painPoints: ['Manual analysis required - please review the transcript'],
-        discussionTopics: ['Transcript analysis needs to be configured'],
-        megaSolutions: ['Custom proposal based on conversation'],
-        summary: 'This proposal has been customized based on your sales conversation. Please review the transcript details to ensure accuracy.'
-      };
-      return NextResponse.json({ insights });
+      console.warn('ANTHROPIC_API_KEY not configured, using fallback');
+      return NextResponse.json({
+        insights: extractInsightsFallback(transcriptSummary)
+      });
     }
 
-    // Call Anthropic API to analyze the transcript
-    const analysisPrompt = `
-Analyze this sales call transcript and extract insights for a tailored marketing agency proposal. Focus on identifying:
+    const analysisPrompt = `You are analyzing a sales call summary to create a tailored marketing proposal. The prospect's company is "${companyName || 'the prospect'}".
 
-1. PAIN POINTS: Specific challenges, frustrations, or gaps the prospect mentioned
-2. DISCUSSION TOPICS: Key areas discussed (budget, channels, goals, timeline, etc.)
-3. MEGA SOLUTIONS: How MEGA's services (SEO, Paid Ads, Website optimization) can address their needs
-4. SUMMARY: A brief executive summary for the proposal
+Here is the meeting summary from Fireflies.ai:
 
-Transcript:
-${transcriptText}
+${transcriptSummary}
 
-Please respond with a JSON object in this exact format:
-{
-  "painPoints": ["specific pain point 1", "specific pain point 2", ...],
-  "discussionTopics": ["topic 1", "topic 2", ...],
-  "megaSolutions": ["how MEGA helps with X", "how MEGA addresses Y", ...],
-  "summary": "A concise 2-3 sentence summary of their situation and how MEGA can help"
-}
+Extract the following as a JSON object:
 
-Keep each array item concise but specific. Focus on actionable insights that will make the proposal feel personalized.
-`;
+1. "painPoints" - Array of 3-6 specific challenges/frustrations the PROSPECT mentioned (not what the sales rep said). Be specific to their business.
+2. "discussionTopics" - Array of 4-8 key business topics discussed (budget, channels, goals, team size, industry specifics, etc.)
+3. "megaSolutions" - Array of 3-6 specific ways MEGA's services address their needs. Map each solution to a pain point. Be concrete, not generic.
+4. "summary" - A 2-3 sentence executive summary written FOR the proposal. Address the prospect directly ("your team", "your challenges"). Don't mention MEGA by name — use "our" or "we". This should feel personalized, not templated.
+
+IMPORTANT: Focus on what the PROSPECT said and needs, not what the sales rep pitched. The proposal should feel like it was written specifically for them.
+
+Respond with ONLY the JSON object, no other text.`;
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -61,8 +46,8 @@ Keep each array item concise but specific. Focus on actionable insights that wil
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-3-sonnet-20240229',
-        max_tokens: 1000,
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1500,
         messages: [{
           role: 'user',
           content: analysisPrompt
@@ -71,37 +56,31 @@ Keep each array item concise but specific. Focus on actionable insights that wil
     });
 
     if (!response.ok) {
-      console.error('Anthropic API error:', response.status, await response.text());
-      throw new Error(`Anthropic API error: ${response.status}`);
+      const errText = await response.text();
+      console.error('Anthropic API error:', response.status, errText);
+      return NextResponse.json({
+        insights: extractInsightsFallback(transcriptSummary)
+      });
     }
 
     const data = await response.json();
     const analysisText = data.content?.[0]?.text;
 
     if (!analysisText) {
-      throw new Error('No analysis content received from Anthropic');
+      return NextResponse.json({
+        insights: extractInsightsFallback(transcriptSummary)
+      });
     }
 
-    // Parse the JSON response from Claude
-    let insights: FirefliesInsights;
-    try {
-      // Extract JSON from the response (in case Claude adds extra text)
-      const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error('No JSON found in analysis response');
-      }
-      insights = JSON.parse(jsonMatch[0]);
-    } catch (parseError) {
-      console.error('Failed to parse AI analysis:', parseError);
-      // Fallback to basic analysis
-      insights = {
-        painPoints: ['Custom analysis based on sales conversation'],
-        discussionTopics: ['Requirements discussed in sales call'],
-        megaSolutions: ['Tailored MEGA solution to address specific needs'],
-        summary: 'This proposal has been customized based on your sales conversation with specific insights from the call.'
-      };
+    // Parse JSON from Claude's response
+    const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      return NextResponse.json({
+        insights: extractInsightsFallback(transcriptSummary)
+      });
     }
 
+    const insights: FirefliesInsights = JSON.parse(jsonMatch[0]);
     return NextResponse.json({ insights });
 
   } catch (error) {
@@ -111,4 +90,21 @@ Keep each array item concise but specific. Focus on actionable insights that wil
       { status: 500 }
     );
   }
+}
+
+/** Fallback: extract basic insights from the summary text without AI */
+function extractInsightsFallback(summary: string): FirefliesInsights {
+  const lines = summary.split('\n').filter(l => l.trim());
+  const bulletPoints = lines.filter(l => l.match(/^[-•*]/));
+  
+  return {
+    painPoints: bulletPoints.slice(0, 3).map(l => l.replace(/^[-•*]\s*\*?\*?/, '').replace(/\*\*/g, '').trim()).filter(Boolean),
+    discussionTopics: bulletPoints.slice(3, 7).map(l => l.replace(/^[-•*]\s*\*?\*?/, '').replace(/\*\*/g, '').trim()).filter(Boolean),
+    megaSolutions: [
+      'AI-powered campaign optimization tailored to your specific needs',
+      'End-to-end management with dedicated account support',
+      'Data-driven lead scoring and qualification framework'
+    ],
+    summary: 'Based on our conversation, we\'ve prepared this proposal to address your specific marketing challenges with a data-driven, AI-powered approach that delivers measurable results.'
+  };
 }

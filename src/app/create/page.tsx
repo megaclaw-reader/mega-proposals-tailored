@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { Agent, Template, ContractTerm, TermOption, FirefliesInsights } from '@/lib/types';
 import { calculatePricing, formatPrice, getTermDisplayName, getTermMonths } from '@/lib/pricing';
@@ -18,7 +18,6 @@ export default function CreateProposal() {
     salesRepName: '',
     salesRepEmail: '',
     firefliesUrl: '',
-    transcriptText: '',
   });
   const [termOptions, setTermOptions] = useState<Record<ContractTerm, { selected: boolean; discount: string }>>({
     annual: { selected: true, discount: '' },
@@ -27,6 +26,32 @@ export default function CreateProposal() {
     monthly: { selected: false, discount: '' },
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [transcriptStatus, setTranscriptStatus] = useState<'idle' | 'fetching' | 'fetched' | 'analyzing' | 'done' | 'error'>('idle');
+  const [transcriptData, setTranscriptData] = useState<{ title: string; summary: string } | null>(null);
+  const [transcriptError, setTranscriptError] = useState<string | null>(null);
+
+  const fetchTranscript = useCallback(async (url: string) => {
+    if (!url.includes('fireflies.ai')) return;
+    setTranscriptStatus('fetching');
+    setTranscriptError(null);
+    try {
+      const res = await fetch('/api/fetch-transcript', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firefliesUrl: url }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to fetch transcript');
+      }
+      const data = await res.json();
+      setTranscriptData(data);
+      setTranscriptStatus('fetched');
+    } catch (err) {
+      setTranscriptError(err instanceof Error ? err.message : 'Failed to fetch transcript');
+      setTranscriptStatus('error');
+    }
+  }, []);
 
   const handleAgentToggle = (agent: Agent) => {
     setFormData(prev => ({
@@ -68,28 +93,46 @@ export default function CreateProposal() {
       const selectedTerms = getSelectedTerms();
       let firefliesInsights = undefined;
 
-      // Analyze transcript if provided
-      if (formData.transcriptText && formData.transcriptText.trim()) {
+      // If we have a Fireflies URL, fetch and analyze the transcript
+      if (formData.firefliesUrl && formData.firefliesUrl.includes('fireflies.ai')) {
         try {
-          const analysisResponse = await fetch('/api/analyze-transcript', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              transcriptText: formData.transcriptText.trim()
-            })
-          });
-
-          if (analysisResponse.ok) {
-            const { insights } = await analysisResponse.json();
-            firefliesInsights = insights;
-          } else {
-            console.warn('Transcript analysis failed, continuing without insights');
+          // Step 1: Fetch transcript if not already fetched
+          let summary = transcriptData?.summary;
+          if (!summary) {
+            setTranscriptStatus('fetching');
+            const fetchRes = await fetch('/api/fetch-transcript', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ firefliesUrl: formData.firefliesUrl }),
+            });
+            if (fetchRes.ok) {
+              const data = await fetchRes.json();
+              summary = data.summary;
+              setTranscriptData(data);
+            }
           }
-        } catch (analysisError) {
-          console.warn('Transcript analysis error:', analysisError);
-          // Continue without insights rather than failing completely
+
+          // Step 2: Analyze the transcript
+          if (summary) {
+            setTranscriptStatus('analyzing');
+            const analyzeRes = await fetch('/api/analyze-transcript', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                transcriptSummary: summary,
+                meetingTitle: transcriptData?.title,
+                companyName: formData.companyName,
+              }),
+            });
+            if (analyzeRes.ok) {
+              const { insights } = await analyzeRes.json();
+              firefliesInsights = insights;
+              setTranscriptStatus('done');
+            }
+          }
+        } catch (err) {
+          console.warn('Transcript analysis error:', err);
+          // Continue without insights
         }
       }
 
@@ -151,34 +194,32 @@ export default function CreateProposal() {
               </label>
               <input type="url" value={formData.firefliesUrl}
                 onChange={(e) => setFormData(prev => ({ ...prev, firefliesUrl: e.target.value }))}
+                onBlur={(e) => { if (e.target.value.includes('fireflies.ai')) fetchTranscript(e.target.value); }}
                 placeholder="https://app.fireflies.ai/view/..."
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-              {formData.firefliesUrl && (
-                <p className="mt-1 text-sm text-green-600">
-                  ✓ Meeting transcript will be used to tailor the proposal to this prospect&apos;s specific pain points and needs.
+              {transcriptStatus === 'fetching' && (
+                <p className="mt-2 text-sm text-blue-600 flex items-center gap-2">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                  Fetching meeting transcript...
+                </p>
+              )}
+              {transcriptStatus === 'fetched' && transcriptData && (
+                <div className="mt-2 bg-green-50 border border-green-200 rounded-md p-3">
+                  <p className="text-sm text-green-700 font-medium">✓ Transcript loaded: {transcriptData.title}</p>
+                  <p className="text-xs text-green-600 mt-1">Meeting notes will be analyzed to personalize your proposal when you submit.</p>
+                </div>
+              )}
+              {transcriptStatus === 'error' && (
+                <p className="mt-2 text-sm text-red-600">
+                  ⚠ {transcriptError || 'Could not fetch transcript. Make sure the meeting link has public sharing enabled.'}
+                </p>
+              )}
+              {!formData.firefliesUrl && (
+                <p className="mt-1 text-xs text-gray-500">
+                  Paste a Fireflies meeting link to automatically pull the transcript and tailor the proposal.
                 </p>
               )}
             </div>
-
-            {/* Meeting Notes / Transcript */}
-            {formData.firefliesUrl && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Meeting Notes / Transcript
-                  <span className="text-gray-400 font-normal ml-1">(copy/paste the call transcript or notes here)</span>
-                </label>
-                <textarea
-                  value={formData.transcriptText}
-                  onChange={(e) => setFormData(prev => ({ ...prev, transcriptText: e.target.value }))}
-                  rows={8}
-                  placeholder="Paste the meeting transcript, key discussion points, or notes from your sales call here. This will be analyzed to create a personalized proposal tailored to the prospect's specific needs and pain points..."
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  💡 The more detailed your notes, the more personalized your proposal will be.
-                </p>
-              </div>
-            )}
 
             {/* Template Selection */}
             <div>
@@ -301,7 +342,11 @@ export default function CreateProposal() {
               <button type="submit"
                 disabled={isSubmitting || !hasAgents || !hasTerms}
                 className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-8 py-3 rounded-lg font-semibold transition-colors">
-                {isSubmitting ? 'Generating...' : 'Generate Proposal'}
+                {isSubmitting
+                  ? (transcriptStatus === 'fetching' ? 'Fetching transcript...'
+                    : transcriptStatus === 'analyzing' ? 'Analyzing call insights...'
+                    : 'Generating proposal...')
+                  : (formData.firefliesUrl ? 'Generate Tailored Proposal' : 'Generate Proposal')}
               </button>
             </div>
           </form>
