@@ -1,5 +1,6 @@
-import { redirect, notFound } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import { list } from '@vercel/blob';
+import ProposalClient from './ProposalClient';
 
 export default async function ProposalSlugPage({
   params,
@@ -7,8 +8,6 @@ export default async function ProposalSlugPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-
-  // Look up the proposal blob
   let encodedProposal: string | null = null;
 
   try {
@@ -31,10 +30,9 @@ export default async function ProposalSlugPage({
     console.error('Slug lookup error:', error);
   }
 
-  // Redirect OUTSIDE the try/catch (redirect throws internally)
-  if (encodedProposal) {
-    redirect(`/proposal/${encodedProposal}`);
+  if (!encodedProposal) {
+    notFound();
   }
 
-  notFound();
+  return <ProposalClient encodedId={encodedProposal} />;
 }
