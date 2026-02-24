@@ -1,29 +1,41 @@
 import { Agent, ContractTerm, PricingBreakdown } from './types';
 
-// Pricing table as per requirements
+/**
+ * Stripe upfront totals — these are the EXACT amounts Stripe charges.
+ * Monthly rates are derived by dividing by term months.
+ * This ensures our proposal numbers match checkout exactly.
+ */
+const STRIPE_UPFRONT_TOTALS: Record<string, Record<string, number>> = {
+  seo: { quarterly: 2547, bi_annual: 4496, annual: 8399 },
+  paid_ads: { quarterly: 5097, bi_annual: 8996, annual: 16800 },
+  seo_paid_combo: { quarterly: 7645, bi_annual: 13491, annual: 25200 },
+  website: { quarterly: 1017, bi_annual: 1796, annual: 3348 },
+};
+
+// Monthly pricing (used for monthly term and display)
 const PRICING_TABLE = {
   seo: {
-    annual: 699,
-    bi_annual: 749,
-    quarterly: 849,
+    annual: 8399 / 12,
+    bi_annual: 4496 / 6,
+    quarterly: 2547 / 3,
     monthly: 999,
   },
   paid_ads: {
-    annual: 1399,
-    bi_annual: 1499,
-    quarterly: 1699,
+    annual: 16800 / 12,
+    bi_annual: 8996 / 6,
+    quarterly: 5097 / 3,
     monthly: 1999,
   },
   seo_paid_combo: {
-    annual: 2099,
-    bi_annual: 2249,
-    quarterly: 2548,
+    annual: 25200 / 12,
+    bi_annual: 13491 / 6,
+    quarterly: 7645 / 3,
     monthly: 2998,
   },
   website: {
-    annual: 279,
-    bi_annual: 299,
-    quarterly: 339,
+    annual: 3348 / 12,
+    bi_annual: 1796 / 6,
+    quarterly: 1017 / 3,
     monthly: 399,
   },
 };
@@ -107,7 +119,24 @@ export function calculatePricing(
   }
 
   const termMonths = getTermMonths(contractTerm);
-  const upfrontTotal = total * termMonths;
+
+  // Use exact Stripe upfront totals when available (no rounding errors)
+  let upfrontTotal: number;
+  if (contractTerm !== 'monthly' && discountPercentage === 0) {
+    // Sum exact Stripe upfront amounts
+    let stripeTotal = 0;
+    if (hasSEO && hasPaidAds) {
+      stripeTotal += STRIPE_UPFRONT_TOTALS.seo_paid_combo[contractTerm] || 0;
+    } else {
+      if (hasSEO) stripeTotal += STRIPE_UPFRONT_TOTALS.seo[contractTerm] || 0;
+      if (hasPaidAds) stripeTotal += STRIPE_UPFRONT_TOTALS.paid_ads[contractTerm] || 0;
+    }
+    if (hasWebsite) stripeTotal += STRIPE_UPFRONT_TOTALS.website[contractTerm] || 0;
+    upfrontTotal = stripeTotal;
+  } else {
+    // Discounted or monthly — calculate normally
+    upfrontTotal = total * termMonths;
+  }
 
   return {
     agents,
