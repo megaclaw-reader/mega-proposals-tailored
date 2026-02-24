@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Agent, Template, ContractTerm, TermOption } from '@/lib/types';
+import { Agent, Template, ContractTerm, TermOption, FirefliesInsights } from '@/lib/types';
 import { calculatePricing, formatPrice, getTermDisplayName, getTermMonths } from '@/lib/pricing';
 import { encodeProposal } from '@/lib/encode';
 
@@ -18,6 +18,7 @@ export default function CreateProposal() {
     salesRepName: '',
     salesRepEmail: '',
     firefliesUrl: '',
+    transcriptText: '',
   });
   const [termOptions, setTermOptions] = useState<Record<ContractTerm, { selected: boolean; discount: string }>>({
     annual: { selected: true, discount: '' },
@@ -59,17 +60,50 @@ export default function CreateProposal() {
       }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
       const selectedTerms = getSelectedTerms();
+      let firefliesInsights = undefined;
+
+      // Analyze transcript if provided
+      if (formData.transcriptText && formData.transcriptText.trim()) {
+        try {
+          const analysisResponse = await fetch('/api/analyze-transcript', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              transcriptText: formData.transcriptText.trim()
+            })
+          });
+
+          if (analysisResponse.ok) {
+            const { insights } = await analysisResponse.json();
+            firefliesInsights = insights;
+          } else {
+            console.warn('Transcript analysis failed, continuing without insights');
+          }
+        } catch (analysisError) {
+          console.warn('Transcript analysis error:', analysisError);
+          // Continue without insights rather than failing completely
+        }
+      }
+
       const encoded = encodeProposal({
-        ...formData,
+        customerName: formData.customerName,
+        companyName: formData.companyName,
+        template: formData.template,
+        selectedAgents: formData.selectedAgents,
+        salesRepName: formData.salesRepName,
+        salesRepEmail: formData.salesRepEmail,
         contractTerm: selectedTerms[0]?.term || 'annual',
         selectedTerms,
         firefliesUrl: formData.firefliesUrl || undefined,
+        firefliesInsights,
       });
       router.push(`/proposal/${encoded}`);
     } catch (error) {
@@ -125,6 +159,26 @@ export default function CreateProposal() {
                 </p>
               )}
             </div>
+
+            {/* Meeting Notes / Transcript */}
+            {formData.firefliesUrl && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Meeting Notes / Transcript
+                  <span className="text-gray-400 font-normal ml-1">(copy/paste the call transcript or notes here)</span>
+                </label>
+                <textarea
+                  value={formData.transcriptText}
+                  onChange={(e) => setFormData(prev => ({ ...prev, transcriptText: e.target.value }))}
+                  rows={8}
+                  placeholder="Paste the meeting transcript, key discussion points, or notes from your sales call here. This will be analyzed to create a personalized proposal tailored to the prospect's specific needs and pain points..."
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  💡 The more detailed your notes, the more personalized your proposal will be.
+                </p>
+              </div>
+            )}
 
             {/* Template Selection */}
             <div>

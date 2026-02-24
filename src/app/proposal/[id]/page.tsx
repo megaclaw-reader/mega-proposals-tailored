@@ -118,11 +118,77 @@ export default function ProposalPage() {
         </div>
 
         <div className="px-8 pb-8 space-y-12">
+          {/* Tailored Proposal Badge */}
+          {proposal.firefliesInsights && (
+            <section data-pdf-block className="mb-6">
+              <div className="bg-blue-600 text-white px-6 py-4 rounded-lg flex items-center">
+                <svg className="w-6 h-6 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <div>
+                  <p className="font-semibold">Tailored Proposal</p>
+                  <p className="text-blue-100 text-sm">Customized based on your sales conversation</p>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Personalized Assessment (only if insights available) */}
+          {proposal.firefliesInsights && (
+            <section data-pdf-block>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Personalized Assessment</h2>
+              <div className="bg-gray-50 rounded-lg p-6 mb-8">
+                <p className="text-gray-700 text-lg mb-6">{proposal.firefliesInsights.summary}</p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Pain Points */}
+                  <div className="bg-white rounded-lg p-5 border border-gray-200">
+                    <h3 className="font-semibold text-red-700 mb-3 flex items-center">
+                      <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      Key Challenges
+                    </h3>
+                    <ul className="space-y-2">
+                      {proposal.firefliesInsights.painPoints.map((point, index) => (
+                        <li key={index} className="flex items-start text-sm">
+                          <span className="text-red-500 mr-2 mt-1">•</span>
+                          <span className="text-gray-700">{point}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* MEGA Solutions */}
+                  <div className="bg-white rounded-lg p-5 border border-gray-200">
+                    <h3 className="font-semibold text-blue-700 mb-3 flex items-center">
+                      <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      How MEGA Helps
+                    </h3>
+                    <ul className="space-y-2">
+                      {proposal.firefliesInsights.megaSolutions.map((solution, index) => (
+                        <li key={index} className="flex items-start text-sm">
+                          <span className="text-blue-500 mr-2 mt-1">•</span>
+                          <span className="text-gray-700">{solution}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
           {/* Executive Summary */}
           <section data-pdf-block>
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Executive Summary</h2>
             <p className="text-gray-700 leading-relaxed text-lg">
-              {EXECUTIVE_SUMMARY_CONTENT[proposal.template]}
+              {proposal.firefliesInsights 
+                ? `Based on our discussion, we understand ${proposal.companyName} is looking to optimize their marketing approach and address specific challenges in lead generation and conversion. ${EXECUTIVE_SUMMARY_CONTENT[proposal.template]}`
+                : EXECUTIVE_SUMMARY_CONTENT[proposal.template]
+              }
             </p>
           </section>
 
