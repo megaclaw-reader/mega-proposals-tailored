@@ -1,4 +1,4 @@
-import { redirect } from 'next/navigation';
+import { redirect, notFound } from 'next/navigation';
 import { list } from '@vercel/blob';
 
 export default async function ProposalSlugPage({
@@ -8,37 +8,33 @@ export default async function ProposalSlugPage({
 }) {
   const { slug } = await params;
 
+  // Look up the proposal blob
+  let encodedProposal: string | null = null;
+
   try {
-    // List blobs with the exact prefix to find our proposal
     const { blobs } = await list({ prefix: `proposals/${slug}.json` });
     const blob = blobs.find(b => b.pathname === `proposals/${slug}.json`);
 
-    if (!blob) {
-      redirect('/');
+    if (blob) {
+      const response = await fetch(blob.url, {
+        headers: {
+          Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        encodedProposal = data.encodedProposal || null;
+      }
     }
-
-    // Fetch the blob content
-    const response = await fetch(blob.url, {
-      headers: {
-        Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`,
-      },
-    });
-
-    if (!response.ok) {
-      redirect('/');
-    }
-
-    const data = await response.json();
-    const { encodedProposal } = data;
-
-    if (!encodedProposal) {
-      redirect('/');
-    }
-
-    // Redirect to the actual proposal page with the encoded data
-    redirect(`/proposal/${encodedProposal}`);
   } catch (error) {
     console.error('Slug lookup error:', error);
-    redirect('/');
   }
+
+  // Redirect OUTSIDE the try/catch (redirect throws internally)
+  if (encodedProposal) {
+    redirect(`/proposal/${encodedProposal}`);
+  }
+
+  notFound();
 }
