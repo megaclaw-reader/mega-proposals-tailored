@@ -10,7 +10,7 @@ import {
   Svg,
   Path,
 } from '@react-pdf/renderer';
-import { Proposal, Agent, Template, TermOption } from '@/lib/types';
+import { Proposal, Agent, Template, TermOption, FirefliesInsights } from '@/lib/types';
 import { calculatePricing, getTermDisplayName, getTermMonths } from '@/lib/pricing';
 import { getServiceScope, EXECUTIVE_SUMMARY_CONTENT, SERVICE_DESCRIPTIONS } from '@/lib/content';
 import { format } from 'date-fns';
@@ -240,6 +240,88 @@ function ServiceScope({ agent, template, isLast }: { agent: Agent; template: Tem
   );
 }
 
+// ── Tailored Assessment Styles ──
+const ts = StyleSheet.create({
+  badge: { backgroundColor: BRAND_BLUE, color: '#ffffff', fontSize: 7, fontWeight: 700, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 10, alignSelf: 'flex-start' as const, letterSpacing: 0.5, textTransform: 'uppercase' as const, marginBottom: 12 },
+  summaryBox: { backgroundColor: BRAND_BLUE_LIGHT, borderRadius: 8, borderLeftWidth: 3, borderLeftColor: BRAND_BLUE, padding: 14, marginBottom: 16 },
+  summaryText: { fontSize: 10, lineHeight: 1.7, color: G800, fontWeight: 500 },
+  colRow: { flexDirection: 'row' as const, gap: 12, marginBottom: 12 },
+  col: { flex: 1 },
+  colTitle: { fontSize: 10, fontWeight: 700, color: G900, marginBottom: 8 },
+  colSubtitle: { fontSize: 7, fontWeight: 600, color: BRAND_BLUE, textTransform: 'uppercase' as const, letterSpacing: 0.8, marginBottom: 6 },
+  painCard: { backgroundColor: '#fff7ed', borderWidth: 1, borderColor: '#fed7aa', borderRadius: 6, padding: 10, marginBottom: 6 },
+  painIcon: { fontSize: 7, fontWeight: 700, color: '#c2410c', marginRight: 5, marginTop: 1 },
+  painText: { flex: 1, fontSize: 8, color: '#7c2d12', lineHeight: 1.5 },
+  solCard: { backgroundColor: GREEN_50, borderWidth: 1, borderColor: '#bbf7d0', borderRadius: 6, padding: 10, marginBottom: 6 },
+  solIcon: { width: 12, height: 12, borderRadius: 6, backgroundColor: GREEN_600, marginRight: 7, marginTop: 1, alignItems: 'center' as const, justifyContent: 'center' as const },
+  solCheck: { color: '#ffffff', fontSize: 6.5, fontWeight: 700 },
+  solText: { flex: 1, fontSize: 8, color: GREEN_800, lineHeight: 1.5 },
+  topicRow: { flexDirection: 'row' as const, flexWrap: 'wrap' as const, gap: 4, marginTop: 4 },
+  topicBadge: { backgroundColor: BRAND_BLUE_MEDIUM, borderRadius: 4, paddingHorizontal: 8, paddingVertical: 3 },
+  topicText: { fontSize: 7, fontWeight: 500, color: BRAND_BLUE_DARK },
+});
+
+function TailoredAssessment({ insights, companyName }: { insights: FirefliesInsights; companyName: string }) {
+  return (
+    <Page size="LETTER" style={s.page} wrap>
+      <Footer />
+
+      <Text style={ts.badge}>Tailored for {companyName}</Text>
+
+      <Text style={s.secTitle}>Personalized Assessment</Text>
+      <View style={s.secBar} />
+
+      {/* Executive Summary from call analysis */}
+      <View style={ts.summaryBox} wrap={false}>
+        <Text style={ts.summaryText}>{insights.summary}</Text>
+      </View>
+
+      {/* Two-column: Challenges + Solutions */}
+      <View style={ts.colRow}>
+        {/* Pain Points */}
+        <View style={ts.col}>
+          <Text style={ts.colSubtitle}>Your Challenges</Text>
+          {insights.painPoints.map((point, i) => (
+            <View key={i} style={ts.painCard} wrap={false}>
+              <View style={{ flexDirection: 'row' as const }}>
+                <Text style={ts.painIcon}>!</Text>
+                <Text style={ts.painText}>{point}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
+        {/* Solutions */}
+        <View style={ts.col}>
+          <Text style={ts.colSubtitle}>How We Help</Text>
+          {insights.megaSolutions.map((solution, i) => (
+            <View key={i} style={ts.solCard} wrap={false}>
+              <View style={{ flexDirection: 'row' as const }}>
+                <View style={ts.solIcon}><Text style={ts.solCheck}>✓</Text></View>
+                <Text style={ts.solText}>{solution}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      {/* Discussion Topics */}
+      {insights.discussionTopics && insights.discussionTopics.length > 0 && (
+        <View wrap={false}>
+          <Text style={ts.colSubtitle}>Key Topics Discussed</Text>
+          <View style={ts.topicRow}>
+            {insights.discussionTopics.map((topic, i) => (
+              <View key={i} style={ts.topicBadge}>
+                <Text style={ts.topicText}>{topic}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
+    </Page>
+  );
+}
+
 export function ProposalPDF({ proposal }: { proposal: Proposal }) {
   const terms: TermOption[] =
     proposal.selectedTerms && proposal.selectedTerms.length > 0
@@ -329,6 +411,14 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
           ))}
         </View>
       </Page>
+
+      {/* ===== TAILORED ASSESSMENT (if available) ===== */}
+      {proposal.firefliesInsights && (
+        <TailoredAssessment
+          insights={proposal.firefliesInsights}
+          companyName={proposal.companyName}
+        />
+      )}
 
       {/* ===== SERVICE SCOPES — single wrapping page ===== */}
       <Page size="LETTER" style={s.page} wrap>
