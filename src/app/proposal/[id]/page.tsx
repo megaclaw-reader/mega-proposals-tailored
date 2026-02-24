@@ -103,7 +103,7 @@ export default function ProposalPage() {
           <div className="flex justify-between items-start mb-6">
             <div>
               <img src="/mega-wordmark.svg" alt="MEGA" className="h-10 mb-4" />
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Statement of Work</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Proposal</h1>
               <p className="text-xl text-blue-600 font-semibold">
                 {proposal.selectedAgents.map(agent => SERVICE_DESCRIPTIONS[agent].title).join(' + ')}
               </p>

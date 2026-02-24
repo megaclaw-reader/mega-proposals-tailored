@@ -456,6 +456,6 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
 }
 
 export const EXECUTIVE_SUMMARY_CONTENT = {
-  leads: "This Statement of Work outlines a comprehensive AI-driven marketing strategy designed to generate high-quality leads for your business. Our approach combines cutting-edge SEO/GEO optimization, intelligent paid advertising, and conversion-focused web development to create a powerful lead generation engine that delivers measurable results and sustainable growth.",
-  ecom: "This Statement of Work presents a complete AI-powered eCommerce marketing solution designed to maximize your online revenue and customer acquisition. Through advanced SEO/GEO strategies, targeted paid advertising, and conversion-optimized web development, we'll create a comprehensive system that drives sales and builds lasting customer relationships."
+  leads: "This proposal outlines a comprehensive AI-driven marketing strategy designed to generate high-quality leads for your business. Our approach combines cutting-edge SEO/GEO optimization, intelligent paid advertising, and conversion-focused web development to create a powerful lead generation engine that delivers measurable results and sustainable growth.",
+  ecom: "This proposal presents a complete AI-powered eCommerce marketing solution designed to maximize your online revenue and customer acquisition. Through advanced SEO/GEO strategies, targeted paid advertising, and conversion-optimized web development, we'll create a comprehensive system that drives sales and builds lasting customer relationships."
 };

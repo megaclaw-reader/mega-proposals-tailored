@@ -240,25 +240,19 @@ function ServiceScope({ agent, template, isLast }: { agent: Agent; template: Tem
   );
 }
 
-// ── Tailored Assessment Styles ──
+// ── Assessment Styles (matches web layout) ──
 const ts = StyleSheet.create({
-  badge: { backgroundColor: BRAND_BLUE, color: '#ffffff', fontSize: 7, fontWeight: 700, paddingHorizontal: 10, paddingVertical: 3, borderRadius: 10, alignSelf: 'flex-start' as const, letterSpacing: 0.5, textTransform: 'uppercase' as const, marginBottom: 12 },
-  summaryBox: { backgroundColor: BRAND_BLUE_LIGHT, borderRadius: 8, borderLeftWidth: 3, borderLeftColor: BRAND_BLUE, padding: 14, marginBottom: 16 },
-  summaryText: { fontSize: 10, lineHeight: 1.7, color: G800, fontWeight: 500 },
-  colRow: { flexDirection: 'row' as const, gap: 12, marginBottom: 12 },
-  col: { flex: 1 },
-  colTitle: { fontSize: 10, fontWeight: 700, color: G900, marginBottom: 8 },
-  colSubtitle: { fontSize: 7, fontWeight: 600, color: BRAND_BLUE, textTransform: 'uppercase' as const, letterSpacing: 0.8, marginBottom: 6 },
-  painCard: { backgroundColor: '#fff7ed', borderWidth: 1, borderColor: '#fed7aa', borderRadius: 6, padding: 10, marginBottom: 6 },
-  painIcon: { fontSize: 7, fontWeight: 700, color: '#c2410c', marginRight: 5, marginTop: 1 },
-  painText: { flex: 1, fontSize: 8, color: '#7c2d12', lineHeight: 1.5 },
-  solCard: { backgroundColor: GREEN_50, borderWidth: 1, borderColor: '#bbf7d0', borderRadius: 6, padding: 10, marginBottom: 6 },
-  solIcon: { width: 12, height: 12, borderRadius: 6, backgroundColor: GREEN_600, marginRight: 7, marginTop: 1, alignItems: 'center' as const, justifyContent: 'center' as const },
-  solCheck: { color: '#ffffff', fontSize: 6.5, fontWeight: 700 },
-  solText: { flex: 1, fontSize: 8, color: GREEN_800, lineHeight: 1.5 },
-  topicRow: { flexDirection: 'row' as const, flexWrap: 'wrap' as const, gap: 4, marginTop: 4 },
-  topicBadge: { backgroundColor: BRAND_BLUE_MEDIUM, borderRadius: 4, paddingHorizontal: 8, paddingVertical: 3 },
-  topicText: { fontSize: 7, fontWeight: 500, color: BRAND_BLUE_DARK },
+  outerBox: { backgroundColor: G50, borderRadius: 8, padding: 16, marginBottom: 14 },
+  summaryText: { fontSize: 10, lineHeight: 1.7, color: G700, marginBottom: 14 },
+  colRow: { flexDirection: 'row' as const, gap: 12 },
+  card: { flex: 1, backgroundColor: '#ffffff', borderWidth: 1, borderColor: G200, borderRadius: 8, padding: 14 },
+  cardTitle: { fontSize: 10, fontWeight: 600, marginBottom: 10, flexDirection: 'row' as const, alignItems: 'center' as const },
+  cardTitleRed: { color: '#b91c1c' },
+  cardTitleBlue: { color: BRAND_BLUE },
+  bulletRow: { flexDirection: 'row' as const, marginBottom: 5 },
+  dotRed: { color: '#ef4444', fontSize: 7, marginRight: 5, marginTop: 1.5 },
+  dotBlue: { color: BRAND_BLUE, fontSize: 7, marginRight: 5, marginTop: 1.5 },
+  bulletText: { flex: 1, fontSize: 8, color: G700, lineHeight: 1.5 },
 });
 
 function TailoredAssessment({ insights, companyName }: { insights: FirefliesInsights; companyName: string }) {
@@ -269,53 +263,35 @@ function TailoredAssessment({ insights, companyName }: { insights: FirefliesInsi
       <Text style={s.secTitle}>Understanding {companyName}</Text>
       <View style={s.secBar} />
 
-      {/* Executive Summary from call analysis */}
-      <View style={ts.summaryBox} wrap={false}>
+      <View style={ts.outerBox}>
+        {/* Summary */}
         <Text style={ts.summaryText}>{insights.summary}</Text>
-      </View>
 
-      {/* Two-column: Challenges + Solutions */}
-      <View style={ts.colRow}>
-        {/* Pain Points */}
-        <View style={ts.col}>
-          <Text style={ts.colSubtitle}>Your Challenges</Text>
-          {insights.painPoints.map((point, i) => (
-            <View key={i} style={ts.painCard} wrap={false}>
-              <View style={{ flexDirection: 'row' as const }}>
-                <Text style={ts.painIcon}>!</Text>
-                <Text style={ts.painText}>{point}</Text>
+        {/* Two-column: Challenges + Solutions */}
+        <View style={ts.colRow}>
+          {/* Key Challenges */}
+          <View style={ts.card}>
+            <Text style={[ts.cardTitle, ts.cardTitleRed]}>Key Challenges</Text>
+            {insights.painPoints.map((point, i) => (
+              <View key={i} style={ts.bulletRow}>
+                <Text style={ts.dotRed}>•</Text>
+                <Text style={ts.bulletText}>{point}</Text>
               </View>
-            </View>
-          ))}
-        </View>
+            ))}
+          </View>
 
-        {/* Solutions */}
-        <View style={ts.col}>
-          <Text style={ts.colSubtitle}>How We Help</Text>
-          {insights.megaSolutions.map((solution, i) => (
-            <View key={i} style={ts.solCard} wrap={false}>
-              <View style={{ flexDirection: 'row' as const }}>
-                <View style={ts.solIcon}><Text style={ts.solCheck}>✓</Text></View>
-                <Text style={ts.solText}>{solution}</Text>
-              </View>
-            </View>
-          ))}
-        </View>
-      </View>
-
-      {/* Discussion Topics */}
-      {insights.discussionTopics && insights.discussionTopics.length > 0 && (
-        <View wrap={false}>
-          <Text style={ts.colSubtitle}>Key Topics Discussed</Text>
-          <View style={ts.topicRow}>
-            {insights.discussionTopics.map((topic, i) => (
-              <View key={i} style={ts.topicBadge}>
-                <Text style={ts.topicText}>{topic}</Text>
+          {/* How MEGA Helps */}
+          <View style={ts.card}>
+            <Text style={[ts.cardTitle, ts.cardTitleBlue]}>How MEGA Helps</Text>
+            {insights.megaSolutions.map((solution, i) => (
+              <View key={i} style={ts.bulletRow}>
+                <Text style={ts.dotBlue}>•</Text>
+                <Text style={ts.bulletText}>{solution}</Text>
               </View>
             ))}
           </View>
         </View>
-      )}
+      </View>
     </Page>
   );
 }
