@@ -414,12 +414,14 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
         <Text style={s.secTitle}>Investment Summary</Text>
         <View style={s.secBar} />
 
-        <View style={s.priceRow} wrap={false}>
+        <View style={termPricings.length >= 4 ? { ...s.priceRow, gap: 6 } : s.priceRow} wrap={false}>
           {termPricings.map(({ option, pricing }, idx) => {
             const best = !isSingleTerm && idx === 0;
             const anyDiscount = termPricings.some(tp => tp.option.discountPercentage > 0);
+            const cardStyle = best ? s.priceCardBest : s.priceCard;
+            const tightCard = termPricings.length >= 4 ? { ...cardStyle, padding: 10 } : cardStyle;
             return (
-              <View key={option.term} style={best ? s.priceCardBest : s.priceCard}>
+              <View key={option.term} style={tightCard}>
                 {best && <Text style={s.bestBadge}>Best Value</Text>}
                 {!best && !isSingleTerm && <View style={{ height: 17 }} />}
 

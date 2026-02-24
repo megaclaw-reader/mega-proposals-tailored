@@ -349,7 +349,7 @@ export default function CreateProposal() {
                         ))}
                         <hr className="my-2" />
                         <div className="flex justify-between font-bold">
-                          <span>Due Upfront ({pricing.termMonths} mo)</span>
+                          <span>{pricing.term === 'monthly' ? 'Monthly Rate' : `Due Upfront (${pricing.termMonths} mo)`}</span>
                           <span className="text-blue-600">${Math.round(pricing.upfrontTotal).toLocaleString()}</span>
                         </div>
                       </div>

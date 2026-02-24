@@ -309,7 +309,7 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
               return (
                 <>
                   {/* Term comparison cards with Stripe CTAs */}
-                  <div className={`grid gap-6 ${termPricings.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : termPricings.length === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-3'}`}>
+                  <div className={`grid gap-6 ${termPricings.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : termPricings.length === 2 ? 'grid-cols-1 md:grid-cols-2' : termPricings.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
                     {termPricings.map(({ option, pricing }, termIndex) => {
                       const isBestValue = !isSingleTerm && termIndex === 0;
                       const stripeLink = getStripeLink(proposal.selectedAgents, option.term);
