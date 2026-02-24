@@ -434,26 +434,45 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
                       We&apos;re excited to partner with {proposal.companyName} and drive meaningful results. Here&apos;s how to get started:
                     </p>
                     <ol className="space-y-3 text-sm text-gray-700">
-                      <li className="flex items-start">
-                        <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">1</span>
-                        <span>Select your preferred plan above and click <strong>Get Started</strong></span>
-                      </li>
-                      {showWebsiteNote && (
-                        <li className="flex items-start">
-                          <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">2</span>
-                          <span>Add the Website Agent during checkout if included in your package</span>
-                        </li>
-                      )}
-                      {showPromoNote && (
-                        <li className="flex items-start">
-                          <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">{showWebsiteNote ? '3' : '2'}</span>
-                          <span>Email {proposal.salesRepName} for your promo code before checkout</span>
-                        </li>
-                      )}
-                      <li className="flex items-start">
-                        <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">{showWebsiteNote && showPromoNote ? '4' : showWebsiteNote || showPromoNote ? '3' : '2'}</span>
-                        <span>Our team begins onboarding — campaigns go live within 14 days</span>
-                      </li>
+                      {(() => {
+                        let step = 1;
+                        const steps = [];
+                        steps.push(
+                          <li key="select" className="flex items-start">
+                            <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">{step++}</span>
+                            <span>Select your preferred plan above and click <strong>Get Started</strong></span>
+                          </li>
+                        );
+                        if (showPromoNote) {
+                          steps.push(
+                            <li key="promo" className="flex items-start">
+                              <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">{step++}</span>
+                              <span>Email {proposal.salesRepName} for your promo code before checkout</span>
+                            </li>
+                          );
+                        }
+                        if (showWebsiteNote) {
+                          steps.push(
+                            <li key="website" className="flex items-start">
+                              <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">{step++}</span>
+                              <span>Add the Website Agent during checkout</span>
+                            </li>
+                          );
+                        }
+                        steps.push(
+                          <li key="onboard" className="flex items-start">
+                            <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">{step++}</span>
+                            <span>Complete the onboarding flow after signing up</span>
+                          </li>
+                        );
+                        steps.push(
+                          <li key="call" className="flex items-start">
+                            <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">{step++}</span>
+                            <span>Schedule a call with your dedicated account manager to kick things off</span>
+                          </li>
+                        );
+                        return steps;
+                      })()}
                     </ol>
                     <p className="text-sm text-gray-600 mt-4">
                       Questions? Contact <span className="font-semibold">{proposal.salesRepName}</span> at{' '}

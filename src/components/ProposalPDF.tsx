@@ -483,9 +483,9 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
           <Text style={s.nextText}>
             We're excited to partner with {proposal.companyName} and drive meaningful results. Here's how to get started:
           </Text>
-          <View style={s.bullet}><Text style={s.dot}>1.</Text><Text style={s.bText}>Review this proposal and let us know if you have any questions</Text></View>
-          <View style={s.bullet}><Text style={s.dot}>2.</Text><Text style={s.bText}>Select your preferred commitment term and confirm your agreement</Text></View>
-          <View style={s.bullet}><Text style={s.dot}>3.</Text><Text style={s.bText}>Our team begins onboarding — campaigns go live within 14 days</Text></View>
+          <View style={s.bullet}><Text style={s.dot}>1.</Text><Text style={s.bText}>Select your preferred plan and click Get Started</Text></View>
+          <View style={s.bullet}><Text style={s.dot}>2.</Text><Text style={s.bText}>Complete the onboarding flow after signing up</Text></View>
+          <View style={s.bullet}><Text style={s.dot}>3.</Text><Text style={s.bText}>Schedule a call with your dedicated account manager to kick things off</Text></View>
           <Text style={s.nextCta}>
             Contact {proposal.salesRepName} at {proposal.salesRepEmail} to get started.
           </Text>
