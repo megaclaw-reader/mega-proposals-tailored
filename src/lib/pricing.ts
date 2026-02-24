@@ -12,30 +12,30 @@ const STRIPE_UPFRONT_TOTALS: Record<string, Record<string, number>> = {
   website: { quarterly: 1017, bi_annual: 1796, annual: 3348 },
 };
 
-// Monthly pricing (used for monthly term and display)
+// Advertised monthly rates (what we show on proposals)
 const PRICING_TABLE = {
   seo: {
-    annual: 8399 / 12,
-    bi_annual: 4496 / 6,
-    quarterly: 2547 / 3,
+    annual: 699,
+    bi_annual: 749,
+    quarterly: 849,
     monthly: 999,
   },
   paid_ads: {
-    annual: 16800 / 12,
-    bi_annual: 8996 / 6,
-    quarterly: 5097 / 3,
+    annual: 1399,
+    bi_annual: 1499,
+    quarterly: 1699,
     monthly: 1999,
   },
   seo_paid_combo: {
-    annual: 25200 / 12,
-    bi_annual: 13491 / 6,
-    quarterly: 7645 / 3,
+    annual: 2099,
+    bi_annual: 2249,
+    quarterly: 2548,
     monthly: 2998,
   },
   website: {
-    annual: 3348 / 12,
-    bi_annual: 1796 / 6,
-    quarterly: 1017 / 3,
+    annual: 279,
+    bi_annual: 299,
+    quarterly: 339,
     monthly: 399,
   },
 };
