@@ -330,7 +330,7 @@ export default function ProposalPage() {
                           
                           <div className="text-center mb-4 mt-1">
                             <h3 className="text-xl font-bold text-gray-900">{getTermDisplayName(option.term)}</h3>
-                            <p className="text-sm text-gray-500">{getTermMonths(option.term)} months</p>
+                            <p className="text-sm text-gray-500">{option.term === 'monthly' ? 'Month-to-month commitment' : `${getTermMonths(option.term)} months`}</p>
                           </div>
 
                           {/* Per-agent breakdown */}
