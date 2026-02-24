@@ -6,10 +6,10 @@ import { Agent, ContractTerm, PricingBreakdown } from './types';
  * This ensures our proposal numbers match checkout exactly.
  */
 const STRIPE_UPFRONT_TOTALS: Record<string, Record<string, number>> = {
-  seo: { quarterly: 2547, bi_annual: 4496, annual: 8399 },
-  paid_ads: { quarterly: 5097, bi_annual: 8996, annual: 16800 },
-  seo_paid_combo: { quarterly: 7645, bi_annual: 13491, annual: 25200 },
-  website: { quarterly: 1017, bi_annual: 1796, annual: 3348 },
+  seo: { monthly: 999, quarterly: 2547, bi_annual: 4496, annual: 8399 },
+  paid_ads: { monthly: 1999, quarterly: 5097, bi_annual: 8996, annual: 16800 },
+  seo_paid_combo: { monthly: 2998, quarterly: 7645, bi_annual: 13491, annual: 25200 },
+  website: { monthly: 399, quarterly: 1017, bi_annual: 1796, annual: 3348 },
 };
 
 // Advertised monthly rates (what we show on proposals)
@@ -122,7 +122,7 @@ export function calculatePricing(
 
   // Use exact Stripe upfront totals when available (no rounding errors)
   let upfrontTotal: number;
-  if (contractTerm !== 'monthly' && discountPercentage === 0) {
+  if (discountPercentage === 0) {
     // Sum exact Stripe upfront amounts
     let stripeTotal = 0;
     if (hasSEO && hasPaidAds) {

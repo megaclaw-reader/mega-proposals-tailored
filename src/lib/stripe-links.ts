@@ -5,6 +5,11 @@ import { Agent, ContractTerm } from './types';
  * Website is always an add-on on Stripe's checkout page, not a separate link.
  */
 const STRIPE_LINKS: Record<string, Record<string, string>> = {
+  monthly: {
+    seo: 'https://buy.stripe.com/4gw8x67exbnH85G7sR?client_reference_id=049e965d-8d5d-4c2a-929c-80a6796ab5ad',
+    paid_ads: 'https://buy.stripe.com/3cs3cM7ex1N7dq0bJe?client_reference_id=8d4dd8c3-0d6a-47e3-8730-c7b3d2846303',
+    seo_paid_ads: 'https://buy.stripe.com/cN28x61UdbnH5Xy3cM?client_reference_id=8ffaf857-c886-4d3c-bd7c-b1de9e85baba',
+  },
   quarterly: {
     seo: 'https://buy.stripe.com/fZufZh4xB1QleSv5fFbbG12?client_reference_id=b168e221-e541-4947-b3b7-6b7d244b0ba3',
     paid_ads: 'https://buy.stripe.com/6oU28r3txeD75hV9vVbbG15?client_reference_id=42437bbf-67f8-4c1b-bc02-aebebf4d0c53',
@@ -27,7 +32,7 @@ const STRIPE_LINKS: Record<string, Record<string, string>> = {
  * Returns null for monthly (no Stripe link) or unsupported combos.
  */
 export function getStripeLink(agents: Agent[], term: ContractTerm): string | null {
-  if (term === 'monthly') return null;
+  // Monthly now has Stripe links
 
   const termLinks = STRIPE_LINKS[term];
   if (!termLinks) return null;

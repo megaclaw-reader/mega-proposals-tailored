@@ -359,8 +359,8 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
 
                           {/* Upfront total */}
                           <div className="bg-gray-100 rounded-lg p-4 text-center mt-4">
-                            <p className="text-sm text-gray-500 mb-1">Total Due Upfront</p>
-                            <p className="text-3xl font-bold text-blue-600">${Math.round(pricing.upfrontTotal).toLocaleString()}</p>
+                            <p className="text-sm text-gray-500 mb-1">{option.term === 'monthly' ? 'Month-to-Month' : 'Total Due Upfront'}</p>
+                            <p className="text-3xl font-bold text-blue-600">${Math.round(pricing.upfrontTotal).toLocaleString()}{option.term === 'monthly' ? '/mo' : ''}</p>
                             {option.discountPercentage > 0 && (
                               <p className="text-green-600 text-sm mt-1 font-medium">
                                 {option.discountPercentage}% discount applied

@@ -424,7 +424,7 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
                 {!best && !isSingleTerm && <View style={{ height: 17 }} />}
 
                 <Text style={s.pTermName}>{getTermDisplayName(option.term)}</Text>
-                <Text style={s.pTermMonths}>{getTermMonths(option.term)} months</Text>
+                <Text style={s.pTermMonths}>{option.term === 'monthly' ? 'Month-to-month commitment' : `${getTermMonths(option.term)} months`}</Text>
 
                 {pricing.agents.map((ag, i) => (
                   <View key={i} style={{ marginBottom: 6 }}>
@@ -449,8 +449,8 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
                 </View>
 
                 <View style={s.pUpBox}>
-                  <Text style={s.pUpLabel}>Total Due Upfront</Text>
-                  <Text style={s.pUpVal}>${Math.round(pricing.upfrontTotal).toLocaleString()}</Text>
+                  <Text style={s.pUpLabel}>{option.term === 'monthly' ? 'Month-to-Month' : 'Total Due Upfront'}</Text>
+                  <Text style={s.pUpVal}>${Math.round(pricing.upfrontTotal).toLocaleString()}{option.term === 'monthly' ? '/mo' : ''}</Text>
                   {option.discountPercentage > 0 ? (
                     <Text style={s.pDisc}>{option.discountPercentage}% discount applied</Text>
                   ) : anyDiscount ? (

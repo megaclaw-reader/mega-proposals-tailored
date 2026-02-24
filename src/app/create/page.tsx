@@ -6,7 +6,7 @@ import { Agent, Template, ContractTerm, TermOption, FirefliesInsights } from '@/
 import { calculatePricing, formatPrice, getTermDisplayName, getTermMonths } from '@/lib/pricing';
 import { encodeProposal } from '@/lib/encode';
 
-const AVAILABLE_TERMS: ContractTerm[] = ['annual', 'bi_annual', 'quarterly'];
+const AVAILABLE_TERMS: ContractTerm[] = ['annual', 'bi_annual', 'quarterly', 'monthly'];
 
 export default function CreateProposal() {
   const router = useRouter();
@@ -290,7 +290,7 @@ export default function CreateProposal() {
                           onChange={() => handleTermToggle(term)} className="mr-3 text-blue-600" />
                         <div>
                           <span className="font-medium text-gray-900">{getTermDisplayName(term)}</span>
-                          <span className="text-gray-500 text-sm ml-2">({getTermMonths(term)} months, paid upfront)</span>
+                          <span className="text-gray-500 text-sm ml-2">({term === 'monthly' ? 'month-to-month' : `${getTermMonths(term)} months, paid upfront`})</span>
                         </div>
                       </label>
                       {termOptions[term].selected && (
