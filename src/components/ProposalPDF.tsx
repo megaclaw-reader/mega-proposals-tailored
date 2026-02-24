@@ -348,7 +348,7 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
         <Text style={s.secTitle}>Executive Summary</Text>
         <View style={s.secBar} />
         <Text style={[s.body, { marginBottom: 18 }]}>
-          {getExecutiveSummary(proposal.template, proposal.selectedAgents)}
+          {proposal.customExecutiveSummary || getExecutiveSummary(proposal.template, proposal.selectedAgents)}
         </Text>
 
         {/* Your Services */}

@@ -18,6 +18,7 @@ export default function CreateProposal() {
     salesRepName: '',
     salesRepEmail: '',
     firefliesUrl: '',
+    businessContext: '',
   });
   const [termOptions, setTermOptions] = useState<Record<ContractTerm, { selected: boolean; discount: string }>>({
     annual: { selected: true, discount: '' },
@@ -28,6 +29,7 @@ export default function CreateProposal() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [transcriptStatus, setTranscriptStatus] = useState<'idle' | 'fetching' | 'fetched' | 'analyzing' | 'done' | 'error'>('idle');
   const [transcriptData, setTranscriptData] = useState<{ title: string; summary: string } | null>(null);
+  const [generatedLinks, setGeneratedLinks] = useState<{ share: string; edit: string } | null>(null);
   const [transcriptError, setTranscriptError] = useState<string | null>(null);
 
   const fetchTranscript = useCallback(async (url: string) => {
@@ -136,6 +138,29 @@ export default function CreateProposal() {
         }
       }
 
+      // Generate AI executive summary if business context provided
+      let customExecutiveSummary: string | undefined;
+      if (formData.businessContext.trim()) {
+        try {
+          const summaryRes = await fetch('/api/generate-summary', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              businessContext: formData.businessContext,
+              companyName: formData.companyName,
+              template: formData.template,
+              agents: formData.selectedAgents,
+            }),
+          });
+          if (summaryRes.ok) {
+            const { summary } = await summaryRes.json();
+            customExecutiveSummary = summary;
+          }
+        } catch (err) {
+          console.warn('Summary generation error:', err);
+        }
+      }
+
       const encoded = encodeProposal({
         customerName: formData.customerName,
         companyName: formData.companyName,
@@ -147,6 +172,8 @@ export default function CreateProposal() {
         selectedTerms,
         firefliesUrl: formData.firefliesUrl || undefined,
         firefliesInsights,
+        businessContext: formData.businessContext || undefined,
+        customExecutiveSummary,
       });
 
       // Save proposal with a clean slug and get the professional URL
@@ -162,7 +189,12 @@ export default function CreateProposal() {
 
         if (saveRes.ok) {
           const { slug } = await saveRes.json();
-          router.push(`/p/${slug}`);
+          const origin = window.location.origin;
+          setGeneratedLinks({
+            share: `${origin}/p/${slug}`,
+            edit: `${origin}/p/${slug}/edit`,
+          });
+          setIsSubmitting(false);
           return;
         }
       } catch (saveErr) {
@@ -181,6 +213,46 @@ export default function CreateProposal() {
   const selectedTerms = getSelectedTerms();
   const hasAgents = formData.selectedAgents.length > 0;
   const hasTerms = selectedTerms.length > 0;
+
+  if (generatedLinks) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="max-w-lg mx-auto bg-white rounded-lg shadow-lg p-8 text-center">
+          <div className="text-green-500 mb-4">
+            <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Proposal Created!</h2>
+          <p className="text-gray-600 mb-6">Your proposal for <strong>{formData.companyName}</strong> is ready.</p>
+          
+          <div className="space-y-4 text-left">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <label className="block text-sm font-semibold text-blue-800 mb-2">📤 Share Link <span className="font-normal text-blue-600">(send to customer)</span></label>
+              <div className="flex gap-2">
+                <input type="text" readOnly value={generatedLinks.share} className="flex-1 text-sm border border-blue-300 rounded px-3 py-2 bg-white" />
+                <button onClick={() => { navigator.clipboard.writeText(generatedLinks.share); }} className="bg-blue-600 text-white px-3 py-2 rounded text-sm font-medium hover:bg-blue-700">Copy</button>
+              </div>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+              <label className="block text-sm font-semibold text-amber-800 mb-2">✏️ Edit Link <span className="font-normal text-amber-600">(tweak before sending)</span></label>
+              <div className="flex gap-2">
+                <input type="text" readOnly value={generatedLinks.edit} className="flex-1 text-sm border border-amber-300 rounded px-3 py-2 bg-white" />
+                <button onClick={() => { navigator.clipboard.writeText(generatedLinks.edit); }} className="bg-amber-600 text-white px-3 py-2 rounded text-sm font-medium hover:bg-amber-700">Copy</button>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 flex gap-3 justify-center">
+            <a href={generatedLinks.share} target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700">Preview Proposal</a>
+            <a href={generatedLinks.edit} target="_blank" rel="noopener noreferrer" className="bg-amber-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-amber-700">Edit Proposal</a>
+            <button onClick={() => { setGeneratedLinks(null); }} className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-medium hover:bg-gray-300">Create Another</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -260,6 +332,21 @@ export default function CreateProposal() {
                   <span>eCom-based (Optimized for eCommerce)</span>
                 </label>
               </div>
+            </div>
+
+            {/* Business Context */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Business Context <span className="text-gray-400 font-normal">(optional — helps tailor the executive summary)</span>
+              </label>
+              <textarea
+                value={formData.businessContext}
+                onChange={(e) => setFormData(prev => ({ ...prev, businessContext: e.target.value }))}
+                placeholder="e.g. They sell event tickets online, focused on music festivals in the Southeast US. Looking to scale from $50K to $200K monthly revenue."
+                rows={3}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              />
+              <p className="mt-1 text-xs text-gray-500">Describe what the customer does so the proposal reads specific to their business.</p>
             </div>
 
             {/* Agents Selection */}

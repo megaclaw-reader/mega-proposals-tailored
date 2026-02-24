@@ -27,6 +27,10 @@ export interface ProposalConfig {
   firefliesUrl?: string;
   /** Extracted insights from the Fireflies transcript */
   firefliesInsights?: FirefliesInsights;
+  /** Free-text business context from the rep */
+  businessContext?: string;
+  /** AI-generated or manually edited executive summary */
+  customExecutiveSummary?: string;
   createdAt: Date;
   isLocked?: boolean;
 }

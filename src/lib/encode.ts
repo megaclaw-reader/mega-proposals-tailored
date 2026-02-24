@@ -31,6 +31,14 @@ export function encodeProposal(config: Omit<ProposalConfig, 'id' | 'createdAt'>)
     payload.fi = config.firefliesInsights;
   }
 
+  if (config.businessContext) {
+    payload.bc = config.businessContext;
+  }
+
+  if (config.customExecutiveSummary) {
+    payload.ces = config.customExecutiveSummary;
+  }
+
   if (!payload.st) {
     // Legacy single-term format
     payload.ct = config.contractTerm;
@@ -87,6 +95,8 @@ export function decodeProposal(encoded: string): ProposalConfig | null {
       createdAt: new Date(payload.ts),
       firefliesUrl: payload.ff || undefined,
       firefliesInsights: payload.fi || undefined,
+      businessContext: payload.bc || undefined,
+      customExecutiveSummary: payload.ces || undefined,
     };
   } catch {
     return null;

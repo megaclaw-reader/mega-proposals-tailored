@@ -169,8 +169,8 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Executive Summary</h2>
             <p className="text-gray-700 leading-relaxed text-lg">
               {proposal.firefliesInsights 
-                ? `Based on our discussion, we understand ${proposal.companyName} is looking to optimize their marketing approach and address specific challenges. ${getExecutiveSummary(proposal.template, proposal.selectedAgents)}`
-                : getExecutiveSummary(proposal.template, proposal.selectedAgents)
+                ? proposal.customExecutiveSummary || `Based on our discussion, we understand ${proposal.companyName} is looking to optimize their marketing approach and address specific challenges. ${getExecutiveSummary(proposal.template, proposal.selectedAgents)}`
+                : proposal.customExecutiveSummary || getExecutiveSummary(proposal.template, proposal.selectedAgents)
               }
             </p>
           </section>
