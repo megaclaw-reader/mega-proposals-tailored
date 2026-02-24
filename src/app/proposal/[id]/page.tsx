@@ -341,11 +341,11 @@ export default function ProposalPage() {
                                 <div className="text-right">
                                   {option.discountPercentage > 0 ? (
                                     <>
-                                      <span className="text-gray-400 line-through text-xs mr-1">${agent.basePrice.toLocaleString()}</span>
+                                      <span className="text-gray-400 line-through text-xs mr-1">${Math.round(agent.basePrice).toLocaleString()}</span>
                                       <span className="font-semibold text-gray-900">${Math.round(agent.finalPrice).toLocaleString()}/mo</span>
                                     </>
                                   ) : (
-                                    <span className="font-semibold text-gray-900">${agent.finalPrice.toLocaleString()}/mo</span>
+                                    <span className="font-semibold text-gray-900">${Math.round(agent.finalPrice).toLocaleString()}/mo</span>
                                   )}
                                 </div>
                               </div>
