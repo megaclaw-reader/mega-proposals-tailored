@@ -12,7 +12,7 @@ import {
 } from '@react-pdf/renderer';
 import { Proposal, Agent, Template, TermOption, FirefliesInsights } from '@/lib/types';
 import { calculatePricing, getTermDisplayName, getTermMonths } from '@/lib/pricing';
-import { getServiceScope, EXECUTIVE_SUMMARY_CONTENT, SERVICE_DESCRIPTIONS } from '@/lib/content';
+import { getServiceScope, getExecutiveSummary, SERVICE_DESCRIPTIONS } from '@/lib/content';
 import { format } from 'date-fns';
 
 // ── Fonts ──
@@ -348,7 +348,7 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
         <Text style={s.secTitle}>Executive Summary</Text>
         <View style={s.secBar} />
         <Text style={[s.body, { marginBottom: 18 }]}>
-          {EXECUTIVE_SUMMARY_CONTENT[proposal.template]}
+          {getExecutiveSummary(proposal.template, proposal.selectedAgents)}
         </Text>
 
         {/* Your Services */}

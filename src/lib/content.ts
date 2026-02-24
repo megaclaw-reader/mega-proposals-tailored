@@ -455,7 +455,49 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
   }
 }
 
+// Legacy static summaries (kept for reference)
 export const EXECUTIVE_SUMMARY_CONTENT = {
-  leads: "This proposal outlines a comprehensive AI-driven marketing strategy designed to generate high-quality leads for your business. Our approach combines cutting-edge SEO/GEO optimization, intelligent paid advertising, and conversion-focused web development to create a powerful lead generation engine that delivers measurable results and sustainable growth.",
-  ecom: "This proposal presents a complete AI-powered eCommerce marketing solution designed to maximize your online revenue and customer acquisition. Through advanced SEO/GEO strategies, targeted paid advertising, and conversion-optimized web development, we'll create a comprehensive system that drives sales and builds lasting customer relationships."
+  leads: "This proposal outlines a comprehensive AI-driven marketing strategy designed to generate high-quality leads for your business.",
+  ecom: "This proposal presents a complete AI-powered eCommerce marketing solution designed to maximize your online revenue and customer acquisition."
 };
+
+const AGENT_SUMMARY_PARTS: Record<string, { leads: string; ecom: string }> = {
+  seo: {
+    leads: "cutting-edge SEO/GEO optimization to drive organic visibility and attract high-intent prospects",
+    ecom: "advanced SEO/GEO strategies to increase organic traffic and product discoverability"
+  },
+  paid_ads: {
+    leads: "intelligent paid advertising to generate a consistent pipeline of qualified leads",
+    ecom: "targeted paid advertising to drive sales and maximize return on ad spend"
+  },
+  website: {
+    leads: "conversion-focused web development to turn visitors into leads",
+    ecom: "conversion-optimized web development to create seamless shopping experiences that drive revenue"
+  }
+};
+
+const TEMPLATE_OUTRO: Record<string, string> = {
+  leads: "delivering measurable results and sustainable growth.",
+  ecom: "building lasting customer relationships and maximizing online revenue."
+};
+
+/** Generate an executive summary that only mentions the selected agents */
+export function getExecutiveSummary(template: 'leads' | 'ecom', agents: string[]): string {
+  const intro = EXECUTIVE_SUMMARY_CONTENT[template];
+  const parts = agents
+    .map(a => AGENT_SUMMARY_PARTS[a]?.[template])
+    .filter(Boolean);
+
+  if (parts.length === 0) return intro;
+
+  let approach: string;
+  if (parts.length === 1) {
+    approach = parts[0];
+  } else if (parts.length === 2) {
+    approach = `${parts[0]} and ${parts[1]}`;
+  } else {
+    approach = `${parts.slice(0, -1).join(', ')}, and ${parts[parts.length - 1]}`;
+  }
+
+  return `${intro} Our approach leverages ${approach} — ${TEMPLATE_OUTRO[template]}`;
+}

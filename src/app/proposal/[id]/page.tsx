@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
 import { Proposal, ContractTerm, TermOption, PricingBreakdown } from '@/lib/types';
 import { calculatePricing, formatPrice, getTermDisplayName, getTermMonths } from '@/lib/pricing';
-import { getServiceScope, EXECUTIVE_SUMMARY_CONTENT, SERVICE_DESCRIPTIONS } from '@/lib/content';
+import { getServiceScope, getExecutiveSummary, SERVICE_DESCRIPTIONS } from '@/lib/content';
 import { decodeProposal } from '@/lib/encode';
 import { format } from 'date-fns';
 
@@ -171,8 +171,8 @@ export default function ProposalPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Executive Summary</h2>
             <p className="text-gray-700 leading-relaxed text-lg">
               {proposal.firefliesInsights 
-                ? `Based on our discussion, we understand ${proposal.companyName} is looking to optimize their marketing approach and address specific challenges in lead generation and conversion. ${EXECUTIVE_SUMMARY_CONTENT[proposal.template]}`
-                : EXECUTIVE_SUMMARY_CONTENT[proposal.template]
+                ? `Based on our discussion, we understand ${proposal.companyName} is looking to optimize their marketing approach and address specific challenges. ${getExecutiveSummary(proposal.template, proposal.selectedAgents)}`
+                : getExecutiveSummary(proposal.template, proposal.selectedAgents)
               }
             </p>
           </section>
