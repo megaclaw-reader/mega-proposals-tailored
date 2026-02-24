@@ -101,7 +101,7 @@ function extractInsightsFallback(summary: string): FirefliesInsights {
     painPoints: bulletPoints.slice(0, 3).map(l => l.replace(/^[-•*]\s*\*?\*?/, '').replace(/\*\*/g, '').trim()).filter(Boolean),
     discussionTopics: bulletPoints.slice(3, 7).map(l => l.replace(/^[-•*]\s*\*?\*?/, '').replace(/\*\*/g, '').trim()).filter(Boolean),
     megaSolutions: [
-      'AI-powered campaign optimization tailored to your specific needs',
+      'AI-powered marketing optimization tailored to your specific needs',
       'End-to-end management with dedicated account support',
       'Data-driven lead scoring and qualification framework'
     ],

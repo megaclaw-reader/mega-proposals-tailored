@@ -387,11 +387,11 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
             ]
           },
           {
-            name: "SEO & Ads Ready",
+            name: "Search & Conversion Ready",
             items: [
               "SEO-optimized site architecture and URL structure",
-              "Ad tracking pixel implementation and testing",
               "Conversion tracking setup and configuration",
+              "Tracking pixel implementation and testing",
               "Meta tags and schema markup optimization",
               "Site speed optimization for better rankings"
             ]
@@ -418,7 +418,7 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
             items: [
               "AI-powered content creation and optimization",
               "Blog setup and content management system",
-              "Landing page development for campaigns"
+              "Landing page development and optimization"
             ]
           },
           {

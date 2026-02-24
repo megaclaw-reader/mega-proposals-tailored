@@ -371,9 +371,9 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
         <View style={s.secBar} />
         <View style={s.whyRow}>
           {[
-            { label: 'AI', title: 'AI-Powered', desc: 'Our proprietary AI agents work 24/7, continuously optimizing your campaigns and content for maximum performance.' },
+            { label: 'AI', title: 'AI-Powered', desc: 'Our proprietary AI agents work 24/7, continuously optimizing your strategy and content for maximum performance.' },
             { label: 'DT', title: 'Dedicated Team', desc: 'Every client gets a dedicated account manager and direct access to specialists — no call centers, no runaround.' },
-            { label: 'ROI', title: 'Results-Driven', desc: 'We optimize for business outcomes, not vanity metrics. Every dollar works toward qualified leads and revenue.' },
+            { label: 'ROI', title: 'Results-Driven', desc: 'We optimize for business outcomes, not vanity metrics. Every dollar works toward measurable growth and revenue.' },
           ].map((item, i) => (
             <View key={i} style={s.whyCard}>
               <View style={[s.svcIconWrap, { marginBottom: 8 }]}>
