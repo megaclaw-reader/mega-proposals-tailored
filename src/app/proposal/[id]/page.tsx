@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import { Proposal, ContractTerm, TermOption, PricingBreakdown } from '@/lib/types';
 import { calculatePricing, formatPrice, getTermDisplayName, getTermMonths } from '@/lib/pricing';
 import { getServiceScope, getExecutiveSummary, SERVICE_DESCRIPTIONS } from '@/lib/content';
+import { getStripeLink, hasWebsiteAddon, hasAnyDiscount } from '@/lib/stripe-links';
 import { decodeProposal } from '@/lib/encode';
 import { format } from 'date-fns';
 
@@ -295,7 +296,6 @@ export default function ProposalPage() {
             <h2 className="text-2xl font-bold text-gray-900">Investment Summary</h2>
 
             {(() => {
-              // Build pricing for all selected terms
               const terms: TermOption[] = proposal.selectedTerms && proposal.selectedTerms.length > 0
                 ? proposal.selectedTerms
                 : [{ term: proposal.contractTerm, discountPercentage: proposal.discountPercentage || 0 }];
@@ -306,16 +306,18 @@ export default function ProposalPage() {
               }));
 
               const isSingleTerm = termPricings.length === 1;
+              const showWebsiteNote = hasWebsiteAddon(proposal.selectedAgents);
+              const showPromoNote = hasAnyDiscount(terms);
 
               return (
                 <>
-                  {/* Term comparison cards */}
-                  <div className={`grid gap-6 ${termPricings.length === 1 ? 'grid-cols-1 max-w-md' : termPricings.length === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-3'}`}>
+                  {/* Term comparison cards with Stripe CTAs */}
+                  <div className={`grid gap-6 ${termPricings.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : termPricings.length === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-3'}`}>
                     {termPricings.map(({ option, pricing }, termIndex) => {
-                      const isLowestPrice = !isSingleTerm && pricing.upfrontTotal === Math.min(...termPricings.map(tp => tp.pricing.upfrontTotal));
-                      const isBestValue = !isSingleTerm && termIndex === 0; // Longest term = best value
+                      const isBestValue = !isSingleTerm && termIndex === 0;
+                      const stripeLink = getStripeLink(proposal.selectedAgents, option.term);
                       return (
-                        <div key={option.term} className={`rounded-lg border-2 p-6 relative ${
+                        <div key={option.term} className={`rounded-lg border-2 p-6 relative flex flex-col ${
                           isBestValue ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'
                         }`}>
                           {isBestValue && (
@@ -368,6 +370,28 @@ export default function ProposalPage() {
                               </p>
                             )}
                           </div>
+
+                          {/* Stripe CTA Button */}
+                          <div className="mt-auto pt-6">
+                            {stripeLink ? (
+                              <a
+                                href={stripeLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`block w-full text-center py-3 px-6 rounded-lg font-semibold text-white transition-colors ${
+                                  isBestValue
+                                    ? 'bg-blue-600 hover:bg-blue-700'
+                                    : 'bg-gray-800 hover:bg-gray-900'
+                                }`}
+                              >
+                                Get Started
+                              </a>
+                            ) : (
+                              <p className="text-center text-sm text-gray-500">
+                                Contact {proposal.salesRepName} to get started
+                              </p>
+                            )}
+                          </div>
                         </div>
                       );
                     })}
@@ -387,6 +411,58 @@ export default function ProposalPage() {
                       </div>
                     );
                   })()}
+
+                  {/* Website add-on note */}
+                  {showWebsiteNote && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <p className="text-blue-800 text-sm">
+                        <span className="font-semibold">Website Agent:</span> The Website Agent will be available as an add-on during checkout. Simply select it when completing your subscription to include it in your plan.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Promo code note — ONLY when discounts exist */}
+                  {showPromoNote && (
+                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                      <p className="text-amber-800 text-sm">
+                        <span className="font-semibold">Promo Code:</span> A promotional discount has been included in this proposal. To apply your discount at checkout, please contact <span className="font-semibold">{proposal.salesRepName}</span> at <a href={`mailto:${proposal.salesRepEmail}`} className="text-blue-600 underline">{proposal.salesRepEmail}</a> to receive your promo code before signing up.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Next Steps */}
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Next Steps</h3>
+                    <p className="text-gray-700 mb-4">
+                      We&apos;re excited to partner with {proposal.companyName} and drive meaningful results. Here&apos;s how to get started:
+                    </p>
+                    <ol className="space-y-3 text-sm text-gray-700">
+                      <li className="flex items-start">
+                        <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">1</span>
+                        <span>Select your preferred plan above and click <strong>Get Started</strong></span>
+                      </li>
+                      {showWebsiteNote && (
+                        <li className="flex items-start">
+                          <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">2</span>
+                          <span>Add the Website Agent during checkout if included in your package</span>
+                        </li>
+                      )}
+                      {showPromoNote && (
+                        <li className="flex items-start">
+                          <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">{showWebsiteNote ? '3' : '2'}</span>
+                          <span>Email {proposal.salesRepName} for your promo code before checkout</span>
+                        </li>
+                      )}
+                      <li className="flex items-start">
+                        <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">{showWebsiteNote && showPromoNote ? '4' : showWebsiteNote || showPromoNote ? '3' : '2'}</span>
+                        <span>Our team begins onboarding — campaigns go live within 14 days</span>
+                      </li>
+                    </ol>
+                    <p className="text-sm text-gray-600 mt-4">
+                      Questions? Contact <span className="font-semibold">{proposal.salesRepName}</span> at{' '}
+                      <a href={`mailto:${proposal.salesRepEmail}`} className="text-blue-600 underline">{proposal.salesRepEmail}</a>
+                    </p>
+                  </div>
                 </>
               );
             })()}
