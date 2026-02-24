@@ -165,8 +165,8 @@ export default function CreateProposal() {
       <div className="max-w-4xl mx-auto py-8 px-4">
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="bg-blue-600 px-6 py-4">
-            <h1 className="text-2xl font-bold text-white">MEGA Tailored Proposal Generator</h1>
-            <p className="text-blue-100 mt-1">Create a personalized proposal based on your sales call</p>
+            <h1 className="text-2xl font-bold text-white">MEGA Proposal Generator</h1>
+            <p className="text-blue-100 mt-1">Create a branded proposal for your customer</p>
           </div>
 
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -346,7 +346,7 @@ export default function CreateProposal() {
                   ? (transcriptStatus === 'fetching' ? 'Fetching transcript...'
                     : transcriptStatus === 'analyzing' ? 'Analyzing call insights...'
                     : 'Generating proposal...')
-                  : (formData.firefliesUrl ? 'Generate Tailored Proposal' : 'Generate Proposal')}
+                  : 'Generate Proposal'}
               </button>
             </div>
           </form>

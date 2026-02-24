@@ -266,9 +266,7 @@ function TailoredAssessment({ insights, companyName }: { insights: FirefliesInsi
     <Page size="LETTER" style={s.page} wrap>
       <Footer />
 
-      <Text style={ts.badge}>Tailored for {companyName}</Text>
-
-      <Text style={s.secTitle}>Personalized Assessment</Text>
+      <Text style={s.secTitle}>Understanding {companyName}</Text>
       <View style={s.secBar} />
 
       {/* Executive Summary from call analysis */}
