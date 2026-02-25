@@ -245,7 +245,7 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
             ]
           },
           {
-            phase: "Day 32-60 (Content & Optimization Engine)",
+            phase: "Day 31-60 (Content & Optimization Engine)",
             items: [
               "Execute rapid iterations of creative testing",
               "Optimize channel performance with retargeting and remarketing",
@@ -350,7 +350,7 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
             ]
           },
           {
-            phase: "Day 32-60 (Creative & Optimization Engine)",
+            phase: "Day 31-60 (Creative & Optimization Engine)",
             items: [
               "Execute cart abandonment retargeting campaigns",
               "Optimize Shopping and Search keyword targeting",
