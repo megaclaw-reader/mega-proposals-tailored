@@ -21,20 +21,20 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const analysisPrompt = `You are analyzing a sales call summary to create a tailored marketing proposal. The prospect's company is "${companyName || 'the prospect'}".
+    const analysisPrompt = `You are analyzing sales call notes to create a tailored marketing proposal. The prospect's company is "${companyName || 'the prospect'}".
 
-Here is the meeting summary from Fireflies.ai:
+Below are meeting notes from Fireflies.ai. There may be multiple meetings — analyze ALL of them together and synthesize the strongest, most relevant points from across every call.
 
 ${transcriptSummary}
 
 Extract the following as a JSON object:
 
-1. "painPoints" - Array of 3-6 specific challenges/frustrations the PROSPECT mentioned (not what the sales rep said). Be specific to their business.
-2. "discussionTopics" - Array of 4-8 key business topics discussed (budget, channels, goals, team size, industry specifics, etc.)
+1. "painPoints" - Array of 3-6 specific challenges/frustrations the PROSPECT mentioned across all calls (not what the sales rep said). Be specific to their business. Pull the strongest points from whichever call they came up in.
+2. "discussionTopics" - Array of 4-8 key business topics discussed across all calls (budget, channels, goals, team size, industry specifics, etc.)
 3. "megaSolutions" - Array of 3-6 specific ways MEGA's services address their needs. Map each solution to a pain point. Be concrete, not generic.
-4. "summary" - A 2-3 sentence executive summary written FOR the proposal. Address the prospect directly ("your team", "your challenges"). Don't mention MEGA by name — use "our" or "we". This should feel personalized, not templated.
+4. "summary" - A 2-3 sentence executive summary written FOR the proposal. Address the prospect directly ("your team", "your challenges"). Don't mention MEGA by name — use "our" or "we". This should feel personalized, not templated. Synthesize insights from all calls into one cohesive narrative.
 
-IMPORTANT: Focus on what the PROSPECT said and needs, not what the sales rep pitched. The proposal should feel like it was written specifically for them.
+IMPORTANT: Focus on what the PROSPECT said and needs, not what the sales rep pitched. If there are multiple calls, combine the best insights — don't repeat or list per-call.
 
 Respond with ONLY the JSON object, no other text.`;
 
