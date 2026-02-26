@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { put, list } from '@vercel/blob';
+import { put, head } from '@vercel/blob';
 
 export async function PUT(
   request: NextRequest,
@@ -13,23 +13,15 @@ export async function PUT(
       return NextResponse.json({ error: 'Missing encodedProposal' }, { status: 400 });
     }
 
-    // Verify the proposal exists
-    const { blobs } = await list({ prefix: `proposals/${slug}.json` });
-    const existing = blobs.find(b => b.pathname === `proposals/${slug}.json`);
-
-    if (!existing) {
+    // Verify the proposal exists using head() (works with private blobs)
+    try {
+      await head(`proposals/${slug}.json`);
+    } catch {
       return NextResponse.json({ error: 'Proposal not found' }, { status: 404 });
     }
 
-    // Read existing data to preserve metadata
-    const existingRes = await fetch(existing.url, {
-      headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}` },
-    });
-    const existingData = existingRes.ok ? await existingRes.json() : {};
-
-    // Update the proposal
+    // Overwrite the proposal with updated encoded data
     await put(`proposals/${slug}.json`, JSON.stringify({
-      ...existingData,
       encodedProposal,
       updatedAt: new Date().toISOString(),
     }), {

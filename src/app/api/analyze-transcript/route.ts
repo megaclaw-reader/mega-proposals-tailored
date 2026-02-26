@@ -29,7 +29,7 @@ ${transcriptSummary}
 
 Extract the following as a JSON object:
 
-1. "painPoints" - Array of 3-6 specific challenges/frustrations the PROSPECT mentioned across all calls (not what the sales rep said). Be specific to their business. Pull the strongest points from whichever call they came up in.
+1. "painPoints" - Array of 3-6 specific challenges/frustrations the PROSPECT mentioned across all calls (not what the sales rep said). Be specific to their business. Pull the strongest points from whichever call they came up in. CRITICAL: Only include challenges that MEGA can actually solve. MEGA offers Google Ads, Meta (Facebook/Instagram) Ads, SEO, GEO, and AI-powered content/creative. MEGA does NOT offer Bing/Microsoft Ads, TikTok Ads, LinkedIn Ads, Amazon Ads, programmatic/display networks, email marketing platforms, CRM software, or web development. If the prospect mentions a challenge related to a service MEGA doesn't provide, DO NOT include it as a pain point — it makes us look bad if we highlight a problem we can't fix.
 2. "discussionTopics" - Array of 4-8 key business topics discussed across all calls (budget, channels, goals, team size, industry specifics, etc.)
 3. "megaSolutions" - Array of 3-6 specific ways MEGA's services address their needs. Map each solution to a pain point. Be concrete, not generic.
 4. "summary" - A 2-3 sentence executive summary written FOR the proposal. Address the prospect directly ("your team", "your challenges"). Don't mention MEGA by name — use "our" or "we". This should feel personalized, not templated. Synthesize insights from all calls into one cohesive narrative.
