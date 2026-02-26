@@ -44,6 +44,7 @@ export async function PUT(
       access: 'private',
       contentType: 'application/json',
       addRandomSuffix: false,
+      allowOverwrite: true,
     });
 
     return NextResponse.json({ ok: true, slug });
