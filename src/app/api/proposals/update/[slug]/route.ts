@@ -1,27 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { put, head } from '@vercel/blob';
+import { put, list } from '@vercel/blob';
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
+  const { slug } = await params;
+
   try {
-    const { slug } = await params;
-    const { encodedProposal } = await request.json();
+    const body = await request.json();
+    const { encodedProposal } = body;
 
     if (!encodedProposal) {
       return NextResponse.json({ error: 'Missing encodedProposal' }, { status: 400 });
     }
 
-    // Verify the proposal exists using head() (works with private blobs)
+    // Read existing blob to preserve metadata (companyName, createdAt)
+    let existingData: Record<string, unknown> = {};
     try {
-      await head(`proposals/${slug}.json`);
-    } catch {
-      return NextResponse.json({ error: 'Proposal not found' }, { status: 404 });
+      const { blobs } = await list({ prefix: `proposals/${slug}.json` });
+      const blob = blobs.find(b => b.pathname === `proposals/${slug}.json`);
+      if (blob) {
+        const res = await fetch(blob.url, {
+          headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}` },
+        });
+        if (res.ok) {
+          existingData = await res.json();
+        }
+      } else {
+        return NextResponse.json({ error: 'Proposal not found' }, { status: 404 });
+      }
+    } catch (listErr) {
+      console.error('Blob list/read error (non-fatal):', listErr);
+      // Continue anyway — we can still overwrite
     }
 
-    // Overwrite the proposal with updated encoded data
+    // Write updated proposal
     await put(`proposals/${slug}.json`, JSON.stringify({
+      ...existingData,
       encodedProposal,
       updatedAt: new Date().toISOString(),
     }), {
@@ -32,7 +48,10 @@ export async function PUT(
 
     return NextResponse.json({ ok: true, slug });
   } catch (error) {
-    console.error('Update proposal error:', error);
-    return NextResponse.json({ error: 'Failed to update proposal' }, { status: 500 });
+    console.error('Update proposal error for slug:', slug, error);
+    return NextResponse.json(
+      { error: 'Failed to update proposal', detail: String(error) },
+      { status: 500 }
+    );
   }
 }
