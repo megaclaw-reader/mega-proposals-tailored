@@ -60,39 +60,27 @@ export function calculatePricing(
   const hasPaidAds = selectedAgents.includes('paid_ads');
   const hasWebsite = selectedAgents.includes('website');
 
-  if (hasSEO && hasPaidAds) {
-    // Use combo pricing for SEO + Paid Ads
-    const comboPrice = PRICING_TABLE.seo_paid_combo[contractTerm];
+  // Always show individual line items for SEO and Paid Ads
+  if (hasSEO) {
+    const seoPrice = PRICING_TABLE.seo[contractTerm];
     agents.push({
-      agent: 'seo_paid_combo' as const,
-      name: AGENT_NAMES.seo_paid_combo,
-      basePrice: comboPrice,
-      finalPrice: comboPrice,
+      agent: 'seo' as Agent,
+      name: AGENT_NAMES.seo,
+      basePrice: seoPrice,
+      finalPrice: seoPrice,
     });
-    subtotal += comboPrice;
-  } else {
-    // Individual pricing
-    if (hasSEO) {
-      const seoPrice = PRICING_TABLE.seo[contractTerm];
-      agents.push({
-        agent: 'seo' as Agent,
-        name: AGENT_NAMES.seo,
-        basePrice: seoPrice,
-        finalPrice: seoPrice,
-      });
-      subtotal += seoPrice;
-    }
+    subtotal += seoPrice;
+  }
 
-    if (hasPaidAds) {
-      const paidAdsPrice = PRICING_TABLE.paid_ads[contractTerm];
-      agents.push({
-        agent: 'paid_ads' as Agent,
-        name: AGENT_NAMES.paid_ads,
-        basePrice: paidAdsPrice,
-        finalPrice: paidAdsPrice,
-      });
-      subtotal += paidAdsPrice;
-    }
+  if (hasPaidAds) {
+    const paidAdsPrice = PRICING_TABLE.paid_ads[contractTerm];
+    agents.push({
+      agent: 'paid_ads' as Agent,
+      name: AGENT_NAMES.paid_ads,
+      basePrice: paidAdsPrice,
+      finalPrice: paidAdsPrice,
+    });
+    subtotal += paidAdsPrice;
   }
 
   // Website agent is always separate (addon)
@@ -105,6 +93,12 @@ export function calculatePricing(
       finalPrice: websitePrice,
     });
     subtotal += websitePrice;
+  }
+
+  // When both SEO + Paid Ads selected, use combo monthly rate for the total
+  // (individual prices may be $1 less due to rounding)
+  if (hasSEO && hasPaidAds) {
+    subtotal = PRICING_TABLE.seo_paid_combo[contractTerm] + (hasWebsite ? PRICING_TABLE.website[contractTerm] : 0);
   }
 
   // Apply discount
