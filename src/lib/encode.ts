@@ -47,7 +47,11 @@ export function encodeProposal(config: Omit<ProposalConfig, 'id' | 'createdAt'>)
 
   const json = JSON.stringify(payload);
   if (typeof window !== 'undefined') {
-    return btoa(json).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    // Use TextEncoder to handle Unicode (em dashes, smart quotes, etc.)
+    const bytes = new TextEncoder().encode(json);
+    let binary = '';
+    for (const b of bytes) binary += String.fromCharCode(b);
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   }
   return Buffer.from(json).toString('base64url');
 }
@@ -57,7 +61,10 @@ export function decodeProposal(encoded: string): ProposalConfig | null {
     let json: string;
     const base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
     if (typeof window !== 'undefined') {
-      json = atob(base64);
+      const binary = atob(base64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      json = new TextDecoder().decode(bytes);
     } else {
       json = Buffer.from(base64, 'base64').toString('utf-8');
     }
