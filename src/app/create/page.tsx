@@ -453,12 +453,12 @@ export default function CreateProposal() {
                               className={`px-2 py-1 text-sm font-medium transition-colors ${termOptions[term].discountType === 'dollar' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
                             >$</button>
                           </div>
-                          <input type="number" min="0" max={termOptions[term].discountType === 'percent' ? 50 : 5000} step={termOptions[term].discountType === 'percent' ? 1 : 50}
+                          <input type="number" min="0" max={termOptions[term].discountType === 'percent' ? 50 : 99999} step={termOptions[term].discountType === 'percent' ? 1 : 1}
                             value={termOptions[term].discount}
                             onChange={(e) => handleTermDiscount(term, e.target.value)}
                             placeholder="0"
-                            className="w-24 border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                          <span className="text-sm text-gray-600">{termOptions[term].discountType === 'percent' ? '%' : '/mo'}</span>
+                            className="w-28 border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                          <span className="text-sm text-gray-600">{termOptions[term].discountType === 'percent' ? '%' : 'off total'}</span>
                         </div>
                       )}
                     </div>
@@ -498,7 +498,7 @@ export default function CreateProposal() {
                             <span className="text-green-600 text-sm font-medium">{termOpt.discountPercentage}% off</span>
                           )}
                           {(termOpt.discountDollar || 0) > 0 && (
-                            <span className="text-green-600 text-sm font-medium">${termOpt.discountDollar}/mo off</span>
+                            <span className="text-green-600 text-sm font-medium">${termOpt.discountDollar?.toLocaleString()} off total</span>
                           )}
                         </div>
                         {pricing.agents.map((agent, i) => (

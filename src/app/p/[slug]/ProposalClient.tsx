@@ -365,7 +365,7 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
                               <p className="text-green-600 text-sm mt-1 font-medium">
                                 {option.discountPercentage > 0 && `${option.discountPercentage}% discount`}
                                 {option.discountPercentage > 0 && (option.discountDollar || 0) > 0 && ' + '}
-                                {(option.discountDollar || 0) > 0 && `$${option.discountDollar}/mo discount`}
+                                {(option.discountDollar || 0) > 0 && `$${option.discountDollar?.toLocaleString()} discount`}
                                 {' applied'}
                               </p>
                             )}

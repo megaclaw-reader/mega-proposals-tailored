@@ -7,7 +7,7 @@ export type ContractTerm = 'annual' | 'bi_annual' | 'quarterly' | 'monthly';
 export interface TermOption {
   term: ContractTerm;
   discountPercentage: number;
-  /** Fixed dollar discount applied to monthly rate (after percentage discount) */
+  /** Fixed dollar discount applied to total upfront price (after percentage discount) */
   discountDollar?: number;
 }
 

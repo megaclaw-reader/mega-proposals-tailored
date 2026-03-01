@@ -102,12 +102,31 @@ export function calculatePricing(
     subtotal = PRICING_TABLE.seo_paid_combo[contractTerm] + (hasWebsite ? PRICING_TABLE.website[contractTerm] : 0);
   }
 
-  // Apply percentage discount first, then dollar discount
-  const percentageDiscountAmount = subtotal * (discountPercentage / 100);
-  const afterPercentage = subtotal - percentageDiscountAmount;
+  const termMonths = getTermMonths(contractTerm);
+
+  // Start with exact Stripe upfront totals
+  let baseUpfront: number;
+  let stripeTotal = 0;
+  if (hasSEO && hasPaidAds) {
+    stripeTotal += STRIPE_UPFRONT_TOTALS.seo_paid_combo[contractTerm] || 0;
+  } else {
+    if (hasSEO) stripeTotal += STRIPE_UPFRONT_TOTALS.seo[contractTerm] || 0;
+    if (hasPaidAds) stripeTotal += STRIPE_UPFRONT_TOTALS.paid_ads[contractTerm] || 0;
+  }
+  if (hasWebsite) stripeTotal += STRIPE_UPFRONT_TOTALS.website[contractTerm] || 0;
+  baseUpfront = stripeTotal;
+
+  // Apply percentage discount to upfront total first
+  const percentageDiscountAmount = baseUpfront * (discountPercentage / 100);
+  const afterPercentage = baseUpfront - percentageDiscountAmount;
+
+  // Apply dollar discount directly off the upfront total
   const dollarDiscountAmount = Math.min(discountDollar, afterPercentage); // Don't go negative
-  const discountAmount = percentageDiscountAmount + dollarDiscountAmount;
-  const total = afterPercentage - dollarDiscountAmount;
+  const upfrontTotal = afterPercentage - dollarDiscountAmount;
+
+  // Derive monthly rate from discounted upfront
+  const total = upfrontTotal / termMonths;
+  const discountAmount = (subtotal * termMonths - upfrontTotal) / termMonths; // per-month discount for display
 
   // Update final prices with discounts applied proportionally
   if (discountPercentage > 0 || discountDollar > 0) {
@@ -115,26 +134,6 @@ export function calculatePricing(
     agents.forEach(agent => {
       agent.finalPrice = agent.basePrice * discountRatio;
     });
-  }
-
-  const termMonths = getTermMonths(contractTerm);
-
-  // Use exact Stripe upfront totals when available (no rounding errors)
-  let upfrontTotal: number;
-  if (discountPercentage === 0 && discountDollar === 0) {
-    // Sum exact Stripe upfront amounts
-    let stripeTotal = 0;
-    if (hasSEO && hasPaidAds) {
-      stripeTotal += STRIPE_UPFRONT_TOTALS.seo_paid_combo[contractTerm] || 0;
-    } else {
-      if (hasSEO) stripeTotal += STRIPE_UPFRONT_TOTALS.seo[contractTerm] || 0;
-      if (hasPaidAds) stripeTotal += STRIPE_UPFRONT_TOTALS.paid_ads[contractTerm] || 0;
-    }
-    if (hasWebsite) stripeTotal += STRIPE_UPFRONT_TOTALS.website[contractTerm] || 0;
-    upfrontTotal = stripeTotal;
-  } else {
-    // Discounted or monthly — calculate normally
-    upfrontTotal = total * termMonths;
   }
 
   return {
