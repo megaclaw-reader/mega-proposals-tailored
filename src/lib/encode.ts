@@ -20,6 +20,7 @@ export function encodeProposal(config: Omit<ProposalConfig, 'id' | 'createdAt'>)
     payload.st = config.selectedTerms.map(t => ({
       t: t.term,
       d: t.discountPercentage || 0,
+      dd: t.discountDollar || 0,
     }));
   }
 
@@ -76,9 +77,10 @@ export function decodeProposal(encoded: string): ProposalConfig | null {
     let discountPercentage: number | undefined;
 
     if (payload.st && Array.isArray(payload.st)) {
-      selectedTerms = payload.st.map((t: { t: string; d: number }) => ({
+      selectedTerms = payload.st.map((t: { t: string; d: number; dd?: number }) => ({
         term: t.t as ContractTerm,
         discountPercentage: t.d || 0,
+        discountDollar: t.dd || 0,
       }));
       // Use first term as the primary for backward compat
       contractTerm = selectedTerms![0].term;
