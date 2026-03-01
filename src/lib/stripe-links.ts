@@ -65,6 +65,6 @@ export function hasWebsiteAddon(agents: Agent[]): boolean {
 /**
  * Check if any term option has a discount applied.
  */
-export function hasAnyDiscount(termOptions: { discountPercentage: number }[]): boolean {
-  return termOptions.some(t => t.discountPercentage > 0);
+export function hasAnyDiscount(termOptions: { discountPercentage: number; discountDollar?: number }[]): boolean {
+  return termOptions.some(t => t.discountPercentage > 0 || (t.discountDollar || 0) > 0);
 }

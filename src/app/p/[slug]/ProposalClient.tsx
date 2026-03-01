@@ -299,7 +299,7 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
               
               const termPricings: { option: TermOption; pricing: PricingBreakdown }[] = terms.map(opt => ({
                 option: opt,
-                pricing: calculatePricing(proposal.selectedAgents, opt.term, opt.discountPercentage),
+                pricing: calculatePricing(proposal.selectedAgents, opt.term, opt.discountPercentage, opt.discountDollar || 0),
               }));
 
               const isSingleTerm = termPricings.length === 1;
@@ -336,7 +336,7 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
                               <div key={i} className="flex justify-between items-center text-sm">
                                 <span className="text-gray-700">{agent.name}</span>
                                 <div className="text-right">
-                                  {option.discountPercentage > 0 ? (
+                                  {(option.discountPercentage > 0 || (option.discountDollar || 0) > 0) ? (
                                     <>
                                       <span className="text-gray-400 line-through text-xs mr-1">${Math.round(agent.basePrice).toLocaleString()}</span>
                                       <span className="font-semibold text-gray-900">${Math.round(agent.finalPrice).toLocaleString()}/mo</span>
@@ -361,9 +361,12 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
                           <div className="bg-gray-100 rounded-lg p-4 text-center mt-4">
                             <p className="text-sm text-gray-500 mb-1">{option.term === 'monthly' ? 'Month-to-Month' : 'Total Due Upfront'}</p>
                             <p className="text-3xl font-bold text-blue-600">${Math.round(pricing.upfrontTotal).toLocaleString()}{option.term === 'monthly' ? '/mo' : ''}</p>
-                            {option.discountPercentage > 0 && (
+                            {(option.discountPercentage > 0 || (option.discountDollar || 0) > 0) && (
                               <p className="text-green-600 text-sm mt-1 font-medium">
-                                {option.discountPercentage}% discount applied
+                                {option.discountPercentage > 0 && `${option.discountPercentage}% discount`}
+                                {option.discountPercentage > 0 && (option.discountDollar || 0) > 0 && ' + '}
+                                {(option.discountDollar || 0) > 0 && `$${option.discountDollar}/mo discount`}
+                                {' applied'}
                               </p>
                             )}
                           </div>

@@ -50,7 +50,8 @@ const AGENT_NAMES = {
 export function calculatePricing(
   selectedAgents: Agent[],
   contractTerm: ContractTerm,
-  discountPercentage: number = 0
+  discountPercentage: number = 0,
+  discountDollar: number = 0
 ): PricingBreakdown {
   const agents = [];
   let subtotal = 0;
@@ -101,14 +102,18 @@ export function calculatePricing(
     subtotal = PRICING_TABLE.seo_paid_combo[contractTerm] + (hasWebsite ? PRICING_TABLE.website[contractTerm] : 0);
   }
 
-  // Apply discount
-  const discountAmount = subtotal * (discountPercentage / 100);
-  const total = subtotal - discountAmount;
+  // Apply percentage discount first, then dollar discount
+  const percentageDiscountAmount = subtotal * (discountPercentage / 100);
+  const afterPercentage = subtotal - percentageDiscountAmount;
+  const dollarDiscountAmount = Math.min(discountDollar, afterPercentage); // Don't go negative
+  const discountAmount = percentageDiscountAmount + dollarDiscountAmount;
+  const total = afterPercentage - dollarDiscountAmount;
 
-  // Update final prices with discount applied proportionally
-  if (discountPercentage > 0) {
+  // Update final prices with discounts applied proportionally
+  if (discountPercentage > 0 || discountDollar > 0) {
+    const discountRatio = subtotal > 0 ? total / subtotal : 1;
     agents.forEach(agent => {
-      agent.finalPrice = agent.basePrice * (1 - discountPercentage / 100);
+      agent.finalPrice = agent.basePrice * discountRatio;
     });
   }
 
@@ -116,7 +121,7 @@ export function calculatePricing(
 
   // Use exact Stripe upfront totals when available (no rounding errors)
   let upfrontTotal: number;
-  if (discountPercentage === 0) {
+  if (discountPercentage === 0 && discountDollar === 0) {
     // Sum exact Stripe upfront amounts
     let stripeTotal = 0;
     if (hasSEO && hasPaidAds) {

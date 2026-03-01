@@ -304,7 +304,7 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
 
   const termPricings = terms.map(opt => ({
     option: opt,
-    pricing: calculatePricing(proposal.selectedAgents, opt.term, opt.discountPercentage),
+    pricing: calculatePricing(proposal.selectedAgents, opt.term, opt.discountPercentage, opt.discountDollar || 0),
   }));
   const isSingleTerm = termPricings.length === 1;
 
@@ -417,7 +417,7 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
         <View style={termPricings.length >= 4 ? { ...s.priceRow, gap: 6 } : s.priceRow} wrap={false}>
           {termPricings.map(({ option, pricing }, idx) => {
             const best = !isSingleTerm && idx === 0;
-            const anyDiscount = termPricings.some(tp => tp.option.discountPercentage > 0);
+            const anyDiscount = termPricings.some(tp => tp.option.discountPercentage > 0 || (tp.option.discountDollar || 0) > 0);
             const cardStyle = best ? s.priceCardBest : s.priceCard;
             const tightCard = termPricings.length >= 4 ? { ...cardStyle, padding: 10 } : cardStyle;
             return (
@@ -434,10 +434,10 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
                       <Text style={s.pAgentName}>{ag.name}</Text>
                       <Text style={s.pPrice}>${Math.round(ag.finalPrice).toLocaleString()}/mo</Text>
                     </View>
-                    {option.discountPercentage > 0 && (
+                    {(option.discountPercentage > 0 || (option.discountDollar || 0) > 0) && (
                       <Text style={[s.pStrike, { textAlign: 'right' as const }]}>was ${ag.basePrice.toLocaleString()}/mo</Text>
                     )}
-                    {!option.discountPercentage && anyDiscount && (
+                    {!option.discountPercentage && !(option.discountDollar || 0) && anyDiscount && (
                       <Text style={{ fontSize: 6.5, color: '#ffffff' }}>-</Text>
                     )}
                   </View>
@@ -453,8 +453,8 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
                 <View style={s.pUpBox}>
                   <Text style={s.pUpLabel}>{option.term === 'monthly' ? 'Month-to-Month' : 'Total Due Upfront'}</Text>
                   <Text style={s.pUpVal}>${Math.round(pricing.upfrontTotal).toLocaleString()}{option.term === 'monthly' ? '/mo' : ''}</Text>
-                  {option.discountPercentage > 0 ? (
-                    <Text style={s.pDisc}>{option.discountPercentage}% discount applied</Text>
+                  {(option.discountPercentage > 0 || (option.discountDollar || 0) > 0) ? (
+                    <Text style={s.pDisc}>{option.discountPercentage > 0 ? `${option.discountPercentage}%` : ''}{option.discountPercentage > 0 && (option.discountDollar || 0) > 0 ? ' + ' : ''}{(option.discountDollar || 0) > 0 ? `$${option.discountDollar}/mo` : ''} discount applied</Text>
                   ) : anyDiscount ? (
                     <Text style={[s.pDisc, { color: G500 }]}>Standard pricing</Text>
                   ) : null}

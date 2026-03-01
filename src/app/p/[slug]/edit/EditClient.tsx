@@ -253,7 +253,7 @@ export default function EditClient({ encodedId, slug }: { encodedId: string; slu
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Investment Summary</h2>
             <div className={`grid gap-6 ${terms.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : terms.length === 2 ? 'grid-cols-1 md:grid-cols-2' : terms.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
               {terms.map((option, termIndex) => {
-                const pricing = calculatePricing(proposal.selectedAgents, option.term, option.discountPercentage);
+                const pricing = calculatePricing(proposal.selectedAgents, option.term, option.discountPercentage, option.discountDollar || 0);
                 const isBestValue = terms.length > 1 && termIndex === 0;
                 return (
                   <div key={option.term} className={`rounded-lg border-2 p-6 ${isBestValue ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'}`}>

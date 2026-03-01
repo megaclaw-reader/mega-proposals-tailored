@@ -29,11 +29,11 @@ export default function CreateProposal() {
   const [firefliesEntries, setFirefliesEntries] = useState<TranscriptEntry[]>([
     { url: '', status: 'idle', data: null, error: null },
   ]);
-  const [termOptions, setTermOptions] = useState<Record<ContractTerm, { selected: boolean; discount: string }>>({
-    annual: { selected: true, discount: '' },
-    bi_annual: { selected: false, discount: '' },
-    quarterly: { selected: false, discount: '' },
-    monthly: { selected: false, discount: '' },
+  const [termOptions, setTermOptions] = useState<Record<ContractTerm, { selected: boolean; discount: string; discountType: 'percent' | 'dollar' }>>({
+    annual: { selected: true, discount: '', discountType: 'percent' },
+    bi_annual: { selected: false, discount: '', discountType: 'percent' },
+    quarterly: { selected: false, discount: '', discountType: 'percent' },
+    monthly: { selected: false, discount: '', discountType: 'percent' },
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [analysisStatus, setAnalysisStatus] = useState<'idle' | 'fetching' | 'analyzing' | 'done'>('idle');
@@ -94,12 +94,20 @@ export default function CreateProposal() {
     }));
   };
 
+  const handleTermDiscountType = (term: ContractTerm, discountType: 'percent' | 'dollar') => {
+    setTermOptions(prev => ({
+      ...prev,
+      [term]: { ...prev[term], discountType, discount: '' },
+    }));
+  };
+
   const getSelectedTerms = (): TermOption[] => {
     return AVAILABLE_TERMS
       .filter(term => termOptions[term].selected)
       .map(term => ({
         term,
-        discountPercentage: parseFloat(termOptions[term].discount) || 0,
+        discountPercentage: termOptions[term].discountType === 'percent' ? (parseFloat(termOptions[term].discount) || 0) : 0,
+        discountDollar: termOptions[term].discountType === 'dollar' ? (parseFloat(termOptions[term].discount) || 0) : 0,
       }));
   };
 
@@ -435,12 +443,22 @@ export default function CreateProposal() {
                       {termOptions[term].selected && (
                         <div className="flex items-center gap-2">
                           <label className="text-sm text-gray-600">Discount:</label>
-                          <input type="number" min="0" max="50" step="1"
+                          <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
+                            <button type="button"
+                              onClick={() => handleTermDiscountType(term, 'percent')}
+                              className={`px-2 py-1 text-sm font-medium transition-colors ${termOptions[term].discountType === 'percent' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                            >%</button>
+                            <button type="button"
+                              onClick={() => handleTermDiscountType(term, 'dollar')}
+                              className={`px-2 py-1 text-sm font-medium transition-colors ${termOptions[term].discountType === 'dollar' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                            >$</button>
+                          </div>
+                          <input type="number" min="0" max={termOptions[term].discountType === 'percent' ? 50 : 5000} step={termOptions[term].discountType === 'percent' ? 1 : 50}
                             value={termOptions[term].discount}
                             onChange={(e) => handleTermDiscount(term, e.target.value)}
                             placeholder="0"
-                            className="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                          <span className="text-sm text-gray-600">%</span>
+                            className="w-24 border border-gray-300 rounded-md px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                          <span className="text-sm text-gray-600">{termOptions[term].discountType === 'percent' ? '%' : '/mo'}</span>
                         </div>
                       )}
                     </div>
@@ -471,13 +489,16 @@ export default function CreateProposal() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Pricing Preview</h3>
                 <div className="space-y-4">
                   {selectedTerms.map(termOpt => {
-                    const pricing = calculatePricing(formData.selectedAgents, termOpt.term, termOpt.discountPercentage);
+                    const pricing = calculatePricing(formData.selectedAgents, termOpt.term, termOpt.discountPercentage, termOpt.discountDollar || 0);
                     return (
                       <div key={termOpt.term} className="border border-gray-200 rounded-lg p-3 bg-white">
                         <div className="flex justify-between items-center mb-2">
                           <span className="font-semibold text-gray-900">{getTermDisplayName(termOpt.term)}</span>
                           {termOpt.discountPercentage > 0 && (
                             <span className="text-green-600 text-sm font-medium">{termOpt.discountPercentage}% off</span>
+                          )}
+                          {(termOpt.discountDollar || 0) > 0 && (
+                            <span className="text-green-600 text-sm font-medium">${termOpt.discountDollar}/mo off</span>
                           )}
                         </div>
                         {pricing.agents.map((agent, i) => (

@@ -24,6 +24,7 @@ export async function GET(
     config.selectedAgents,
     terms[0].term,
     terms[0].discountPercentage,
+    terms[0].discountDollar || 0,
   );
 
   const proposal: Proposal = { ...config, pricing };
