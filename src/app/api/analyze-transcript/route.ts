@@ -5,7 +5,7 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 export async function POST(request: NextRequest) {
   try {
-    const { transcriptSummary, meetingTitle, companyName } = await request.json();
+    const { transcriptSummary, meetingTitle, companyName, sourceType } = await request.json();
 
     if (!transcriptSummary || transcriptSummary.trim().length === 0) {
       return NextResponse.json(
@@ -21,9 +21,15 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    const sourceDescription = sourceType === 'justcall'
+      ? 'Below is a phone call transcript from JustCall. Analyze it thoroughly and extract the strongest, most relevant points.'
+      : sourceType === 'mixed'
+      ? 'Below are transcripts from multiple sources (meetings and phone calls). Analyze ALL of them together and synthesize the strongest, most relevant points from across every interaction.'
+      : 'Below are meeting notes from Fireflies.ai. There may be multiple meetings — analyze ALL of them together and synthesize the strongest, most relevant points from across every call.';
+
     const analysisPrompt = `You are analyzing sales call notes to create a tailored marketing proposal. The prospect's company is "${companyName || 'the prospect'}".
 
-Below are meeting notes from Fireflies.ai. There may be multiple meetings — analyze ALL of them together and synthesize the strongest, most relevant points from across every call.
+${sourceDescription}
 
 ${transcriptSummary}
 

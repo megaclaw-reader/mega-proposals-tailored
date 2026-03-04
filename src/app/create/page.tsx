@@ -15,6 +15,13 @@ interface TranscriptEntry {
   error: string | null;
 }
 
+interface JustCallEntry {
+  url: string;
+  status: 'idle' | 'fetching' | 'fetched' | 'error';
+  data: { title: string; summary: string } | null;
+  error: string | null;
+}
+
 export default function CreateProposal() {
   const router = useRouter();
   const [formData, setFormData] = useState({
@@ -27,6 +34,9 @@ export default function CreateProposal() {
     businessContext: '',
   });
   const [firefliesEntries, setFirefliesEntries] = useState<TranscriptEntry[]>([
+    { url: '', status: 'idle', data: null, error: null },
+  ]);
+  const [justcallEntries, setJustcallEntries] = useState<JustCallEntry[]>([
     { url: '', status: 'idle', data: null, error: null },
   ]);
   const [termOptions, setTermOptions] = useState<Record<ContractTerm, { selected: boolean; discount: string; discountType: 'percent' | 'dollar' }>>({
@@ -69,6 +79,38 @@ export default function CreateProposal() {
 
   const updateFirefliesUrl = (index: number, url: string) => {
     setFirefliesEntries(prev => prev.map((e, i) => i === index ? { ...e, url } : e));
+  };
+
+  const fetchJustcallTranscript = useCallback(async (index: number, url: string) => {
+    if (!url.includes('justcall.io')) return;
+    setJustcallEntries(prev => prev.map((e, i) => i === index ? { ...e, status: 'fetching', error: null } : e));
+    try {
+      const res = await fetch('/api/fetch-justcall', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ justcallUrl: url }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to fetch JustCall transcript');
+      }
+      const data = await res.json();
+      setJustcallEntries(prev => prev.map((e, i) => i === index ? { ...e, status: 'fetched', data } : e));
+    } catch (err) {
+      setJustcallEntries(prev => prev.map((e, i) => i === index ? { ...e, status: 'error', error: err instanceof Error ? err.message : 'Failed to fetch transcript' } : e));
+    }
+  }, []);
+
+  const addJustcallEntry = () => {
+    setJustcallEntries(prev => [...prev, { url: '', status: 'idle', data: null, error: null }]);
+  };
+
+  const removeJustcallEntry = (index: number) => {
+    setJustcallEntries(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const updateJustcallUrl = (index: number, url: string) => {
+    setJustcallEntries(prev => prev.map((e, i) => i === index ? { ...e, url } : e));
   };
 
   const handleAgentToggle = (agent: Agent) => {
@@ -120,20 +162,22 @@ export default function CreateProposal() {
       let firefliesInsights = undefined;
 
       // Collect all Fireflies URLs that have content
-      const validEntries = firefliesEntries.filter(e => e.url.includes('fireflies.ai'));
+      const validFirefliesEntries = firefliesEntries.filter(e => e.url.includes('fireflies.ai'));
+      const validJustcallEntries = justcallEntries.filter(e => e.url.includes('justcall.io'));
 
-      if (validEntries.length > 0) {
+      if (validFirefliesEntries.length > 0 || validJustcallEntries.length > 0) {
         try {
           // Step 1: Fetch any transcripts not already fetched
           setAnalysisStatus('fetching');
-          const allSummaries: { title: string; summary: string }[] = [];
+          const allSummaries: { title: string; summary: string; source: 'fireflies' | 'justcall' }[] = [];
 
+          // Fetch Fireflies transcripts
           for (let i = 0; i < firefliesEntries.length; i++) {
             const entry = firefliesEntries[i];
             if (!entry.url.includes('fireflies.ai')) continue;
 
             if (entry.data?.summary) {
-              allSummaries.push(entry.data);
+              allSummaries.push({ ...entry.data, source: 'fireflies' });
             } else {
               const fetchRes = await fetch('/api/fetch-transcript', {
                 method: 'POST',
@@ -142,8 +186,29 @@ export default function CreateProposal() {
               });
               if (fetchRes.ok) {
                 const data = await fetchRes.json();
-                allSummaries.push(data);
+                allSummaries.push({ ...data, source: 'fireflies' });
                 setFirefliesEntries(prev => prev.map((e, idx) => idx === i ? { ...e, status: 'fetched', data } : e));
+              }
+            }
+          }
+
+          // Fetch JustCall transcripts
+          for (let i = 0; i < justcallEntries.length; i++) {
+            const entry = justcallEntries[i];
+            if (!entry.url.includes('justcall.io')) continue;
+
+            if (entry.data?.summary) {
+              allSummaries.push({ ...entry.data, source: 'justcall' });
+            } else {
+              const fetchRes = await fetch('/api/fetch-justcall', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ justcallUrl: entry.url }),
+              });
+              if (fetchRes.ok) {
+                const data = await fetchRes.json();
+                allSummaries.push({ ...data, source: 'justcall' });
+                setJustcallEntries(prev => prev.map((e, idx) => idx === i ? { ...e, status: 'fetched', data } : e));
               }
             }
           }
@@ -153,10 +218,15 @@ export default function CreateProposal() {
             setAnalysisStatus('analyzing');
             const combinedSummary = allSummaries.length === 1
               ? allSummaries[0].summary
-              : allSummaries.map((s, i) => `--- Meeting ${i + 1}: ${s.title} ---\n${s.summary}`).join('\n\n');
+              : allSummaries.map((s, i) => `--- ${s.source === 'justcall' ? 'Phone Call' : 'Meeting'} ${i + 1}: ${s.title} ---\n${s.summary}`).join('\n\n');
             const combinedTitle = allSummaries.length === 1
               ? allSummaries[0].title
-              : `${allSummaries.length} meetings with ${formData.companyName}`;
+              : `${allSummaries.length} interactions with ${formData.companyName}`;
+
+            // Determine source type for prompt customization
+            const hasFireflies = allSummaries.some(s => s.source === 'fireflies');
+            const hasJustcall = allSummaries.some(s => s.source === 'justcall');
+            const sourceType = hasFireflies && hasJustcall ? 'mixed' : hasJustcall ? 'justcall' : 'fireflies';
 
             const analyzeRes = await fetch('/api/analyze-transcript', {
               method: 'POST',
@@ -165,6 +235,7 @@ export default function CreateProposal() {
                 transcriptSummary: combinedSummary,
                 meetingTitle: combinedTitle,
                 companyName: formData.companyName,
+                sourceType,
               }),
             });
             if (analyzeRes.ok) {
@@ -256,7 +327,7 @@ export default function CreateProposal() {
   const selectedTerms = getSelectedTerms();
   const hasAgents = formData.selectedAgents.length > 0;
   const hasTerms = selectedTerms.length > 0;
-  const fetchedCount = firefliesEntries.filter(e => e.status === 'fetched').length;
+  const fetchedCount = firefliesEntries.filter(e => e.status === 'fetched').length + justcallEntries.filter(e => e.status === 'fetched').length;
 
   if (generatedLinks) {
     return (
@@ -373,6 +444,47 @@ export default function CreateProposal() {
                   {fetchedCount} transcripts loaded — all will be analyzed together to personalize your proposal.
                 </p>
               )}
+            </div>
+
+            {/* JustCall Recording Links */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                JustCall Call Recording Links
+                <span className="text-gray-400 font-normal ml-1">(optional — paste shared voice links to include phone call insights)</span>
+              </label>
+              <div className="space-y-3">
+                {justcallEntries.map((entry, index) => (
+                  <div key={index}>
+                    <div className="flex gap-2">
+                      <input type="url" value={entry.url}
+                        onChange={(e) => updateJustcallUrl(index, e.target.value)}
+                        onBlur={(e) => { if (e.target.value.includes('justcall.io')) fetchJustcallTranscript(index, e.target.value); }}
+                        placeholder="https://iq-app.justcall.io/app/sharedvoice?token=..."
+                        className="flex-1 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      {justcallEntries.length > 1 && (
+                        <button type="button" onClick={() => removeJustcallEntry(index)}
+                          className="text-red-400 hover:text-red-600 px-2 text-lg font-bold" title="Remove">×</button>
+                      )}
+                    </div>
+                    {entry.status === 'fetching' && (
+                      <p className="mt-1 text-sm text-blue-600 flex items-center gap-2">
+                        <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                        Fetching call transcript...
+                      </p>
+                    )}
+                    {entry.status === 'fetched' && entry.data && (
+                      <p className="mt-1 text-sm text-green-700">✓ {entry.data.title}</p>
+                    )}
+                    {entry.status === 'error' && (
+                      <p className="mt-1 text-sm text-red-600">⚠ {entry.error || 'Could not fetch transcript.'}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <button type="button" onClick={addJustcallEntry}
+                className="mt-2 text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
+                <span className="text-lg leading-none">+</span> Add another call
+              </button>
             </div>
 
             {/* Template Selection */}
