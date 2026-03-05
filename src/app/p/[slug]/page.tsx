@@ -2,6 +2,8 @@ import { notFound } from 'next/navigation';
 import { list } from '@vercel/blob';
 import ProposalClient from './ProposalClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ProposalSlugPage({
   params,
 }: {
