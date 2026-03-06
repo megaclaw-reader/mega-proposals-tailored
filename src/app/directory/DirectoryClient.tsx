@@ -65,16 +65,76 @@ const REP_COLORS = [
   'bg-sky-600',
 ];
 
+// Normalize rep names so slight variations merge into one card
+function normalizeRepName(name: string): string {
+  // Trim and collapse whitespace
+  let n = name.trim().replace(/\s+/g, ' ');
+  // Title-case each word for consistency
+  n = n.replace(/\b\w/g, (c) => c.toUpperCase());
+  return n || 'Unknown Rep';
+}
+
+// Pick the best display name from a set of raw names (longest / most complete)
+function pickDisplayName(rawNames: Set<string>): string {
+  const arr = Array.from(rawNames);
+  arr.sort((a, b) => b.length - a.length);
+  return arr[0];
+}
+
+// Second pass: merge keys where one name is a prefix of another (e.g. "Julien" into "Julien Comito")
+function mergeSubnames(
+  grouped: Record<string, ProposalEntry[]>,
+  rawNamesMap: Record<string, Set<string>>,
+) {
+  const keys = Object.keys(grouped).sort((a, b) => a.length - b.length);
+  const mergeMap: Record<string, string> = {}; // short key → long key
+
+  for (let i = 0; i < keys.length; i++) {
+    if (mergeMap[keys[i]]) continue;
+    for (let j = i + 1; j < keys.length; j++) {
+      if (mergeMap[keys[j]]) continue;
+      // Check if the shorter name is a prefix/first-name of the longer one
+      if (keys[j].startsWith(keys[i] + ' ') || keys[j] === keys[i]) {
+        mergeMap[keys[i]] = keys[j];
+        break;
+      }
+    }
+  }
+
+  // Apply merges
+  for (const [shortKey, longKey] of Object.entries(mergeMap)) {
+    grouped[longKey] = [...(grouped[longKey] || []), ...grouped[shortKey]];
+    for (const n of rawNamesMap[shortKey]) rawNamesMap[longKey].add(n);
+    delete grouped[shortKey];
+    delete rawNamesMap[shortKey];
+  }
+}
+
 export default function DirectoryClient({ proposals }: { proposals: ProposalEntry[] }) {
   const [selectedRep, setSelectedRep] = useState<string | null>(null);
   const [search, setSearch] = useState('');
 
-  // Group by sales rep
+  // Group by normalized sales rep name
   const grouped: Record<string, ProposalEntry[]> = {};
+  const rawNamesMap: Record<string, Set<string>> = {};
   for (const p of proposals) {
-    const rep = p.salesRepName || 'Unknown Rep';
-    if (!grouped[rep]) grouped[rep] = [];
-    grouped[rep].push(p);
+    const raw = p.salesRepName || 'Unknown Rep';
+    const key = normalizeRepName(raw);
+    if (!grouped[key]) {
+      grouped[key] = [];
+      rawNamesMap[key] = new Set();
+    }
+    grouped[key].push(p);
+    rawNamesMap[key].add(raw.trim() || 'Unknown Rep');
+  }
+
+  // Merge partial-name duplicates (e.g. "Julien" → "Julien Comito")
+  mergeSubnames(grouped, rawNamesMap);
+
+  // Build display names (longest variant wins)
+  const displayNames: Record<string, string> = {};
+  for (const key of Object.keys(grouped)) {
+    displayNames[key] = pickDisplayName(rawNamesMap[key]);
   }
 
   const sortedReps = Object.keys(grouped).sort();
@@ -127,10 +187,10 @@ export default function DirectoryClient({ proposals }: { proposals: ProposalEntr
                   <div
                     className={`w-14 h-14 rounded-full ${REP_COLORS[i % REP_COLORS.length]} text-white flex items-center justify-center text-lg font-bold group-hover:scale-105 transition-transform`}
                   >
-                    {getInitials(rep)}
+                    {getInitials(displayNames[rep])}
                   </div>
                   <div className="text-center">
-                    <div className="font-semibold text-gray-900 text-sm">{rep}</div>
+                    <div className="font-semibold text-gray-900 text-sm">{displayNames[rep]}</div>
                     <div className="text-xs text-gray-400 mt-0.5">
                       {grouped[rep].length} proposal{grouped[rep].length !== 1 ? 's' : ''}
                     </div>
@@ -157,10 +217,10 @@ export default function DirectoryClient({ proposals }: { proposals: ProposalEntr
                 <div
                   className={`w-10 h-10 rounded-full ${REP_COLORS[sortedReps.indexOf(selectedRep) % REP_COLORS.length]} text-white flex items-center justify-center text-sm font-bold`}
                 >
-                  {getInitials(selectedRep)}
+                  {getInitials(displayNames[selectedRep])}
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">{selectedRep}</h2>
+                  <h2 className="text-xl font-bold text-gray-900">{displayNames[selectedRep]}</h2>
                   <p className="text-sm text-gray-500">
                     {grouped[selectedRep].length} proposal{grouped[selectedRep].length !== 1 ? 's' : ''}
                   </p>
