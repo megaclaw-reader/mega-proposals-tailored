@@ -315,11 +315,11 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
                       const stripeLink = getStripeLink(proposal.selectedAgents, option.term);
                       return (
                         <div key={option.term} className={`rounded-lg border-2 p-6 relative flex flex-col ${
-                          isBestValue ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'
+                          isBestValue ? 'border-blue-400 bg-white' : 'border-gray-200 bg-white'
                         }`}>
                           {isBestValue && (
                             <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                              <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+                              <span className="bg-blue-100 text-blue-700 px-3 py-0.5 rounded-full text-xs font-medium tracking-wide">
                                 Best Value
                               </span>
                             </div>

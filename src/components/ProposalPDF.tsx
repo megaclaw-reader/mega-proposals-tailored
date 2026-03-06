@@ -108,8 +108,8 @@ const s = StyleSheet.create({
   // Pricing
   priceRow: { flexDirection: 'row' as const, gap: 10, marginBottom: 14, alignItems: 'stretch' as const },
   priceCard: { flex: 1, borderWidth: 1.5, borderColor: G200, borderRadius: 8, padding: 14, backgroundColor: '#ffffff' },
-  priceCardBest: { flex: 1, borderWidth: 2, borderColor: BRAND_BLUE, borderRadius: 8, padding: 14, backgroundColor: BRAND_BLUE_LIGHT },
-  bestBadge: { backgroundColor: BRAND_BLUE, color: '#ffffff', fontSize: 6.5, fontWeight: 700, paddingHorizontal: 8, paddingVertical: 2.5, borderRadius: 8, alignSelf: 'center' as const, marginBottom: 6, letterSpacing: 0.4, textTransform: 'uppercase' as const },
+  priceCardBest: { flex: 1, borderWidth: 2, borderColor: BRAND_BLUE_MEDIUM, borderRadius: 8, padding: 14, backgroundColor: '#ffffff' },
+  bestBadge: { backgroundColor: BRAND_BLUE_LIGHT, color: BRAND_BLUE, fontSize: 6.5, fontWeight: 500, paddingHorizontal: 8, paddingVertical: 2.5, borderRadius: 8, alignSelf: 'center' as const, marginBottom: 6, letterSpacing: 0.4 },
   pTermName: { fontSize: 12, fontWeight: 700, color: G900, textAlign: 'center' as const, marginBottom: 2 },
   pTermMonths: { fontSize: 7.5, color: G500, textAlign: 'center' as const, marginBottom: 10 },
   pAgentRow: { flexDirection: 'row' as const, justifyContent: 'space-between' as const, alignItems: 'center' as const, marginBottom: 4 },
