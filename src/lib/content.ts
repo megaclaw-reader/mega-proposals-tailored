@@ -17,19 +17,19 @@ export interface ServiceContent {
 export const SERVICE_DESCRIPTIONS = {
   seo: {
     title: "SEO & GEO Agent",
-    shortDescription: "Dominate search results with AI-powered SEO and GEO strategies",
+    shortDescription: "AI agents that create, optimize, and adapt your content daily — not monthly like traditional agencies",
     badge: "SEO/GEO",
     color: "blue"
   },
   paid_ads: {
     title: "Paid Ads Agent",
-    shortDescription: "Maximize ROI with intelligent paid advertising automation",
+    shortDescription: "AI agents living inside your ad accounts, optimizing bids, budgets, and creative around the clock",
     badge: "PAID ADS",
     color: "blue"
   },
   website: {
     title: "Website Agent",
-    shortDescription: "Custom AI-optimized websites built for conversion",
+    shortDescription: "Conversion-optimized websites with unlimited changes and 2-day turnaround",
     badge: "WEB",
     color: "blue"
   }
@@ -40,10 +40,11 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
     case 'seo':
       return {
         title: "SEO/GEO Agent Services Scope",
-        description: "Our SEO/GEO Agent leverages cutting-edge AI technology to optimize your digital presence across search engines and local geo-locations. Through strategic content creation, technical optimization, and local search dominance, we drive qualified traffic and improve your online visibility where it matters most.",
+        description: "Our SEO/GEO Agent deploys AI directly into your content and search strategy — creating 20-25 optimized pages per month, updating existing content daily, and adapting to algorithm changes in real time. Where traditional agencies review your SEO quarterly, our agents are optimizing every single day.",
         highlights: [
           "Dedicated Account Manager: You'll work one-on-one with a dedicated SEO/GEO Account Manager available for monthly strategy meetings to review performance, discuss goals, and align on priorities.",
-          "Ongoing Optimization: This isn't a one-time setup. Our AI agents continuously monitor performance, update articles, and adapt to algorithm changes. We optimize content daily and adjust strategies based on search trends."
+          "Daily Optimization, Not Monthly Reviews: Our AI agents update and optimize your content every day — adapting to algorithm changes, search trend shifts, and competitor movements as they happen. Traditional agencies check in once a month; we never stop.",
+          "20-25 Pages Per Month: Most agencies deliver 4-8 blog posts per month. Our AI content engine produces 20-25 fully optimized pages — building topical authority 3-5x faster than conventional approaches."
         ],
         categories: [
           {
@@ -161,11 +162,12 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
     case 'paid_ads':
       return template === 'leads' ? {
         title: "Paid Ads Agent Services Scope",
-        description: "Our Paid Ads Agent leverages advanced AI technology to optimize your paid advertising campaigns across all major platforms. Through strategic campaign management, creative testing, and performance optimization, we drive high-quality leads and maximize your advertising ROI.",
+        description: "Our Paid Ads Agent deploys AI directly inside your ad accounts — optimizing bids, reallocating budgets, and refreshing creative continuously, not just during weekly check-ins. The result: faster learning, lower cost per qualified lead, and every dollar of your budget working harder than it would at a traditional agency.",
         highlights: [
           "Dedicated Paid Ads Expert: You'll work one-on-one with a dedicated Paid Ads Expert and Account Manager available for monthly strategy meetings to review performance, discuss goals, and align on priorities.",
-          "Optimized for CPQL, Not Just CPL: We don't just chase cheap leads. Our AI optimizes for Cost Per Qualified Lead (CPQL)—focusing your budget on the leads that actually convert into revenue, not just form fills.",
-          "Ongoing Optimization: This isn't a one-time setup. Our AI agents continuously monitor performance, analyze data, and optimize your campaigns daily. We adjust budgets, refresh creatives, and adapt to market changes."
+          "Optimized for CPQL, Not Just CPL: We don't just chase cheap leads. Our AI optimizes for Cost Per Qualified Lead (CPQL) — focusing your budget on the leads that actually convert into revenue, not just form fills.",
+          "Always-On Optimization: Our AI agents live inside your ad accounts 24/7 — adjusting bids, shifting budget to top performers, and pausing underperformers in real time. Traditional agencies review campaigns weekly or biweekly. We optimize continuously.",
+          "AI-Powered Creative at Zero Extra Cost: Agencies charge $500-$2,000 per ad creative. Our AI generates and tests multiple creative variations at no additional cost — so 100% of your ad budget goes to media spend, not production fees."
         ],
         categories: [
           {
@@ -189,33 +191,33 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
             ]
           },
           {
-            name: "Creative",
+            name: "AI-Powered Creative",
             items: [
-              "Hook and headline testing strategies",
-              "Image and basic video creative development",
-              "Creative refresh cycles and rotation",
-              "Ad variant testing and optimization",
-              "Platform-native format adaptation"
+              "AI-generated ad creative at no additional production cost",
+              "Multiple creative variations tested simultaneously — not 3-4 ads recycled for months",
+              "Winning patterns identified automatically, new variations generated from top performers",
+              "Platform-native format adaptation across search, social, and display",
+              "Creative refresh cycles that prevent ad fatigue before it impacts performance"
             ]
           },
           {
             name: "Campaign Management",
             items: [
               "Ad account setup and configuration",
-              "Campaign launches and monitoring",
-              "Ad scheduling and budget management",
-              "Naming conventions and organization",
-              "Live issue monitoring and resolution"
+              "Campaign launches with real-time monitoring",
+              "AI-driven budget reallocation based on live performance signals",
+              "Cross-platform campaign coordination",
+              "Live issue detection and resolution within hours, not days"
             ]
           },
           {
-            name: "Performance Optimization",
+            name: "Continuous Performance Optimization",
             items: [
-              "Budget reallocation based on performance",
-              "Creative rotation and testing cycles",
-              "Audience pruning and refinement",
-              "Bid strategy tuning and optimization",
-              "A/B testing implementation and analysis"
+              "Real-time bid adjustments based on conversion signals — not weekly manual reviews",
+              "Automatic budget shift from underperforming to top-performing campaigns",
+              "Audience refinement as the AI learns which segments drive qualified leads",
+              "A/B testing running continuously with AI selecting winners automatically",
+              "Seasonal and competitive adjustments made proactively as market conditions change"
             ]
           },
           {
@@ -223,8 +225,8 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
             items: [
               "Weekly performance reporting and analysis",
               "Channel comparison and optimization",
-              "Top performing ad identification",
-              "Goal tracking and ROI measurement",
+              "Top performing ad and audience identification",
+              "CPQL tracking and lead quality measurement",
               "Strategic recommendations and planning"
             ]
           }
@@ -237,40 +239,41 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
               "Full audit of past ad performance and learnings",
               "Re-instrument website with proper pixel implementation",
               "CRM integration and lead tracking setup",
-              "Develop comprehensive advertising strategy",
+              "Deploy AI optimization agents into ad accounts",
+              "Launch initial creative testing with AI-generated ad variations across multiple formats",
               "Begin incrementally testing branded search campaigns",
-              "Identify and reduce current spend inefficiencies",
-              "Launch first round of creative testing",
+              "Identify and eliminate current spend inefficiencies — most accounts have 15-30% wasted spend",
               "Implement initial landing page A/B testing"
             ]
           },
           {
-            phase: "Day 31-60 (Content & Optimization Engine)",
+            phase: "Day 31-60 (Optimize & Accelerate)",
             items: [
-              "Execute rapid iterations of creative testing",
-              "Optimize channel performance with retargeting and remarketing",
-              "Refine keyword targeting and negative keyword implementation",
-              "Continue landing page refinement and testing",
-              "Implement advanced bidding strategy refinements"
+              "Scale creative testing with fresh AI-generated variations based on first 30 days of performance data",
+              "Deploy retargeting and remarketing campaigns to recapture warm audiences",
+              "Refine keyword targeting and build negative keyword lists from real conversion data",
+              "AI agents compound daily optimizations — bid adjustments, audience refinements, budget shifts",
+              "Continue landing page refinement informed by actual conversion behavior"
             ]
           },
           {
             phase: "Day 61-90 (Scale & Compound)",
             items: [
-              "Maintain rapid iteration cycles for continuous improvement",
-              "Deploy complex audience segmentation strategies",
-              "Implement multi-approach bidding strategies",
-              "Launch fully robust lead scoring and lead quality solutions"
+              "Deploy advanced audience segmentation based on 60 days of qualified lead data",
+              "Implement multi-approach bidding strategies informed by conversion patterns",
+              "Launch lead scoring and quality-based optimization to focus spend on highest-value prospects",
+              "AI optimization compounds — each day builds on the last, widening the performance gap vs. traditional management"
             ]
           }
         ]
       } : {
         title: "Paid Ads Agent Services Scope",
-        description: "Our Paid Ads Agent leverages advanced AI technology to optimize your eCommerce advertising campaigns across all major platforms. Through strategic campaign management, product-focused creative testing, and revenue optimization, we drive profitable sales and maximize your return on ad spend.",
+        description: "Our Paid Ads Agent deploys AI directly inside your ad accounts — optimizing bids, reallocating budgets, and generating fresh creative continuously. For eCommerce, creative volume is everything: Meta's algorithm needs variety to find winners. Our AI produces more creative variations in a week than most agencies produce in a quarter, at zero additional production cost — so every dollar of your ad spend goes to driving revenue.",
         highlights: [
           "Dedicated Paid Ads Expert: You'll work one-on-one with a dedicated Paid Ads Expert and Account Manager available for monthly strategy meetings to review performance, discuss goals, and align on priorities.",
-          "Optimized for ROAS & CAC: We don't just chase clicks. Our AI optimizes for Return on Ad Spend (ROAS) and Customer Acquisition Cost (CAC)—focusing your budget on driving profitable revenue, not just traffic.",
-          "Ongoing Optimization: This isn't a one-time setup. Our AI agents continuously monitor performance, analyze data, and optimize your campaigns daily. We adjust budgets, refresh creatives, and adapt to market changes."
+          "Optimized for ROAS & CAC: We don't just chase clicks. Our AI optimizes for Return on Ad Spend (ROAS) and Customer Acquisition Cost (CAC) — focusing your budget on driving profitable revenue, not just traffic.",
+          "Always-On Optimization: Our AI agents live inside your ad accounts 24/7 — adjusting bids, shifting budget to top-performing products and audiences, and pausing underperformers in real time. Agencies review campaigns weekly; we never stop.",
+          "AI Creative Engine: The #1 reason eCommerce ads decline is creative fatigue. Our AI generates fresh creative variations continuously — testing new hooks, angles, and formats at a pace no human team can match. You get more creative variety AND 100% of your budget goes to media spend, not production fees."
         ],
         categories: [
           {
@@ -294,33 +297,33 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
             ]
           },
           {
-            name: "Creative",
+            name: "AI-Powered Creative Engine",
             items: [
-              "Product-focused creative asset development",
-              "User-generated content style advertisements",
-              "Shopping ad format optimization",
-              "Dynamic creative testing for products",
-              "Seasonal and promotional creative campaigns"
+              "AI-generated creative variations at no additional production cost — agencies charge $500-$2,000 per creative",
+              "Continuous creative testing across formats: static, carousel, short video, UGC-style, and product-focused",
+              "AI identifies winning patterns and automatically generates new variations from top performers",
+              "Creative rotation that prevents ad fatigue — fresh material keeps CPAs low and ROAS high",
+              "Seasonal and promotional campaign creative produced in days, not the typical 2-3 week agency timeline"
             ]
           },
           {
             name: "Campaign Management",
             items: [
               "Prospecting campaign setup and scaling",
-              "Retargeting campaign optimization",
-              "Shopping campaign management and bidding",
-              "Brand awareness and consideration campaigns",
-              "Cross-platform campaign coordination"
+              "Retargeting and cart abandonment campaigns",
+              "Shopping campaign management with AI-driven bidding",
+              "Cross-platform campaign coordination",
+              "Live performance monitoring with automatic issue resolution"
             ]
           },
           {
-            name: "Performance Optimization",
+            name: "Continuous Performance Optimization",
             items: [
-              "Focus budget on highest-ROAS campaigns",
-              "Optimize for target ROAS and CAC thresholds",
-              "Revenue lift testing and implementation",
-              "Product performance analysis and optimization",
-              "Customer journey optimization across touchpoints"
+              "Real-time ROAS optimization — budget automatically flows to highest-returning products and audiences",
+              "AI-driven bid adjustments based on live conversion and revenue signals",
+              "Product-level performance analysis with automatic budget reallocation",
+              "Customer journey optimization from first click to purchase",
+              "Competitive response — campaigns adapt to market shifts within hours, not weeks"
             ]
           },
           {
@@ -329,7 +332,7 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
               "ROAS and CAC performance tracking",
               "Revenue attribution and customer journey analysis",
               "Product performance insights and recommendations",
-              "Customer lifetime value reporting",
+              "Creative performance analysis — which hooks, angles, and formats drive the most revenue",
               "Profitability analysis and strategic recommendations"
             ]
           }
@@ -342,28 +345,30 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
               "Full audit of past ad performance and eCommerce metrics",
               "Product feed setup and catalog optimization",
               "Purchase tracking implementation and testing",
-              "Launch Shopping campaigns and dynamic ads",
-              "Begin incrementally testing branded search campaigns",
-              "Identify and reduce current spend inefficiencies",
-              "Launch first round of product-focused creative testing",
+              "Deploy AI optimization agents into ad accounts",
+              "Launch Shopping campaigns and dynamic product ads",
+              "Launch first round of AI-generated creative testing across multiple formats and hooks",
+              "Identify and eliminate current spend inefficiencies — most accounts have 15-30% wasted spend",
               "Implement initial product page A/B testing"
             ]
           },
           {
-            phase: "Day 31-60 (Creative & Optimization Engine)",
+            phase: "Day 31-60 (Creative Volume & Optimization)",
             items: [
-              "Execute cart abandonment retargeting campaigns",
-              "Optimize Shopping and Search keyword targeting",
-              "Continue product page refinement and testing",
-              "Implement ROAS and CAC-focused bidding strategies"
+              "Scale AI creative production — fresh variations weekly based on first 30 days of performance data",
+              "Deploy cart abandonment retargeting with dynamic product creative",
+              "Optimize Shopping and Search keyword targeting with real conversion data",
+              "AI agents compound daily optimizations — bids, audiences, budget allocation all improving continuously",
+              "Continue product page refinement informed by actual purchase behavior"
             ]
           },
           {
             phase: "Day 61-90 (Scale & Compound)",
             items: [
-              "Deploy lookalike audience scaling strategies",
-              "Implement advanced ROAS-optimized bidding",
-              "Launch comprehensive revenue attribution modeling"
+              "Deploy lookalike audience scaling based on actual purchaser profiles",
+              "Full creative rotation preventing ad fatigue — fresh AI-generated variations replace declining performers automatically",
+              "Advanced ROAS-optimized bidding across all channels",
+              "AI optimization compounds — each day's improvements build on the last, widening the performance gap vs. traditional management"
             ]
           }
         ]
@@ -457,28 +462,28 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
 
 // Legacy static summaries (kept for reference)
 export const EXECUTIVE_SUMMARY_CONTENT = {
-  leads: "This proposal outlines a comprehensive AI-driven marketing strategy designed to generate high-quality leads for your business.",
-  ecom: "This proposal presents a complete AI-powered eCommerce marketing solution designed to maximize your online revenue and customer acquisition."
+  leads: "This proposal outlines how MEGA's AI agents will generate high-quality leads for your business — not through periodic campaign reviews like a traditional agency, but through always-on optimization that compounds daily improvements into measurable results.",
+  ecom: "This proposal outlines how MEGA's AI agents will drive profitable revenue for your eCommerce business — with always-on campaign optimization, AI-generated creative at zero production cost, and every dollar of your ad budget going to media spend instead of agency overhead."
 };
 
 const AGENT_SUMMARY_PARTS: Record<string, { leads: string; ecom: string }> = {
   seo: {
-    leads: "cutting-edge SEO/GEO optimization to drive organic visibility and attract high-intent prospects",
-    ecom: "advanced SEO/GEO strategies to increase organic traffic and product discoverability"
+    leads: "AI-powered SEO/GEO agents that produce 20-25 optimized pages per month and adapt to algorithm changes daily — building organic visibility 3-5x faster than conventional SEO",
+    ecom: "AI-powered SEO/GEO agents that produce 20-25 optimized pages per month, increasing organic traffic and product discoverability while reducing your dependence on paid channels"
   },
   paid_ads: {
-    leads: "intelligent paid advertising to generate a consistent pipeline of qualified leads",
-    ecom: "targeted paid advertising to drive sales and maximize return on ad spend"
+    leads: "always-on paid advertising agents that live inside your ad accounts, optimizing bids and budgets continuously to drive down your cost per qualified lead",
+    ecom: "always-on paid advertising agents that live inside your ad accounts, generating fresh creative and optimizing for ROAS around the clock"
   },
   website: {
-    leads: "conversion-focused web development to turn visitors into leads",
-    ecom: "conversion-optimized web development to create seamless shopping experiences that drive revenue"
+    leads: "conversion-optimized web development with unlimited changes and 2-day turnaround",
+    ecom: "conversion-optimized web development designed to turn traffic into purchases, with unlimited changes and 2-day turnaround"
   }
 };
 
 const TEMPLATE_OUTRO: Record<string, string> = {
-  leads: "delivering measurable results and sustainable growth.",
-  ecom: "building lasting customer relationships and maximizing online revenue."
+  leads: "delivering measurable results that compound over time.",
+  ecom: "driving sustainable, profitable revenue growth."
 };
 
 /** Generate an executive summary that only mentions the selected agents */
