@@ -17,6 +17,7 @@ export default function EditClient({ encodedId, slug }: { encodedId: string; slu
   const [editedFirefliesSummary, setEditedFirefliesSummary] = useState('');
   const [editedPainPoints, setEditedPainPoints] = useState<string[]>([]);
   const [editedSolutions, setEditedSolutions] = useState<string[]>([]);
+  const [editedTerms, setEditedTerms] = useState<TermOption[]>([]);
 
   useEffect(() => {
     const config = decodeProposal(encodedId);
@@ -40,6 +41,14 @@ export default function EditClient({ encodedId, slug }: { encodedId: string; slu
         setEditedPainPoints([...config.firefliesInsights.painPoints]);
         setEditedSolutions([...config.firefliesInsights.megaSolutions]);
       }
+      
+      // Initialize term options for discount editing
+      const initialTerms = config.selectedTerms || [{ 
+        term: config.contractTerm, 
+        discountPercentage: config.discountPercentage || 0,
+        discountDollar: 0
+      }];
+      setEditedTerms(initialTerms.map(t => ({ ...t })));
     }
     setLoading(false);
   }, [encodedId]);
@@ -65,8 +74,9 @@ export default function EditClient({ encodedId, slug }: { encodedId: string; slu
         selectedAgents: proposal.selectedAgents,
         salesRepName: proposal.salesRepName,
         salesRepEmail: proposal.salesRepEmail,
-        contractTerm: proposal.contractTerm,
-        selectedTerms: proposal.selectedTerms,
+        contractTerm: editedTerms[0]?.term || proposal.contractTerm,
+        discountPercentage: editedTerms[0]?.discountPercentage || 0,
+        selectedTerms: editedTerms,
         firefliesUrl: proposal.firefliesUrl,
         firefliesInsights: updatedInsights,
         businessContext: proposal.businessContext,
@@ -248,25 +258,78 @@ export default function EditClient({ encodedId, slug }: { encodedId: string; slu
             <p className="text-sm text-gray-400 mt-2 italic">Service scope sections and timelines are not editable — they use standard templates.</p>
           </section>
 
-          {/* Investment Summary (read-only preview) */}
+          {/* Investment Summary (editable discounts) */}
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Investment Summary</h2>
-            <div className={`grid gap-6 ${terms.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : terms.length === 2 ? 'grid-cols-1 md:grid-cols-2' : terms.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
-              {terms.map((option, termIndex) => {
+            <p className="text-sm text-amber-600 font-medium mb-4">✏️ Add or adjust discounts for each term below. The proposal pricing updates automatically.</p>
+            <div className={`grid gap-6 ${editedTerms.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : editedTerms.length === 2 ? 'grid-cols-1 md:grid-cols-2' : editedTerms.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
+              {editedTerms.map((option, termIndex) => {
                 const pricing = calculatePricing(proposal.selectedAgents, option.term, option.discountPercentage, option.discountDollar || 0);
-                const isBestValue = terms.length > 1 && termIndex === 0;
+                const basePricing = calculatePricing(proposal.selectedAgents, option.term, 0, 0);
+                const isBestValue = editedTerms.length > 1 && termIndex === 0;
+                const hasDiscount = (option.discountPercentage || 0) > 0 || (option.discountDollar || 0) > 0;
                 return (
                   <div key={option.term} className={`rounded-lg border-2 p-6 ${isBestValue ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'}`}>
                     {isBestValue && <span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">Best Value</span>}
                     <h3 className="text-xl font-bold text-gray-900 mt-2">{getTermDisplayName(option.term)}</h3>
-                    <p className="text-sm text-gray-500">{option.term === 'monthly' ? 'Month-to-month commitment' : `${getTermMonths(option.term)} months`}</p>
-                    <p className="text-2xl font-bold text-blue-600 mt-3">${Math.round(pricing.upfrontTotal).toLocaleString()}{option.term === 'monthly' ? '/mo' : ''}</p>
-                    <p className="text-xs text-gray-400">{option.term === 'monthly' ? 'Month-to-Month' : 'Total Due Upfront'}</p>
+                    <p className="text-sm text-gray-500 mb-3">{option.term === 'monthly' ? 'Month-to-month' : `${getTermMonths(option.term)} months`}</p>
+                    
+                    {/* Base price */}
+                    <p className="text-sm text-gray-500">Base: ${Math.round(basePricing.total).toLocaleString()}/mo</p>
+                    
+                    {/* Discount controls */}
+                    <div className="mt-3 space-y-2 bg-amber-50 rounded-lg p-3 border border-amber-200">
+                      <div>
+                        <label className="block text-xs font-semibold text-amber-700 mb-1">Discount %</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="50"
+                          step="1"
+                          value={option.discountPercentage || 0}
+                          onChange={(e) => {
+                            const updated = [...editedTerms];
+                            updated[termIndex] = { ...updated[termIndex], discountPercentage: Math.min(50, Math.max(0, parseInt(e.target.value) || 0)) };
+                            setEditedTerms(updated);
+                          }}
+                          className="w-full border border-amber-300 rounded px-2 py-1 text-sm focus:border-amber-500 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-amber-700 mb-1">Discount $/mo</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="2000"
+                          step="25"
+                          value={option.discountDollar || 0}
+                          onChange={(e) => {
+                            const updated = [...editedTerms];
+                            updated[termIndex] = { ...updated[termIndex], discountDollar: Math.min(2000, Math.max(0, parseInt(e.target.value) || 0)) };
+                            setEditedTerms(updated);
+                          }}
+                          className="w-full border border-amber-300 rounded px-2 py-1 text-sm focus:border-amber-500 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                    
+                    {/* Updated price preview */}
+                    <div className="mt-3 pt-3 border-t border-gray-200">
+                      {hasDiscount && <p className="text-sm text-gray-400 line-through">${Math.round(basePricing.total).toLocaleString()}/mo</p>}
+                      <p className="text-2xl font-bold text-blue-600">${Math.round(pricing.total).toLocaleString()}/mo</p>
+                      <p className="text-sm text-gray-500 mt-1">
+                        {option.term === 'monthly' ? 'Month-to-Month' : `Upfront: $${Math.round(pricing.upfrontTotal).toLocaleString()}`}
+                      </p>
+                      {hasDiscount && (
+                        <p className="text-xs text-green-600 font-medium mt-1">
+                          Saving ${Math.round(basePricing.total - pricing.total).toLocaleString()}/mo
+                        </p>
+                      )}
+                    </div>
                   </div>
                 );
               })}
             </div>
-            <p className="text-sm text-gray-400 mt-2 italic">Pricing is not editable — regenerate the proposal to change pricing options.</p>
           </section>
         </div>
       </div>
