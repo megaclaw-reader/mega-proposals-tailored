@@ -236,6 +236,7 @@ export default function CreateProposal() {
                 meetingTitle: combinedTitle,
                 companyName: formData.companyName,
                 sourceType,
+                selectedAgents: formData.selectedAgents,
               }),
             });
             if (analyzeRes.ok) {

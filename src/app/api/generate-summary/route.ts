@@ -32,7 +32,7 @@ Rules:
 - Keep it professional but not stuffy
 - 2-3 sentences max
 - Start with "This proposal outlines..." or similar
-- Only mention the services that are included (don't mention SEO if it's not selected, etc.)
+- ONLY mention the services that are included (${agentNames.join(', ')}). Do NOT reference any other services. If only SEO is included, do not mention paid ads, ad accounts, ad spend, campaigns, bidding, ROAS, or any paid advertising concepts. If only Paid Ads is included, do not mention SEO, organic traffic, content creation, or keywords.
 
 Return ONLY the summary text, nothing else.`;
 

@@ -462,14 +462,14 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
 
 // Legacy static summaries (kept for reference)
 export const EXECUTIVE_SUMMARY_CONTENT = {
-  leads: "This proposal outlines how MEGA's AI agents will generate high-quality leads for your business — not through periodic campaign reviews like a traditional agency, but through always-on optimization that compounds daily improvements into measurable results.",
-  ecom: "This proposal outlines how MEGA's AI agents will drive profitable revenue for your eCommerce business — with always-on campaign optimization, AI-generated creative at zero production cost, and every dollar of your ad budget going to media spend instead of agency overhead."
+  leads: "This proposal outlines how MEGA's AI agents will generate high-quality leads for your business — not through periodic reviews like a traditional agency, but through always-on optimization that compounds daily improvements into measurable results.",
+  ecom: "This proposal outlines how MEGA's AI agents will drive profitable revenue for your eCommerce business — with always-on optimization, AI-generated creative at zero production cost, and a results-driven approach that outperforms traditional agency models."
 };
 
 const AGENT_SUMMARY_PARTS: Record<string, { leads: string; ecom: string }> = {
   seo: {
     leads: "AI-powered SEO/GEO agents that produce 20-25 optimized pages per month and adapt to algorithm changes daily — building organic visibility 3-5x faster than conventional SEO",
-    ecom: "AI-powered SEO/GEO agents that produce 20-25 optimized pages per month, increasing organic traffic and product discoverability while reducing your dependence on paid channels"
+    ecom: "AI-powered SEO/GEO agents that produce 20-25 optimized pages per month, increasing organic traffic and product discoverability while building sustainable, long-term search visibility"
   },
   paid_ads: {
     leads: "always-on paid advertising agents that live inside your ad accounts, optimizing bids and budgets continuously to drive down your cost per qualified lead",

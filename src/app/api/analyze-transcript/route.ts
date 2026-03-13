@@ -5,7 +5,7 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 export async function POST(request: NextRequest) {
   try {
-    const { transcriptSummary, meetingTitle, companyName, sourceType } = await request.json();
+    const { transcriptSummary, meetingTitle, companyName, sourceType, selectedAgents } = await request.json();
 
     if (!transcriptSummary || transcriptSummary.trim().length === 0) {
       return NextResponse.json(
@@ -27,7 +27,25 @@ export async function POST(request: NextRequest) {
       ? 'Below are transcripts from multiple sources (meetings and phone calls). Analyze ALL of them together and synthesize the strongest, most relevant points from across every interaction.'
       : 'Below are meeting notes from Fireflies.ai. There may be multiple meetings — analyze ALL of them together and synthesize the strongest, most relevant points from across every call.';
 
+    // Map selected agents to human-readable service names
+    const agentServiceMap: Record<string, string> = {
+      seo: 'SEO/GEO (search engine optimization, content creation, organic traffic growth)',
+      paid_ads: 'Paid Advertising (Google Ads, Meta/Facebook/Instagram Ads, AI-optimized campaigns)',
+      website: 'Website Development (conversion-optimized web design)',
+    };
+    const selectedServices = (selectedAgents as string[] || ['seo', 'paid_ads', 'website'])
+      .map(a => agentServiceMap[a] || a)
+      .join(', ');
+    const excludedServices = Object.entries(agentServiceMap)
+      .filter(([key]) => !(selectedAgents as string[] || []).includes(key))
+      .map(([, name]) => name);
+    const excludeNote = excludedServices.length > 0
+      ? `\n\nCRITICAL: This proposal ONLY includes these services: ${selectedServices}. Do NOT mention or reference ${excludedServices.join(' or ')} in any way. No mentions of ad accounts, ad spend, paid campaigns, bidding, ROAS, cost per click, ad creative, or any paid advertising concepts unless Paid Advertising is one of the selected services. No mentions of SEO, organic traffic, keywords, or content creation unless SEO/GEO is one of the selected services. Stay strictly within the selected services.`
+      : '';
+
     const analysisPrompt = `You are analyzing sales call notes to create a tailored marketing proposal. The prospect's company is "${companyName || 'the prospect'}".
+
+Services included in this proposal: ${selectedServices}${excludeNote}
 
 ${sourceDescription}
 
@@ -35,10 +53,10 @@ ${transcriptSummary}
 
 Extract the following as a JSON object:
 
-1. "painPoints" - Array of 3-6 specific challenges/frustrations the PROSPECT mentioned across all calls (not what the sales rep said). Be specific to their business. Pull the strongest points from whichever call they came up in. CRITICAL: Only include challenges that MEGA can actually solve. MEGA offers Google Ads, Meta (Facebook/Instagram) Ads, SEO, GEO, and AI-powered content/creative. MEGA does NOT offer Bing/Microsoft Ads, TikTok Ads, LinkedIn Ads, Amazon Ads, programmatic/display networks, email marketing platforms, CRM software, or web development. If the prospect mentions a challenge related to a service MEGA doesn't provide, DO NOT include it as a pain point — it makes us look bad if we highlight a problem we can't fix.
+1. "painPoints" - Array of 3-6 specific challenges/frustrations the PROSPECT mentioned across all calls (not what the sales rep said). Be specific to their business. Pull the strongest points from whichever call they came up in. CRITICAL: Only include challenges that can be solved by the selected services (${selectedServices}). Do NOT include pain points related to services not in this proposal.
 2. "discussionTopics" - Array of 4-8 key business topics discussed across all calls (budget, channels, goals, team size, industry specifics, etc.)
-3. "megaSolutions" - Array of 3-6 specific ways MEGA's services address their needs. Map each solution to a pain point. Be concrete, not generic.
-4. "summary" - A 2-3 sentence executive summary written FOR the proposal. Address the prospect directly ("your team", "your challenges"). Don't mention MEGA by name — use "our" or "we". This should feel personalized, not templated. Synthesize insights from all calls into one cohesive narrative.
+3. "megaSolutions" - Array of 3-6 specific ways the SELECTED services (${selectedServices}) address their needs. Map each solution to a pain point. Be concrete, not generic. Do NOT suggest solutions involving services not included in this proposal.
+4. "summary" - A 2-3 sentence executive summary written FOR the proposal. Address the prospect directly ("your team", "your challenges"). Don't mention MEGA by name — use "our" or "we". This should feel personalized, not templated. Only reference the selected services. Synthesize insights from all calls into one cohesive narrative.
 
 IMPORTANT: Focus on what the PROSPECT said and needs, not what the sales rep pitched. If there are multiple calls, combine the best insights — don't repeat or list per-call.
 
