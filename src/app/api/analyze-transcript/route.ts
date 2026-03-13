@@ -105,6 +105,46 @@ Respond with ONLY the JSON object, no other text.`;
     }
 
     const insights: FirefliesInsights = JSON.parse(jsonMatch[0]);
+
+    // POST-GENERATION VALIDATION: Strip any references to unselected services
+    // This is a hard safety net — even if the AI ignores instructions, we catch it here
+    const agents = (selectedAgents as string[]) || [];
+    const hasPaidAds = agents.includes('paid_ads');
+    const hasSeo = agents.includes('seo');
+
+    const paidAdsTerms = /\b(paid ad|google ads?|meta ads?|facebook ads?|instagram ads?|ad account|ad spend|ad budget|advertising budget|cost per click|CPC|ROAS|bidding|ad creative|ad campaign|paid campaign|paid advertising|campaign optimization|campaign coordination|ad targeting)\b/gi;
+    const seoTerms = /\b(SEO|organic traffic|keyword ranking|backlink|search engine optimization|content strategy|blog post|topical authority)\b/gi;
+
+    function scrubText(text: string): string {
+      if (!hasPaidAds) text = text.replace(paidAdsTerms, (match) => {
+        console.warn(`[SCRUB] Removed paid ads term "${match}" from insights`);
+        return 'marketing';
+      });
+      // Don't scrub SEO terms since they're less likely to be wrong,
+      // but flag them if SEO isn't selected
+      return text;
+    }
+
+    function scrubArray(arr: string[]): string[] {
+      if (!hasPaidAds) {
+        // Remove entire items that are fundamentally about paid ads
+        arr = arr.filter(item => {
+          const lower = item.toLowerCase();
+          const isPaidAds = lower.includes('google ads') || lower.includes('ad account') || 
+                           lower.includes('ad spend') || lower.includes('paid advertising') ||
+                           lower.includes('cost per click') || lower.includes('ad campaign');
+          if (isPaidAds) console.warn(`[SCRUB] Removed paid-ads item: "${item.substring(0, 80)}..."`);
+          return !isPaidAds;
+        });
+      }
+      return arr.map(scrubText);
+    }
+
+    insights.painPoints = scrubArray(insights.painPoints);
+    insights.megaSolutions = scrubArray(insights.megaSolutions);
+    insights.discussionTopics = scrubArray(insights.discussionTopics);
+    insights.summary = scrubText(insights.summary);
+
     return NextResponse.json({ insights });
 
   } catch (error) {
