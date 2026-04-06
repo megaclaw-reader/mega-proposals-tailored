@@ -54,12 +54,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Extract structured AI notes (action items, outline, etc.) if available
+    const aiNotes = meetingNote.summary || {};
+    const structuredSections: string[] = [];
+    
+    // Pull all structured sections from the AI summary
+    if (aiNotes.shorthand_bullet) structuredSections.push(`## Key Points\n${aiNotes.shorthand_bullet}`);
+    if (aiNotes.action_items) structuredSections.push(`## Action Items\n${aiNotes.action_items}`);
+    if (aiNotes.outline) structuredSections.push(`## Meeting Outline\n${aiNotes.outline}`);
+    if (aiNotes.overview) structuredSections.push(`## Overview\n${aiNotes.overview}`);
+    if (aiNotes.keywords) structuredSections.push(`## Keywords\n${Array.isArray(aiNotes.keywords) ? aiNotes.keywords.join(', ') : aiNotes.keywords}`);
+
+    // Combine everything for maximum context — gist + structured notes + full AI summary
+    const combinedSummary = [
+      gist ? `## Gist\n${gist}` : '',
+      ...structuredSections,
+      summaryComment ? `## Full AI Summary\n${summaryComment}` : '',
+    ].filter(Boolean).join('\n\n');
+
     return NextResponse.json({
       title: meetingNote.title || 'Unknown Meeting',
       date: meetingNote.date || null,
       duration: meetingNote.durationMins || null,
       gist,
-      summary: summaryComment,
+      summary: combinedSummary || summaryComment || gist,
       owner: meetingNote.ownerProfile?.name || null,
     });
 

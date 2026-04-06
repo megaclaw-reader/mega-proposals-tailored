@@ -186,44 +186,39 @@ export default function EditClient({ encodedId, slug }: { encodedId: string; slu
                   />
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-white rounded-lg p-5 border border-gray-200">
-                    <h3 className="font-semibold text-red-700 mb-3">Key Challenges</h3>
-                    {editedPainPoints.map((point, index) => (
-                      <div key={index} className="flex items-start mb-2">
-                        <span className="text-red-500 mr-2 mt-1">•</span>
-                        <input
-                          type="text"
-                          value={point}
-                          onChange={(e) => {
-                            const updated = [...editedPainPoints];
-                            updated[index] = e.target.value;
-                            setEditedPainPoints(updated);
-                          }}
-                          className="flex-1 text-sm text-gray-700 border-b border-amber-200 focus:border-amber-500 focus:outline-none py-1 bg-transparent"
-                        />
+                <div className="space-y-4">
+                  {editedPainPoints.map((point, index) => (
+                    <div key={index} className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                      <div className="grid grid-cols-1 md:grid-cols-2">
+                        <div className="p-4 border-b md:border-b-0 md:border-r border-gray-200">
+                          <label className="text-xs font-semibold text-red-700 uppercase tracking-wider mb-1 block">Challenge {index + 1}</label>
+                          <textarea
+                            value={point}
+                            onChange={(e) => {
+                              const updated = [...editedPainPoints];
+                              updated[index] = e.target.value;
+                              setEditedPainPoints(updated);
+                            }}
+                            rows={3}
+                            className="w-full text-sm text-gray-700 border border-amber-200 rounded p-2 focus:border-amber-500 focus:outline-none bg-transparent"
+                          />
+                        </div>
+                        <div className="p-4">
+                          <label className="text-xs font-semibold text-blue-700 uppercase tracking-wider mb-1 block">Our Approach {index + 1}</label>
+                          <textarea
+                            value={editedSolutions[index] || ''}
+                            onChange={(e) => {
+                              const updated = [...editedSolutions];
+                              updated[index] = e.target.value;
+                              setEditedSolutions(updated);
+                            }}
+                            rows={3}
+                            className="w-full text-sm text-gray-700 border border-amber-200 rounded p-2 focus:border-amber-500 focus:outline-none bg-transparent"
+                          />
+                        </div>
                       </div>
-                    ))}
-                  </div>
-
-                  <div className="bg-white rounded-lg p-5 border border-gray-200">
-                    <h3 className="font-semibold text-blue-700 mb-3">How MEGA Helps</h3>
-                    {editedSolutions.map((solution, index) => (
-                      <div key={index} className="flex items-start mb-2">
-                        <span className="text-blue-500 mr-2 mt-1">•</span>
-                        <input
-                          type="text"
-                          value={solution}
-                          onChange={(e) => {
-                            const updated = [...editedSolutions];
-                            updated[index] = e.target.value;
-                            setEditedSolutions(updated);
-                          }}
-                          className="flex-1 text-sm text-gray-700 border-b border-amber-200 focus:border-amber-500 focus:outline-none py-1 bg-transparent"
-                        />
-                      </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </section>

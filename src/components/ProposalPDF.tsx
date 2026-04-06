@@ -263,35 +263,33 @@ function TailoredAssessment({ insights, companyName }: { insights: FirefliesInsi
       <Text style={s.secTitle}>Understanding {companyName}</Text>
       <View style={s.secBar} />
 
-      <View style={ts.outerBox}>
-        {/* Summary */}
-        <Text style={ts.summaryText}>{insights.summary}</Text>
-
-        {/* Two-column: Challenges + Solutions */}
-        <View style={ts.colRow}>
-          {/* Key Challenges */}
-          <View style={ts.card}>
-            <Text style={[ts.cardTitle, ts.cardTitleRed]}>Key Challenges</Text>
-            {insights.painPoints.map((point, i) => (
-              <View key={i} style={ts.bulletRow}>
-                <Text style={ts.dotRed}>•</Text>
-                <Text style={ts.bulletText}>{point}</Text>
-              </View>
-            ))}
-          </View>
-
-          {/* How MEGA Helps */}
-          <View style={ts.card}>
-            <Text style={[ts.cardTitle, ts.cardTitleBlue]}>How MEGA Helps</Text>
-            {insights.megaSolutions.map((solution, i) => (
-              <View key={i} style={ts.bulletRow}>
-                <Text style={ts.dotBlue}>•</Text>
-                <Text style={ts.bulletText}>{solution}</Text>
-              </View>
-            ))}
-          </View>
-        </View>
+      {/* Personalized summary with left border accent */}
+      <View style={{ borderLeftWidth: 3, borderLeftColor: BRAND_BLUE, paddingLeft: 12, marginBottom: 16 }}>
+        <Text style={{ fontSize: 10, lineHeight: 1.7, color: G700, fontStyle: 'italic' }}>{insights.summary}</Text>
       </View>
+
+      {/* Challenge → Solution pairs */}
+      {insights.painPoints.map((point, i) => {
+        const solution = insights.megaSolutions[i];
+        return (
+          <View key={i} style={{ backgroundColor: G50, borderWidth: 1, borderColor: G200, borderRadius: 8, marginBottom: 8, overflow: 'hidden' }} wrap={false}>
+            <View style={{ flexDirection: 'row' as const }}>
+              {/* Challenge */}
+              <View style={{ flex: 1, padding: 12, borderRightWidth: 1, borderRightColor: G200 }}>
+                <Text style={{ fontSize: 7, fontWeight: 600, color: '#b91c1c', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Challenge</Text>
+                <Text style={{ fontSize: 8, color: '#1f2937', lineHeight: 1.5 }}>{point}</Text>
+              </View>
+              {/* Solution */}
+              {solution && (
+                <View style={{ flex: 1, padding: 12, backgroundColor: '#ffffff' }}>
+                  <Text style={{ fontSize: 7, fontWeight: 600, color: BRAND_BLUE, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 }}>Our Approach</Text>
+                  <Text style={{ fontSize: 8, color: '#1f2937', lineHeight: 1.5 }}>{solution}</Text>
+                </View>
+              )}
+            </View>
+          </View>
+        );
+      })}
     </Page>
   );
 }
