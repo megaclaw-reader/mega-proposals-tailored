@@ -88,6 +88,7 @@ CRITICAL RULES:
 - Never use these phrases: "leverage", "cutting-edge", "state-of-the-art", "comprehensive solution", "holistic approach", "digital landscape", "drive results"
 - Every pain point and solution should feel like it was written by someone who deeply understands THIS prospect's business
 - The prospect should read this and think "they actually listened to what I said"
+- **NEVER mention specific dollar amounts for MEGA's management fees, pricing, or service costs** (e.g. "$1,000/month", "$2,000/month", "$1,399/month"). The pricing section is generated separately and must be the single source of truth for all pricing. If the prospect discussed pricing on the call, reference it generically (e.g. "competitive management fee", "discounted rate to get started") — never with a specific number. You CAN mention the prospect's own numbers (ad budget, revenue, CAC targets, etc.) — just not MEGA's fees.
 
 Respond with ONLY the JSON object.`;
 
