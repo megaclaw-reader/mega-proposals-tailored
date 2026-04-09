@@ -266,7 +266,7 @@ function TailoredAssessment({ insights, companyName }: { insights: FirefliesInsi
 
       {/* Personalized summary with left border accent */}
       <View style={{ borderLeftWidth: 3, borderLeftColor: BRAND_BLUE, paddingLeft: 12, marginBottom: 16 }}>
-        <Text style={{ fontSize: 10, lineHeight: 1.7, color: G700, fontStyle: 'italic' }}>{insights.summary}</Text>
+        <Text style={{ fontSize: 10, lineHeight: 1.7, color: G700 }}>{insights.summary}</Text>
       </View>
 
       {/* Challenge → Solution pairs */}
