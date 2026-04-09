@@ -89,6 +89,7 @@ CRITICAL RULES:
 - Every pain point and solution should feel like it was written by someone who deeply understands THIS prospect's business
 - The prospect should read this and think "they actually listened to what I said"
 - **NEVER mention specific dollar amounts for MEGA's management fees, pricing, or service costs** (e.g. "$1,000/month", "$2,000/month", "$1,399/month"). The pricing section is generated separately and must be the single source of truth for all pricing. If the prospect discussed pricing on the call, reference it generically (e.g. "competitive management fee", "discounted rate to get started") — never with a specific number. You CAN mention the prospect's own numbers (ad budget, revenue, CAC targets, etc.) — just not MEGA's fees.
+- **NEVER fabricate or exaggerate the prospect's current situation.** If the transcript doesn't explicitly state something (e.g. "zero organic traffic", "no online presence", "no leads"), DO NOT claim it. If you're unsure about a metric, use hedging language ("limited", "underutilized", "room to grow") — never absolute claims like "zero", "none", or "no customers from [channel]". Getting the prospect's current state wrong destroys credibility instantly. When in doubt, frame the opportunity positively ("grow from X to Y") rather than negatively ("you currently have nothing").
 
 Respond with ONLY the JSON object.`;
 
