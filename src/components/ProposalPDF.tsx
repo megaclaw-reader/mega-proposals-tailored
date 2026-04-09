@@ -10,7 +10,7 @@ import {
   Svg,
   Path,
 } from '@react-pdf/renderer';
-import { Proposal, Agent, Template, TermOption, FirefliesInsights } from '@/lib/types';
+import { Proposal, Agent, Template, TermOption, FirefliesInsights, AgreementSection } from '@/lib/types';
 import { calculatePricing, getTermDisplayName, getTermMonths } from '@/lib/pricing';
 import { getServiceScope, getExecutiveSummary, SERVICE_DESCRIPTIONS } from '@/lib/content';
 import { format } from 'date-fns';
@@ -491,6 +491,47 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
           </Text>
         </View>
       </Page>
+
+      {/* ===== AGREEMENT TERMS (when present) ===== */}
+      {proposal.agreementSections && proposal.agreementSections.length > 0 && (
+        <Page size="LETTER" style={s.page} wrap>
+          <Footer />
+          <Text style={s.secTitle}>Service Agreement Terms</Text>
+          <View style={s.secBar} />
+          <Text style={[s.body, { marginBottom: 14 }]}>
+            The following terms govern this engagement and reflect the commitments discussed between both parties.
+          </Text>
+
+          {proposal.agreementSections.map((section, sIdx) => (
+            <View key={sIdx} style={{ marginBottom: 12 }}>
+              <View wrap={false}>
+                <Text style={[s.subTitle, { fontSize: 10, marginBottom: 4 }]}>{section.title}</Text>
+                {section.description && (
+                  <Text style={[s.body, { marginBottom: 4 }]}>{section.description}</Text>
+                )}
+                {section.items && section.items.length > 0 && (
+                  <View style={{ marginBottom: 4 }}>
+                    {section.items.map((item, i) => (
+                      <Bullet key={i} text={item} />
+                    ))}
+                  </View>
+                )}
+              </View>
+              {section.subsections && section.subsections.map((sub, subIdx) => (
+                <View key={subIdx} wrap={false} style={{ backgroundColor: G50, borderRadius: 4, borderWidth: 0.5, borderColor: G200, padding: 8, marginBottom: 4, marginTop: 4 }}>
+                  <Text style={[s.catTitle, { marginBottom: 3 }]}>{sub.title}</Text>
+                  {sub.description && (
+                    <Text style={[s.body, { marginBottom: 3 }]}>{sub.description}</Text>
+                  )}
+                  {sub.items && sub.items.map((item, i) => (
+                    <Bullet key={i} text={item} />
+                  ))}
+                </View>
+              ))}
+            </View>
+          ))}
+        </Page>
+      )}
     </Document>
   );
 }
