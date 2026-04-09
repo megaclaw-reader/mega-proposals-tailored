@@ -105,6 +105,8 @@ export function decodeProposal(encoded: string): ProposalConfig | null {
       selectedTerms,
       salesRepName: payload.sr,
       salesRepEmail: payload.se,
+      salesRepTitle: payload.srt || undefined,
+      officeAddress: payload.loc || undefined,
       createdAt: new Date(payload.ts),
       firefliesUrl: payload.ff || undefined,
       firefliesInsights: payload.fi || undefined,

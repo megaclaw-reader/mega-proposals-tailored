@@ -114,7 +114,10 @@ export default function ProposalPage() {
               <p><span className="font-semibold">Prepared for:</span> {proposal.customerName}</p>
               <p><span className="font-semibold">Company:</span> {proposal.companyName}</p>
               <p><span className="font-semibold">Date:</span> {format(new Date(proposal.createdAt), 'MMMM dd, yyyy')}</p>
-              <p><span className="font-semibold">Prepared by:</span> {proposal.salesRepName}</p>
+              <p><span className="font-semibold">Prepared by:</span> {proposal.salesRepName}{proposal.salesRepTitle ? `, ${proposal.salesRepTitle}` : ''}</p>
+              {proposal.officeAddress && (
+                <p><span className="font-semibold">Office:</span> {proposal.officeAddress}</p>
+              )}
             </div>
           </div>
         </div>

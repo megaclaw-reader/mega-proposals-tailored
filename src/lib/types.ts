@@ -25,6 +25,8 @@ export interface ProposalConfig {
   selectedTerms?: TermOption[];
   salesRepName: string;
   salesRepEmail: string;
+  salesRepTitle?: string;
+  officeAddress?: string;
   /** Fireflies meeting transcript URL for tailored proposals */
   firefliesUrl?: string;
   /** Extracted insights from the Fireflies transcript */
