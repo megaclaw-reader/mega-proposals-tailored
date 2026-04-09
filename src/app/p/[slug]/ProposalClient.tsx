@@ -510,6 +510,52 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
               );
             })()}
           </section>
+
+          {/* Agreement Terms (when present) */}
+          {proposal.agreementSections && proposal.agreementSections.length > 0 && (
+            <>
+              <div className="border-t-2 border-blue-600 pt-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">Service Agreement Terms</h2>
+                <p className="text-sm text-gray-500 mb-8">The following terms govern this engagement and reflect the commitments discussed between both parties.</p>
+              </div>
+              {proposal.agreementSections.map((section, sIdx) => (
+                <section key={`agreement-${sIdx}`} data-pdf-block className="space-y-4">
+                  <h3 className="text-xl font-semibold text-gray-900">{section.title}</h3>
+                  {section.description && (
+                    <p className="text-gray-700 text-sm leading-relaxed">{section.description}</p>
+                  )}
+                  {section.items && section.items.length > 0 && (
+                    <ul className="space-y-2">
+                      {section.items.map((item, iIdx) => (
+                        <li key={iIdx} className="flex items-start text-sm">
+                          <span className="text-blue-600 mr-2 mt-0.5 flex-shrink-0">•</span>
+                          <span className="text-gray-700">{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {section.subsections && section.subsections.map((sub, subIdx) => (
+                    <div key={subIdx} className="bg-gray-50 rounded-lg p-5 border border-gray-200">
+                      <h4 className="font-semibold text-gray-900 mb-2 text-sm">{sub.title}</h4>
+                      {sub.description && (
+                        <p className="text-gray-700 text-sm leading-relaxed mb-2">{sub.description}</p>
+                      )}
+                      {sub.items && sub.items.length > 0 && (
+                        <ul className="space-y-1.5">
+                          {sub.items.map((item, iIdx) => (
+                            <li key={iIdx} className="flex items-start text-sm">
+                              <span className="text-blue-600 mr-2 mt-0.5 flex-shrink-0">•</span>
+                              <span className="text-gray-700">{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </section>
+              ))}
+            </>
+          )}
         </div>
       </div>
     </div>

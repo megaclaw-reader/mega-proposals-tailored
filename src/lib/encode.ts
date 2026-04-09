@@ -1,4 +1,4 @@
-import { ProposalConfig, Agent, Template, ContractTerm, TermOption, FirefliesInsights } from './types';
+import { ProposalConfig, Agent, Template, ContractTerm, TermOption, FirefliesInsights, AgreementSection } from './types';
 
 /**
  * Encode proposal config into a compact URL-safe string.
@@ -38,6 +38,10 @@ export function encodeProposal(config: Omit<ProposalConfig, 'id' | 'createdAt'>)
 
   if (config.customExecutiveSummary) {
     payload.ces = config.customExecutiveSummary;
+  }
+
+  if (config.agreementSections && config.agreementSections.length > 0) {
+    payload.as = config.agreementSections;
   }
 
   if (!payload.st) {
@@ -106,6 +110,7 @@ export function decodeProposal(encoded: string): ProposalConfig | null {
       firefliesInsights: payload.fi || undefined,
       businessContext: payload.bc || undefined,
       customExecutiveSummary: payload.ces || undefined,
+      agreementSections: payload.as || undefined,
     };
   } catch {
     return null;

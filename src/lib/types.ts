@@ -35,6 +35,21 @@ export interface ProposalConfig {
   customExecutiveSummary?: string;
   createdAt: Date;
   isLocked?: boolean;
+  /** Optional agreement/contract terms sections */
+  agreementSections?: AgreementSection[];
+}
+
+export interface AgreementSubsection {
+  title: string;
+  description?: string;
+  items?: string[];
+}
+
+export interface AgreementSection {
+  title: string;
+  description?: string;
+  items?: string[];
+  subsections?: AgreementSubsection[];
 }
 
 export interface FirefliesInsights {
