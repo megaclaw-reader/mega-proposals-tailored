@@ -126,7 +126,7 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
               
               {/* Personalized summary */}
               <div className="border-l-4 border-blue-500 pl-6 mb-8">
-                <p className="text-gray-700 text-lg leading-relaxed">{proposal.firefliesInsights.summary}</p>
+                <p className="text-gray-700 text-lg leading-relaxed not-italic font-normal">{proposal.firefliesInsights.summary}</p>
               </div>
 
               {/* Challenge → Solution pairs */}
