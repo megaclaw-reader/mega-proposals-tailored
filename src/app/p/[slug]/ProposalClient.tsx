@@ -520,6 +520,11 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
               <div className="border-t-2 border-blue-600 pt-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Service Agreement Terms</h2>
                 <p className="text-sm text-gray-500 mb-8">The following terms govern this engagement and reflect the commitments discussed between both parties.</p>
+                {(proposal as any).startDate && (
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 mb-8">
+                    <p className="text-sm font-semibold text-gray-900">Official Start Date: {(proposal as any).startDate}</p>
+                  </div>
+                )}
               </div>
               {proposal.agreementSections.map((section, sIdx) => (
                 <section key={`agreement-${sIdx}`} data-pdf-block className="space-y-4">
