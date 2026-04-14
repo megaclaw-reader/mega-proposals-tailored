@@ -499,6 +499,11 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
           <Footer />
           <Text style={s.secTitle}>Service Agreement Terms</Text>
           <View style={s.secBar} />
+          {(proposal as any).startDate && (
+            <View style={{ backgroundColor: G50, borderRadius: 4, borderWidth: 0.5, borderColor: G200, padding: 10, marginBottom: 14 }} wrap={false}>
+              <Text style={[s.body, { fontWeight: 600, fontSize: 10 }]}>Official Start Date: {(proposal as any).startDate}</Text>
+            </View>
+          )}
           <Text style={[s.body, { marginBottom: 14 }]}>
             The following terms govern this engagement and reflect the commitments discussed between both parties.
           </Text>

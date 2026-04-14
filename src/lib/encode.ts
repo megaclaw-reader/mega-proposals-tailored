@@ -44,6 +44,10 @@ export function encodeProposal(config: Omit<ProposalConfig, 'id' | 'createdAt'>)
     payload.as = config.agreementSections;
   }
 
+  if ((config as any).startDate) {
+    payload.sd = (config as any).startDate;
+  }
+
   if (!payload.st) {
     // Legacy single-term format
     payload.ct = config.contractTerm;
@@ -113,7 +117,8 @@ export function decodeProposal(encoded: string): ProposalConfig | null {
       businessContext: payload.bc || undefined,
       customExecutiveSummary: payload.ces || undefined,
       agreementSections: payload.as || undefined,
-    };
+      startDate: payload.sd || undefined,
+    } as any;
   } catch {
     return null;
   }
