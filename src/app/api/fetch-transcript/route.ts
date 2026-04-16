@@ -1,10 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+const FIREFLIES_API_KEY = process.env.FIREFLIES_API_KEY || '';
+const FIREFLIES_GRAPHQL = 'https://api.fireflies.ai/graphql';
+
 /**
- * Fetches Fireflies transcript data from a shared meeting link.
- * Works for meetings with "anyone with link" privacy setting.
- * Extracts the AI summary and notes from the __NEXT_DATA__ JSON embedded in the page.
+ * Extract transcript ID from a Fireflies URL.
+ * Handles:
+ *   /view/Some-Title-id01KPBTRF03VFXSTWX9JZ9902YK
+ *   /view/01KPBTRF03VFXSTWX9JZ9902YK
+ *   /notepad/01KPBTRF03VFXSTWX9JZ9902YK
  */
+function extractTranscriptId(url: string): string | null {
+  const idMatch = url.match(/-id([A-Z0-9]+)$/i) || url.match(/id([A-Z0-9]{20,})$/i);
+  if (idMatch) return idMatch[1];
+
+  const pathMatch = url.match(/(?:view|notepad)\/([A-Z0-9]{20,})(?:[?#]|$)/i);
+  if (pathMatch) return pathMatch[1];
+
+  return null;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const { firefliesUrl } = await request.json();
@@ -16,69 +31,114 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Fetch the Fireflies page HTML
-    const response = await fetch(firefliesUrl, {
+    if (!FIREFLIES_API_KEY) {
+      return NextResponse.json(
+        { error: 'Fireflies API key not configured' },
+        { status: 500 }
+      );
+    }
+
+    const transcriptId = extractTranscriptId(firefliesUrl);
+    if (!transcriptId) {
+      return NextResponse.json(
+        { error: 'Could not extract transcript ID from URL. Please check the link format.' },
+        { status: 400 }
+      );
+    }
+
+    // Fetch transcript via Fireflies GraphQL API
+    const gqlRes = await fetch(FIREFLIES_GRAPHQL, {
+      method: 'POST',
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Authorization': `Bearer ${FIREFLIES_API_KEY}`,
+        'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        query: `query Transcript($id: String!) {
+          transcript(id: $id) {
+            title
+            date
+            duration
+            organizer_email
+            summary {
+              gist
+              overview
+              shorthand_bullet
+              action_items
+              outline
+              keywords
+            }
+            sentences {
+              text
+              speaker_name
+            }
+          }
+        }`,
+        variables: { id: transcriptId },
+      }),
     });
 
-    if (!response.ok) {
+    if (!gqlRes.ok) {
       return NextResponse.json(
-        { error: `Failed to fetch Fireflies page: ${response.status}` },
+        { error: 'Fireflies API request failed' },
         { status: 502 }
       );
     }
 
-    const html = await response.text();
+    const gqlData = await gqlRes.json();
+    const transcript = gqlData?.data?.transcript;
 
-    // Extract __NEXT_DATA__ from the page
-    const nextDataMatch = html.match(/<script id="__NEXT_DATA__"[^>]*>(.*?)<\/script>/);
-    if (!nextDataMatch) {
+    if (!transcript) {
       return NextResponse.json(
-        { error: 'Could not find transcript data on the page. The link may require authentication.' },
+        { error: 'Transcript not found. It may not exist or may still be processing.' },
         { status: 404 }
       );
     }
 
-    const nextData = JSON.parse(nextDataMatch[1]);
-    const pageProps = nextData?.props?.pageProps || {};
-    const meetingNote = pageProps.initialMeetingNote || {};
-    const summaryComment = pageProps.summaryMeetingNoteComment?.comment || '';
-    const gist = meetingNote.summary?.gist || '';
+    const aiNotes = transcript.summary || {};
 
-    if (!summaryComment && !gist) {
+    // Check if we have any content at all
+    if (!aiNotes.shorthand_bullet && !aiNotes.overview && !aiNotes.gist && (!transcript.sentences || transcript.sentences.length === 0)) {
       return NextResponse.json(
-        { error: 'No transcript summary found. The meeting may require authentication to view.' },
+        { error: 'No transcript content found. The meeting may still be processing.' },
         { status: 404 }
       );
     }
 
-    // Extract structured AI notes (action items, outline, etc.) if available
-    const aiNotes = meetingNote.summary || {};
+    // Build structured sections (same format the create page expects)
     const structuredSections: string[] = [];
-    
-    // Pull all structured sections from the AI summary
     if (aiNotes.shorthand_bullet) structuredSections.push(`## Key Points\n${aiNotes.shorthand_bullet}`);
     if (aiNotes.action_items) structuredSections.push(`## Action Items\n${aiNotes.action_items}`);
     if (aiNotes.outline) structuredSections.push(`## Meeting Outline\n${aiNotes.outline}`);
     if (aiNotes.overview) structuredSections.push(`## Overview\n${aiNotes.overview}`);
-    if (aiNotes.keywords) structuredSections.push(`## Keywords\n${Array.isArray(aiNotes.keywords) ? aiNotes.keywords.join(', ') : aiNotes.keywords}`);
+    if (aiNotes.keywords) {
+      const kw = Array.isArray(aiNotes.keywords) ? aiNotes.keywords.join(', ') : aiNotes.keywords;
+      structuredSections.push(`## Keywords\n${kw}`);
+    }
 
-    // Combine everything for maximum context — gist + structured notes + full AI summary
+    // If no AI summary yet, fall back to raw sentences
+    if (structuredSections.length === 0 && transcript.sentences?.length > 0) {
+      const rawText = transcript.sentences
+        .map((s: { text: string; speaker_name?: string }) =>
+          s.speaker_name ? `${s.speaker_name}: ${s.text}` : s.text
+        )
+        .join('\n');
+      structuredSections.push(`## Transcript\n${rawText}`);
+    }
+
+    const gist = aiNotes.gist || '';
     const combinedSummary = [
       gist ? `## Gist\n${gist}` : '',
       ...structuredSections,
-      summaryComment ? `## Full AI Summary\n${summaryComment}` : '',
     ].filter(Boolean).join('\n\n');
 
     return NextResponse.json({
-      title: meetingNote.title || 'Unknown Meeting',
-      date: meetingNote.date || null,
-      duration: meetingNote.durationMins || null,
+      title: transcript.title || 'Unknown Meeting',
+      date: transcript.date || null,
+      duration: transcript.duration || null,
       gist,
-      summary: combinedSummary || summaryComment || gist,
-      owner: meetingNote.ownerProfile?.name || null,
+      summary: combinedSummary,
+      owner: transcript.organizer_email || null,
     });
 
   } catch (error) {
