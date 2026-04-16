@@ -454,7 +454,7 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
                     <div>
                       <h4 className="font-semibold text-green-900 mb-1">30-Day Money-Back Guarantee</h4>
                       <p className="text-green-800 text-sm leading-relaxed">
-                        We are offering a 30-day money-back guarantee on the Quarterly or Biannual plans. If you&apos;re not happy with the performance in the first month, we&apos;re happy to refund the entire quarter&apos;s value.
+                        We are offering a 30-day money-back guarantee on the Quarterly or Biannual plans. If you&apos;re not happy with the performance in the first month, we&apos;re happy to refund the entire quarter&apos;s value. This guarantee supersedes the standard refund policy outlined in our Terms &amp; Conditions below.
                       </p>
                     </div>
                   </div>
@@ -575,15 +575,162 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
               ))}
             </>
           )}
-          {/* Terms & Conditions */}
-          <div className="border-t border-gray-200 pt-6 pb-2 text-center">
-            <p className="text-xs text-gray-400">
-              By engaging MEGA AI services, you agree to our{' '}
-              <a href="https://www.gomega.ai/legal/terms-of-use" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline hover:text-blue-700">
-                Terms &amp; Conditions
-              </a>.
+          {/* Full Terms & Conditions */}
+          <section data-pdf-block className="border-t-2 border-gray-300 pt-8 mt-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Terms &amp; Conditions</h2>
+            <p className="text-sm text-gray-500 mb-6">
+              By engaging MEGA AI services, you agree to be bound by the following Terms of Service. Where this proposal offers specific guarantees (such as the 30-Day Money-Back Guarantee above), those terms take precedence over the standard terms below.
             </p>
-          </div>
+
+            <div className="space-y-6 text-sm text-gray-700 leading-relaxed">
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">1. Eligibility &amp; Account Responsibility</h3>
+                <p>You must be at least 18 years old and capable of entering into a legally binding agreement. If you&apos;re using our services on behalf of an organization, you represent and warrant that you have authority to bind them. You are responsible for maintaining the security of your account credentials. Notify us immediately if you suspect any unauthorized use.</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">2. Services Provided</h3>
+                <p className="mb-3">We provide access to a web-based platform that uses artificial intelligence and other technologies to assist with marketing such as SEO, Paid Ads, and Website Development. We may offer optional beta features, provided &quot;as is&quot; with no guarantee of stability or accuracy. We reserve the right to modify, suspend, or discontinue services at any time, without liability to you.</p>
+                <h4 className="font-semibold text-gray-800 mb-1">2.1 AI-Powered SEO Services</h4>
+                <ul className="list-disc ml-5 mb-3 space-y-1">
+                  <li>Automated keyword research and clustering based on industry and competitive signals</li>
+                  <li>On-page SEO updates</li>
+                  <li>Technical SEO audits, monitoring and fixes</li>
+                  <li>Local SEO optimization</li>
+                  <li>Automated backlink outreach and tracking</li>
+                  <li>Competitor SEO analysis and benchmarking</li>
+                  <li>Minimum 20 blog posts every month</li>
+                  <li>Programmatic SEO</li>
+                  <li>SEO strategy work</li>
+                  <li>Conversion optimization</li>
+                  <li>LLM placement</li>
+                </ul>
+                <h4 className="font-semibold text-gray-800 mb-1">2.2 Paid Advertising Management</h4>
+                <ul className="list-disc ml-5 mb-3 space-y-1">
+                  <li>Strategic direction, implementation solutions, creative design, campaign management, performance optimization and weekly reporting</li>
+                  <li>Campaign creation, optimization, and budget allocation across Google Ads, Meta Ads, and other major platforms</li>
+                  <li>Ad copy and creative variants for A/B testing</li>
+                  <li>Audience segmentation and targeting</li>
+                  <li>Cross-platform budget management and attribution analysis</li>
+                </ul>
+                <h4 className="font-semibold text-gray-800 mb-1">2.3 Website Development Services</h4>
+                <ul className="list-disc ml-5 mb-3 space-y-1">
+                  <li>Project planning and UX/UI design</li>
+                  <li>Web development and site deployment</li>
+                  <li>Hosting services</li>
+                  <li>Content creation (Copywriting and Image Generation)</li>
+                  <li>Search and conversion optimization</li>
+                  <li>Testing, quality assurance</li>
+                  <li>Ongoing site maintenance</li>
+                </ul>
+                <p><strong>2.3.1 Website Buyout Fee.</strong> The Website Buyout Fee is a one-time fee required to transfer ownership of the Company-created website assets under Section 4.6.</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">3. Data Ownership and Usage</h3>
+                <p>You retain ownership of all data you upload and all content generated through your authorized use of the services (&quot;User Data&quot;). We do not claim ownership of your data but require a license to use it solely to provide and improve the service. We retain ownership of all intellectual property related to the platform, models, and underlying systems. For Website Management Services, we retain ownership of all underlying code, architecture, and proprietary design/theme elements created and provided by us. Such Company-created IP is licensed to the Customer until the payment of the Website Buyout Fee (Sec. 4.6) or license revocation.</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">4. Subscription, Billing &amp; Cancellation</h3>
+                <h4 className="font-semibold text-gray-800 mb-1">4.1 General Billing Terms</h4>
+                <ul className="list-disc ml-5 mb-3 space-y-1">
+                  <li>All fees are listed in U.S. dollars unless otherwise stated.</li>
+                  <li>You authorize us to charge your selected payment method for all recurring charges, subscription renewals, and outstanding balances.</li>
+                  <li>Canceling your payment method does not cancel your financial obligation.</li>
+                  <li>We may use third-party collections services, legal processes, or report delinquencies to credit bureaus to recover unpaid balances.</li>
+                </ul>
+                <h4 className="font-semibold text-gray-800 mb-1">4.2 Monthly Subscriptions</h4>
+                <ul className="list-disc ml-5 mb-3 space-y-1">
+                  <li>Monthly subscriptions are month-to-month commitments that auto-renew unless canceled with at least 30 days&apos; prior written notice.</li>
+                  <li>If your payment method is declined, you remain fully liable for all unpaid months.</li>
+                </ul>
+                <h4 className="font-semibold text-gray-800 mb-1">4.3 Annual Subscriptions</h4>
+                <ul className="list-disc ml-5 mb-3 space-y-1">
+                  <li>Annual subscriptions billed monthly require a 12-month minimum commitment.</li>
+                  <li>Annual subscriptions billed upfront require full payment for the entire 12-month period at the start of the term.</li>
+                  <li>Canceling your payment method does not cancel your obligation to complete your annual commitment.</li>
+                  <li>You may prepay your remaining annual balance at any time.</li>
+                </ul>
+                <h4 className="font-semibold text-gray-800 mb-1">4.4 Refund &amp; Credit Policy</h4>
+                <ul className="list-disc ml-5 mb-3 space-y-1">
+                  <li>Refunds are only available if you cancel within 24 hours of your initial payment.</li>
+                  <li>After 24 hours, all fees are non-refundable.</li>
+                  <li>No credits or prorated refunds are issued for unused time, partial months, or early termination.</li>
+                  <li>Prepaid fees (including annual subscriptions) are non-refundable.</li>
+                </ul>
+                <h4 className="font-semibold text-gray-800 mb-1">4.5 Dispute Policy</h4>
+                <p className="mb-3">All billing concerns or cancellation requests must be addressed directly with us in writing at agents@gomega.ai. Filing a chargeback or payment dispute through your bank without first contacting us constitutes a breach of this Agreement. We reserve the right to suspend or terminate your account and/or pursue legal remedies if you initiate a chargeback in violation of this policy.</p>
+                <h4 className="font-semibold text-gray-800 mb-1">4.6 Website Buyout Plan &amp; Transfer of Ownership</h4>
+                <ul className="list-disc ml-5 space-y-1">
+                  <li>Termination/Buyout within Year 1 (Months 1–12): $6,000.00 USD</li>
+                  <li>Termination/Buyout within Year 2 (Months 13–24): $3,000.00 USD</li>
+                  <li>Termination/Buyout within Year 3 (Months 25–36): $2,000.00 USD</li>
+                  <li>Termination/Buyout after Year 4 (Month 48+): $0.00 USD (Ownership Transfer at no extra cost)</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">5. Acceptable Use</h3>
+                <p>You agree not to use the service for illegal, harmful, or fraudulent activities; violate intellectual property rights; circumvent usage restrictions, rate limits, or access controls; or attempt to reverse engineer or clone the service. We may suspend or terminate your account for violations.</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">6. Third-Party Services &amp; Dependencies</h3>
+                <p>Some features rely on third-party services (e.g., OpenAI, Google, etc.). We are not responsible for their availability or changes to their APIs, pricing, or terms.</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">7. Service Availability &amp; Uptime</h3>
+                <p>We strive for 99.9% uptime but do not guarantee uninterrupted service. Downtime for maintenance or outages does not entitle you to compensation.</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">8. AI Output &amp; Content Responsibility</h3>
+                <p>Content generated by our AI models is not guaranteed to be accurate, legal, or appropriate. You are solely responsible for reviewing and validating generated content before use.</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">9. Support</h3>
+                <p>We provide standard support via email during business hours. Premium support may be available under a separate agreement.</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">10. Disclaimer of Warranties</h3>
+                <p>The service is provided &quot;as is&quot; and &quot;as available.&quot; We disclaim all warranties, express or implied, including merchantability and fitness for a particular purpose.</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">11. Limitation of Liability</h3>
+                <p>To the fullest extent permitted by law, we are not liable for indirect, incidental, special, or consequential damages. Our total liability is capped at the amount you&apos;ve paid us in the 12 months prior to the event.</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">12. Indemnification</h3>
+                <p>You agree to defend, indemnify, and hold harmless the Company from any claims, liabilities, damages, and expenses arising from your use of the services, User Data, or violation of these Terms.</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">13. Termination</h3>
+                <p>We may terminate or suspend your access at any time for cause. You may cancel by giving 30 days&apos; written notice to support. Upon termination, all rights granted to you cease. See Section 4.6 for specific terms regarding Website services.</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">14. Governing Law and Dispute Resolution</h3>
+                <p>These Terms are governed by the laws of New York. All disputes will be resolved by binding individual arbitration, waiving class actions. You may opt out of arbitration by notifying us in writing within 30 days of first accepting these Terms.</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">15. Entire Agreement</h3>
+                <p>These Terms constitute the full agreement between you and us and supersede any prior agreements. We may assign these Terms without your consent.</p>
+              </div>
+            </div>
+
+            <p className="text-xs text-gray-400 mt-6 text-center">
+              Last updated: January 16, 2026 · Full terms also available at{' '}
+              <a href="https://www.gomega.ai/legal/terms-of-use" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline">gomega.ai/legal/terms-of-use</a>
+            </p>
+          </section>
         </div>
       </div>
     </div>
