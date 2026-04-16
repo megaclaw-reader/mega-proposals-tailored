@@ -93,33 +93,57 @@ CRITICAL RULES:
 
 Respond with ONLY the JSON object.`;
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1500,
-        messages: [{
-          role: 'user',
-          content: analysisPrompt
-        }]
-      })
-    });
+    // Try with retries and model fallback for rate limits
+    const models = ['claude-sonnet-4-20250514', 'claude-3-5-sonnet-20241022'];
+    let data: any = null;
+    let lastError = '';
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error('Anthropic API error:', response.status, errText);
-      return NextResponse.json({
-        insights: extractInsightsFallback(transcriptSummary),
-        _debug: { status: response.status, error: errText.substring(0, 500) }
-      });
+    for (const model of models) {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (attempt > 0) {
+          // Wait before retry: 2s, 5s
+          await new Promise(r => setTimeout(r, attempt === 1 ? 2000 : 5000));
+        }
+
+        const response = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': ANTHROPIC_API_KEY!,
+            'anthropic-version': '2023-06-01'
+          },
+          body: JSON.stringify({
+            model,
+            max_tokens: 1500,
+            messages: [{
+              role: 'user',
+              content: analysisPrompt
+            }]
+          })
+        });
+
+        if (response.ok) {
+          data = await response.json();
+          break;
+        }
+
+        const errText = await response.text();
+        lastError = `${model} attempt ${attempt + 1}: ${response.status} ${errText.substring(0, 200)}`;
+        console.error('Anthropic API error:', lastError);
+
+        // Only retry on rate limits (429) or server errors (5xx)
+        if (response.status !== 429 && response.status < 500) break;
+      }
+      if (data) break;
     }
 
-    const data = await response.json();
+    if (!data) {
+      console.error('All Anthropic API attempts failed:', lastError);
+      return NextResponse.json({
+        insights: extractInsightsFallback(transcriptSummary),
+        _debug: { error: lastError }
+      });
+    }
     const analysisText = data.content?.[0]?.text;
 
     if (!analysisText) {
