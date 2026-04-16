@@ -114,7 +114,8 @@ Respond with ONLY the JSON object.`;
       const errText = await response.text();
       console.error('Anthropic API error:', response.status, errText);
       return NextResponse.json({
-        insights: extractInsightsFallback(transcriptSummary)
+        insights: extractInsightsFallback(transcriptSummary),
+        _debug: { status: response.status, error: errText.substring(0, 500) }
       });
     }
 
