@@ -448,6 +448,19 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
                     </div>
                   )}
 
+                  {/* 30-Day Money-Back Guarantee — Quarterly & Biannual plans */}
+                  {termPricings.some(({ option }) => option.term === 'quarterly' || option.term === 'bi_annual') && (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-5 flex items-start">
+                      <span className="text-2xl mr-3 flex-shrink-0">🛡️</span>
+                      <div>
+                        <h4 className="font-semibold text-green-900 mb-1">30-Day Money-Back Guarantee</h4>
+                        <p className="text-green-800 text-sm leading-relaxed">
+                          We are offering a 30-day money-back guarantee on the Quarterly or Biannual plans. If you&apos;re not happy with the performance in the first month, we&apos;re happy to refund the entire quarter&apos;s value.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Promo code note — ONLY when discounts exist */}
                   {showPromoNote && (
                     <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
@@ -564,6 +577,15 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
               ))}
             </>
           )}
+          {/* Terms & Conditions */}
+          <div className="border-t border-gray-200 pt-6 pb-2 text-center">
+            <p className="text-xs text-gray-400">
+              By engaging MEGA AI services, you agree to our{' '}
+              <a href="https://www.gomega.ai/legal/terms-of-use" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline hover:text-blue-700">
+                Terms &amp; Conditions
+              </a>.
+            </p>
+          </div>
         </div>
       </div>
     </div>

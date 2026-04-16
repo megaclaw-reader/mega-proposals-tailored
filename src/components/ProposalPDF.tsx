@@ -478,6 +478,16 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
           );
         })()}
 
+        {/* 30-Day Money-Back Guarantee */}
+        {termPricings.some(({ option }) => option.term === 'quarterly' || option.term === 'bi_annual') && (
+          <View style={{ backgroundColor: '#f0fdf4', borderWidth: 0.5, borderColor: '#bbf7d0', borderRadius: 4, padding: 12, marginBottom: 12 }} wrap={false}>
+            <Text style={{ fontSize: 10, fontWeight: 700, color: '#14532d', marginBottom: 4 }}>🛡️ 30-Day Money-Back Guarantee</Text>
+            <Text style={{ fontSize: 9, color: '#166534', lineHeight: 1.5 }}>
+              We are offering a 30-day money-back guarantee on the Quarterly or Biannual plans. If you're not happy with the performance in the first month, we're happy to refund the entire quarter's value.
+            </Text>
+          </View>
+        )}
+
         {/* Next Steps */}
         <View style={s.nextBox} wrap={false}>
           <Text style={s.nextTitle}>Next Steps</Text>
@@ -489,6 +499,13 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
           <View style={s.bullet}><Text style={s.dot}>3.</Text><Text style={s.bText}>Schedule a call with your dedicated account manager to kick things off</Text></View>
           <Text style={s.nextCta}>
             Contact {proposal.salesRepName} at {proposal.salesRepEmail} to get started.
+          </Text>
+        </View>
+
+        {/* Terms & Conditions */}
+        <View style={{ borderTopWidth: 0.5, borderTopColor: '#e5e7eb', paddingTop: 8, marginTop: 16, alignItems: 'center' }}>
+          <Text style={{ fontSize: 7, color: '#9ca3af' }}>
+            By engaging MEGA AI services, you agree to our Terms & Conditions: https://www.gomega.ai/legal/terms-of-use
           </Text>
         </View>
       </Page>
