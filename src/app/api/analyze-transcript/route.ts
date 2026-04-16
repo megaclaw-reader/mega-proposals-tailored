@@ -141,7 +141,6 @@ Respond with ONLY the JSON object.`;
       console.error('All Anthropic API attempts failed:', lastError);
       return NextResponse.json({
         insights: extractInsightsFallback(transcriptSummary),
-        _debug: { error: lastError }
       });
     }
     const analysisText = data.content?.[0]?.text;
