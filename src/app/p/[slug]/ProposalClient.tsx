@@ -455,7 +455,7 @@ export default function ProposalClient({ encodedId, showTerms = false }: { encod
                     <div>
                       <h4 className="font-semibold text-green-900 mb-1">30-Day Money-Back Guarantee</h4>
                       <p className="text-green-800 text-sm leading-relaxed">
-                        We are offering a 30-day money-back guarantee on the Quarterly or Biannual plans. If you&apos;re not happy with the performance in the first month, we&apos;re happy to refund the entire quarter&apos;s value. This guarantee supersedes the standard refund policy outlined in our Terms &amp; Conditions below.
+                        We are offering a 30-day money-back guarantee on the Quarterly or Biannual plans. If you&apos;re not happy with the performance in the first month, we&apos;re happy to refund the entire quarter&apos;s value. See the formal addendum below for full details — this guarantee is legally binding and supersedes our standard refund policy.
                       </p>
                     </div>
                   </div>
@@ -577,6 +577,39 @@ export default function ProposalClient({ encodedId, showTerms = false }: { encod
               ))}
             </>
           )}
+          {/* Addendum — 30-Day Money-Back Guarantee (only when showTerms is enabled) */}
+          {showTerms && (
+          <section data-pdf-block className="border-t-2 border-blue-400 pt-8 mt-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Addendum: 30-Day Money-Back Guarantee</h2>
+            <p className="text-sm text-gray-500 mb-6">
+              This addendum is specific to {proposal.companyName}&apos;s engagement and supersedes the standard Terms &amp; Conditions below where conflicts arise — specifically Section 4.4 (Refund &amp; Credit Policy).
+            </p>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-4 text-sm text-gray-800 leading-relaxed">
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">1. Scope</h4>
+                <p>The 30-Day Money-Back Guarantee applies to {proposal.companyName}&apos;s Quarterly plan subscription. This guarantee overrides Section 4.4 of the standard Terms of Use for this account.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">2. Guarantee Window</h4>
+                <p>The 30-day guarantee period begins on the date of first ad campaign launch (not the signing date or payment date). The exact launch date will be confirmed in writing by your account manager.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">3. How to Invoke</h4>
+                <p>To request a refund under this guarantee, send a written request to <a href="mailto:agents@gomega.ai" className="text-blue-600 underline">agents@gomega.ai</a> within 30 days of the campaign launch date. No reason is required — if you&apos;re not satisfied with performance, the guarantee applies.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">4. Refund Amount &amp; Timeline</h4>
+                <p>The full quarterly subscription amount is refundable. The refund will be processed to the original payment method within 10 business days of the written request being received.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">5. Precedence</h4>
+                <p>In the event of any conflict between this addendum and the standard Terms of Use (including but not limited to Sections 4.1, 4.4, and 15), this addendum shall take precedence for {proposal.companyName}&apos;s account.</p>
+              </div>
+            </div>
+          </section>
+          )}
+
           {/* Full Terms & Conditions (only when showTerms is enabled) */}
           {showTerms && <section data-pdf-block className="border-t-2 border-gray-300 pt-8 mt-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Terms &amp; Conditions</h2>
