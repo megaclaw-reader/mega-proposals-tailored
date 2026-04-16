@@ -592,7 +592,7 @@ export default function ProposalClient({ encodedId, showTerms = false }: { encod
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">2. Guarantee Window</h4>
-                <p>The 30-day guarantee period begins on the date of first ad campaign launch (not the signing date or payment date). The exact launch date will be confirmed in writing by your account manager.</p>
+                <p>The 30-day guarantee period begins on the date onboarding is complete (not the signing date or payment date). The onboarding completion date will be confirmed in writing by your account manager.</p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">3. How to Invoke</h4>
