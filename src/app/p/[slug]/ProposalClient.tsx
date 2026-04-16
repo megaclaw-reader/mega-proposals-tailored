@@ -448,18 +448,16 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
                     </div>
                   )}
 
-                  {/* 30-Day Money-Back Guarantee — Quarterly & Biannual plans */}
-                  {termPricings.some(({ option }) => option.term === 'quarterly' || option.term === 'bi_annual') && (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-5 flex items-start">
-                      <span className="text-2xl mr-3 flex-shrink-0">🛡️</span>
-                      <div>
-                        <h4 className="font-semibold text-green-900 mb-1">30-Day Money-Back Guarantee</h4>
-                        <p className="text-green-800 text-sm leading-relaxed">
-                          We are offering a 30-day money-back guarantee on the Quarterly or Biannual plans. If you&apos;re not happy with the performance in the first month, we&apos;re happy to refund the entire quarter&apos;s value.
-                        </p>
-                      </div>
+                  {/* 30-Day Money-Back Guarantee */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-5 flex items-start">
+                    <span className="text-2xl mr-3 flex-shrink-0">🛡️</span>
+                    <div>
+                      <h4 className="font-semibold text-green-900 mb-1">30-Day Money-Back Guarantee</h4>
+                      <p className="text-green-800 text-sm leading-relaxed">
+                        We are offering a 30-day money-back guarantee on the Quarterly or Biannual plans. If you&apos;re not happy with the performance in the first month, we&apos;re happy to refund the entire quarter&apos;s value.
+                      </p>
                     </div>
-                  )}
+                  </div>
 
                   {/* Promo code note — ONLY when discounts exist */}
                   {showPromoNote && (
