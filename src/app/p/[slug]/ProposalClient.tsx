@@ -8,7 +8,7 @@ import { getStripeLink, hasWebsiteAddon, hasAnyDiscount } from '@/lib/stripe-lin
 import { decodeProposal } from '@/lib/encode';
 import { format } from 'date-fns';
 
-export default function ProposalClient({ encodedId }: { encodedId: string }) {
+export default function ProposalClient({ encodedId, showTerms = false }: { encodedId: string; showTerms?: boolean }) {
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -449,6 +449,7 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
                   )}
 
                   {/* 30-Day Money-Back Guarantee */}
+                  {showTerms && (
                   <div className="bg-green-50 border border-green-200 rounded-lg p-5 flex items-start">
                     <span className="text-2xl mr-3 flex-shrink-0">🛡️</span>
                     <div>
@@ -458,6 +459,7 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
                       </p>
                     </div>
                   </div>
+                  )}
 
                   {/* Promo code note — ONLY when discounts exist */}
                   {showPromoNote && (
@@ -575,8 +577,8 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
               ))}
             </>
           )}
-          {/* Full Terms & Conditions */}
-          <section data-pdf-block className="border-t-2 border-gray-300 pt-8 mt-12">
+          {/* Full Terms & Conditions (only when showTerms is enabled) */}
+          {showTerms && <section data-pdf-block className="border-t-2 border-gray-300 pt-8 mt-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Terms &amp; Conditions</h2>
             <p className="text-sm text-gray-500 mb-6">
               By engaging MEGA AI services, you agree to be bound by the following Terms of Service. Where this proposal offers specific guarantees (such as the 30-Day Money-Back Guarantee above), those terms take precedence over the standard terms below.
@@ -730,7 +732,7 @@ export default function ProposalClient({ encodedId }: { encodedId: string }) {
               Last updated: January 16, 2026 · Full terms also available at{' '}
               <a href="https://www.gomega.ai/legal/terms-of-use" target="_blank" rel="noopener noreferrer" className="text-blue-400 underline">gomega.ai/legal/terms-of-use</a>
             </p>
-          </section>
+          </section>}
         </div>
       </div>
     </div>
