@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { put, list } from '@vercel/blob';
+import { put, del, list } from '@vercel/blob';
 
 export async function PUT(
   request: NextRequest,
@@ -17,10 +17,12 @@ export async function PUT(
 
     // Read existing blob to preserve metadata (companyName, createdAt)
     let existingData: Record<string, unknown> = {};
+    let existingBlobUrl: string | null = null;
     try {
       const { blobs } = await list({ prefix: `proposals/${slug}.json` });
       const blob = blobs.find(b => b.pathname === `proposals/${slug}.json`);
       if (blob) {
+        existingBlobUrl = blob.url;
         const res = await fetch(blob.url, {
           headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}` },
         });
@@ -32,7 +34,15 @@ export async function PUT(
       }
     } catch (listErr) {
       console.error('Blob list/read error (non-fatal):', listErr);
-      // Continue anyway — we can still overwrite
+    }
+
+    // Delete old blob first (allowOverwrite not reliable in older SDK versions)
+    if (existingBlobUrl) {
+      try {
+        await del(existingBlobUrl);
+      } catch (delErr) {
+        console.error('Blob delete error (non-fatal):', delErr);
+      }
     }
 
     // Write updated proposal (merge any extra fields like showTerms)
@@ -45,7 +55,6 @@ export async function PUT(
       access: 'private',
       contentType: 'application/json',
       addRandomSuffix: false,
-      allowOverwrite: true,
     });
 
     return NextResponse.json({ ok: true, slug });
