@@ -600,7 +600,7 @@ export default function ProposalClient({ encodedId, showTerms = false }: { encod
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">4. Refund Amount &amp; Timeline</h4>
-                <p>The full quarterly subscription amount is refundable. The refund will be processed to the original payment method within 10 business days of the written request being received.</p>
+                <p>The full subscription amount is refundable. The refund will be processed to the original payment method within 10 business days of the written request being received.</p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">5. Precedence</h4>
