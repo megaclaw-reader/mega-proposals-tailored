@@ -482,7 +482,7 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
         <View style={{ backgroundColor: '#f0fdf4', borderWidth: 0.5, borderColor: '#bbf7d0', borderRadius: 4, padding: 12, marginBottom: 12 }} wrap={false}>
           <Text style={{ fontSize: 10, fontWeight: 700, color: '#14532d', marginBottom: 4 }}>30-Day Money-Back Guarantee</Text>
           <Text style={{ fontSize: 9, color: '#166534', lineHeight: 1.5 }}>
-            We are offering a 30-day money-back guarantee on the Quarterly or Biannual plans. If you're not happy with the performance in the first month, we're happy to refund the entire quarter's value.
+            We are offering a 30-day money-back guarantee on your {proposal.pricing.term === 'monthly' ? 'Monthly' : proposal.pricing.term === 'quarterly' ? 'Quarterly' : proposal.pricing.term === 'bi_annual' ? 'Bi-Annual' : 'Annual'} plan. If you're not happy with the performance in the first month, we're happy to issue a full refund.
           </Text>
         </View>
 

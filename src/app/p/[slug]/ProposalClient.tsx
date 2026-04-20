@@ -455,7 +455,7 @@ export default function ProposalClient({ encodedId, showTerms = false }: { encod
                     <div>
                       <h4 className="font-semibold text-green-900 mb-1">30-Day Money-Back Guarantee</h4>
                       <p className="text-green-800 text-sm leading-relaxed">
-                        We are offering a 30-day money-back guarantee on the Quarterly or Biannual plans. If you&apos;re not happy with the performance in the first month, we&apos;re happy to refund the entire quarter&apos;s value. See the formal addendum below for full details — this guarantee is legally binding and supersedes our standard refund policy.
+                        We are offering a 30-day money-back guarantee on your {proposal.pricing.term === 'monthly' ? 'Monthly' : proposal.pricing.term === 'quarterly' ? 'Quarterly' : proposal.pricing.term === 'bi_annual' ? 'Bi-Annual' : 'Annual'} plan. If you&apos;re not happy with the performance in the first month, we&apos;re happy to issue a full refund. See the formal addendum below for full details — this guarantee is legally binding and supersedes our standard refund policy.
                       </p>
                     </div>
                   </div>
@@ -588,7 +588,7 @@ export default function ProposalClient({ encodedId, showTerms = false }: { encod
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-4 text-sm text-gray-800 leading-relaxed">
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">1. Scope</h4>
-                <p>The 30-Day Money-Back Guarantee applies to {proposal.companyName}&apos;s Quarterly plan subscription. This guarantee overrides Section 4.4 of the standard Terms of Use for this account.</p>
+                <p>The 30-Day Money-Back Guarantee applies to {proposal.companyName}&apos;s {proposal.pricing.term === 'monthly' ? 'Monthly' : proposal.pricing.term === 'quarterly' ? 'Quarterly' : proposal.pricing.term === 'bi_annual' ? 'Bi-Annual' : 'Annual'} plan subscription. This guarantee overrides Section 4.4 of the standard Terms of Use for this account.</p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">2. Guarantee Window</h4>
