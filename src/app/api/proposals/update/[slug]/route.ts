@@ -9,7 +9,7 @@ export async function PUT(
 
   try {
     const body = await request.json();
-    const { encodedProposal } = body;
+    const { encodedProposal, ...extraFields } = body;
 
     if (!encodedProposal) {
       return NextResponse.json({ error: 'Missing encodedProposal' }, { status: 400 });
@@ -35,9 +35,10 @@ export async function PUT(
       // Continue anyway — we can still overwrite
     }
 
-    // Write updated proposal
+    // Write updated proposal (merge any extra fields like showTerms)
     await put(`proposals/${slug}.json`, JSON.stringify({
       ...existingData,
+      ...extraFields,
       encodedProposal,
       updatedAt: new Date().toISOString(),
     }), {
