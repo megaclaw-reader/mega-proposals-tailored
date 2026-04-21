@@ -48,6 +48,14 @@ export function encodeProposal(config: Omit<ProposalConfig, 'id' | 'createdAt'>)
     payload.sd = (config as any).startDate;
   }
 
+  if ((config as any).customMonthlyPrice) {
+    payload.cmp = (config as any).customMonthlyPrice;
+  }
+
+  if ((config as any).customStripeLink) {
+    payload.csl = (config as any).customStripeLink;
+  }
+
   if (!payload.st) {
     // Legacy single-term format
     payload.ct = config.contractTerm;
@@ -118,6 +126,8 @@ export function decodeProposal(encoded: string): ProposalConfig | null {
       customExecutiveSummary: payload.ces || undefined,
       agreementSections: payload.as || undefined,
       startDate: payload.sd || undefined,
+      customMonthlyPrice: payload.cmp || undefined,
+      customStripeLink: payload.csl || undefined,
     } as any;
   } catch {
     return null;

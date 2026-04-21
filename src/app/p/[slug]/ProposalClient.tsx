@@ -324,10 +324,29 @@ export default function ProposalClient({ encodedId, showTerms = false }: { encod
                 ? proposal.selectedTerms
                 : [{ term: proposal.contractTerm, discountPercentage: proposal.discountPercentage || 0 }];
               
-              const termPricings: { option: TermOption; pricing: PricingBreakdown }[] = terms.map(opt => ({
-                option: opt,
-                pricing: calculatePricing(proposal.selectedAgents, opt.term, opt.discountPercentage, opt.discountDollar || 0),
-              }));
+              const customMonthlyPrice = (proposal as any).customMonthlyPrice as number | undefined;
+              const customStripeLink = (proposal as any).customStripeLink as string | undefined;
+
+              const termPricings: { option: TermOption; pricing: PricingBreakdown }[] = terms.map(opt => {
+                const pricing = calculatePricing(proposal.selectedAgents, opt.term, opt.discountPercentage, opt.discountDollar || 0);
+                if (customMonthlyPrice) {
+                  // Override all pricing with custom amount
+                  const ratio = customMonthlyPrice / pricing.total;
+                  pricing.total = customMonthlyPrice;
+                  pricing.upfrontTotal = customMonthlyPrice * pricing.termMonths;
+                  pricing.subtotal = customMonthlyPrice;
+                  pricing.agents = pricing.agents.map(a => ({
+                    ...a,
+                    basePrice: a.basePrice * ratio,
+                    finalPrice: a.finalPrice * ratio,
+                  }));
+                  if (pricing.agents.length === 1) {
+                    pricing.agents[0].finalPrice = customMonthlyPrice;
+                    pricing.agents[0].basePrice = customMonthlyPrice;
+                  }
+                }
+                return { option: opt, pricing };
+              });
 
               const isSingleTerm = termPricings.length === 1;
               const showWebsiteNote = hasWebsiteAddon(proposal.selectedAgents);
@@ -339,7 +358,7 @@ export default function ProposalClient({ encodedId, showTerms = false }: { encod
                   <div className={`grid gap-6 ${termPricings.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : termPricings.length === 2 ? 'grid-cols-1 md:grid-cols-2' : termPricings.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
                     {termPricings.map(({ option, pricing }, termIndex) => {
                       const isBestValue = !isSingleTerm && termIndex === 0;
-                      const stripeLink = getStripeLink(proposal.selectedAgents, option.term);
+                      const stripeLink = customStripeLink || getStripeLink(proposal.selectedAgents, option.term);
                       return (
                         <div key={option.term} className={`rounded-lg border-2 p-6 relative flex flex-col ${
                           isBestValue ? 'border-blue-400 bg-white' : 'border-gray-200 bg-white'
