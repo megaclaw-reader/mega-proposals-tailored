@@ -473,17 +473,23 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                   )}
 
                   {/* Money-Back Guarantee */}
-                  {showTerms && (
+                  {showTerms && (() => {
+                    const termCount = proposal.selectedTerms?.length || 1;
+                    const planLabel = termCount > 1
+                      ? 'your subscription (regardless of which plan you choose)'
+                      : `your ${proposal.pricing.term === 'monthly' ? 'Monthly' : proposal.pricing.term === 'quarterly' ? 'Quarterly' : proposal.pricing.term === 'bi_annual' ? 'Bi-Annual' : 'Annual'} plan`;
+                    return (
                   <div className="bg-green-50 border border-green-200 rounded-lg p-5 flex items-start">
                     <span className="text-2xl mr-3 flex-shrink-0">🛡️</span>
                     <div>
                       <h4 className="font-semibold text-green-900 mb-1">{guaranteeDays}-Day Money-Back Guarantee</h4>
                       <p className="text-green-800 text-sm leading-relaxed">
-                        We are offering a {guaranteeDays}-day money-back guarantee on your {proposal.pricing.term === 'monthly' ? 'Monthly' : proposal.pricing.term === 'quarterly' ? 'Quarterly' : proposal.pricing.term === 'bi_annual' ? 'Bi-Annual' : 'Annual'} plan. If you&apos;re not happy with the performance in the first {guaranteeDays === 30 ? 'month' : `${guaranteeDays} days`}, we&apos;re happy to issue a full refund. See the formal addendum below for full details — this guarantee is legally binding and supersedes our standard refund policy.
+                        We are offering a {guaranteeDays}-day money-back guarantee on {planLabel}. If you&apos;re not happy with the performance in the first {guaranteeDays === 30 ? 'month' : `${guaranteeDays} days`}, we&apos;re happy to issue a full refund. See the formal addendum below for full details — this guarantee is legally binding and supersedes our standard refund policy.
                       </p>
                     </div>
                   </div>
-                  )}
+                    );
+                  })()}
 
                   {/* Promo code note — ONLY when discounts exist */}
                   {showPromoNote && (
@@ -602,7 +608,12 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
             </>
           )}
           {/* Addendum — Money-Back Guarantee (only when showTerms is enabled) */}
-          {showTerms && (
+          {showTerms && (() => {
+            const termCount = proposal.selectedTerms?.length || 1;
+            const scopeLabel = termCount > 1
+              ? `${proposal.companyName}'s subscription under any selected plan`
+              : `${proposal.companyName}'s ${proposal.pricing.term === 'monthly' ? 'Monthly' : proposal.pricing.term === 'quarterly' ? 'Quarterly' : proposal.pricing.term === 'bi_annual' ? 'Bi-Annual' : 'Annual'} plan subscription`;
+            return (
           <section data-pdf-block className="border-t-2 border-blue-400 pt-8 mt-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Addendum: {guaranteeDays}-Day Money-Back Guarantee</h2>
             <p className="text-sm text-gray-500 mb-6">
@@ -612,7 +623,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-4 text-sm text-gray-800 leading-relaxed">
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">1. Scope</h4>
-                <p>The {guaranteeDays}-Day Money-Back Guarantee applies to {proposal.companyName}&apos;s {proposal.pricing.term === 'monthly' ? 'Monthly' : proposal.pricing.term === 'quarterly' ? 'Quarterly' : proposal.pricing.term === 'bi_annual' ? 'Bi-Annual' : 'Annual'} plan subscription. This guarantee overrides Section 4.4 of the standard Terms of Use for this account.</p>
+                <p>The {guaranteeDays}-Day Money-Back Guarantee applies to {scopeLabel}. This guarantee overrides Section 4.4 of the standard Terms of Use for this account.</p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">2. Guarantee Window</h4>
@@ -632,7 +643,8 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
               </div>
             </div>
           </section>
-          )}
+            );
+          })()}
 
           {/* Full Terms & Conditions — removed per Julien's request, link in addendum instead */}
           {false && <section data-pdf-block className="border-t-2 border-gray-300 pt-8 mt-12">
