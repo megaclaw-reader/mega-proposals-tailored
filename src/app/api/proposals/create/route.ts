@@ -58,7 +58,7 @@ function slugify(text: string): string {
 
 export async function POST(request: NextRequest) {
   try {
-    const { encodedProposal, companyName } = await request.json();
+    const { encodedProposal, companyName, guaranteeDays } = await request.json();
 
     if (!encodedProposal || !companyName) {
       return NextResponse.json(
@@ -100,6 +100,7 @@ export async function POST(request: NextRequest) {
       encodedProposal,
       companyName,
       createdAt: new Date().toISOString(),
+      ...(guaranteeDays && { showTerms: true, guaranteeDays }),
     }), {
       access: 'private',
       contentType: 'application/json',

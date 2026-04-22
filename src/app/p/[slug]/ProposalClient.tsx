@@ -8,7 +8,7 @@ import { getStripeLink, hasWebsiteAddon, hasAnyDiscount } from '@/lib/stripe-lin
 import { decodeProposal } from '@/lib/encode';
 import { format } from 'date-fns';
 
-export default function ProposalClient({ encodedId, showTerms = false }: { encodedId: string; showTerms?: boolean }) {
+export default function ProposalClient({ encodedId, showTerms = false, guaranteeDays = 30 }: { encodedId: string; showTerms?: boolean; guaranteeDays?: number }) {
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -324,11 +324,16 @@ export default function ProposalClient({ encodedId, showTerms = false }: { encod
                 ? proposal.selectedTerms
                 : [{ term: proposal.contractTerm, discountPercentage: proposal.discountPercentage || 0 }];
               
-              const customMonthlyPrice = (proposal as any).customMonthlyPrice as number | undefined;
+              const rawCustomPrice = (proposal as any).customMonthlyPrice as number | Record<string, number> | undefined;
               const customStripeLink = (proposal as any).customStripeLink as string | undefined;
+              const hideStripeButton = customStripeLink === 'none';
 
               const termPricings: { option: TermOption; pricing: PricingBreakdown }[] = terms.map(opt => {
                 const pricing = calculatePricing(proposal.selectedAgents, opt.term, opt.discountPercentage, opt.discountDollar || 0);
+                // Resolve per-term or global custom price
+                const customMonthlyPrice = typeof rawCustomPrice === 'object' && rawCustomPrice !== null
+                  ? rawCustomPrice[opt.term]
+                  : rawCustomPrice;
                 if (customMonthlyPrice) {
                   // Override all pricing with custom amount
                   const ratio = customMonthlyPrice / pricing.total;
@@ -358,7 +363,7 @@ export default function ProposalClient({ encodedId, showTerms = false }: { encod
                   <div className={`grid gap-6 ${termPricings.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : termPricings.length === 2 ? 'grid-cols-1 md:grid-cols-2' : termPricings.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
                     {termPricings.map(({ option, pricing }, termIndex) => {
                       const isBestValue = !isSingleTerm && termIndex === 0;
-                      const stripeLink = customStripeLink || getStripeLink(proposal.selectedAgents, option.term);
+                      const stripeLink = hideStripeButton ? null : (customStripeLink || getStripeLink(proposal.selectedAgents, option.term));
                       return (
                         <div key={option.term} className={`rounded-lg border-2 p-6 relative flex flex-col ${
                           isBestValue ? 'border-blue-400 bg-white' : 'border-gray-200 bg-white'
@@ -467,14 +472,14 @@ export default function ProposalClient({ encodedId, showTerms = false }: { encod
                     </div>
                   )}
 
-                  {/* 30-Day Money-Back Guarantee */}
+                  {/* Money-Back Guarantee */}
                   {showTerms && (
                   <div className="bg-green-50 border border-green-200 rounded-lg p-5 flex items-start">
                     <span className="text-2xl mr-3 flex-shrink-0">🛡️</span>
                     <div>
-                      <h4 className="font-semibold text-green-900 mb-1">30-Day Money-Back Guarantee</h4>
+                      <h4 className="font-semibold text-green-900 mb-1">{guaranteeDays}-Day Money-Back Guarantee</h4>
                       <p className="text-green-800 text-sm leading-relaxed">
-                        We are offering a 30-day money-back guarantee on your {proposal.pricing.term === 'monthly' ? 'Monthly' : proposal.pricing.term === 'quarterly' ? 'Quarterly' : proposal.pricing.term === 'bi_annual' ? 'Bi-Annual' : 'Annual'} plan. If you&apos;re not happy with the performance in the first month, we&apos;re happy to issue a full refund. See the formal addendum below for full details — this guarantee is legally binding and supersedes our standard refund policy.
+                        We are offering a {guaranteeDays}-day money-back guarantee on your {proposal.pricing.term === 'monthly' ? 'Monthly' : proposal.pricing.term === 'quarterly' ? 'Quarterly' : proposal.pricing.term === 'bi_annual' ? 'Bi-Annual' : 'Annual'} plan. If you&apos;re not happy with the performance in the first {guaranteeDays === 30 ? 'month' : `${guaranteeDays} days`}, we&apos;re happy to issue a full refund. See the formal addendum below for full details — this guarantee is legally binding and supersedes our standard refund policy.
                       </p>
                     </div>
                   </div>
@@ -596,26 +601,26 @@ export default function ProposalClient({ encodedId, showTerms = false }: { encod
               ))}
             </>
           )}
-          {/* Addendum — 30-Day Money-Back Guarantee (only when showTerms is enabled) */}
+          {/* Addendum — Money-Back Guarantee (only when showTerms is enabled) */}
           {showTerms && (
           <section data-pdf-block className="border-t-2 border-blue-400 pt-8 mt-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Addendum: 30-Day Money-Back Guarantee</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Addendum: {guaranteeDays}-Day Money-Back Guarantee</h2>
             <p className="text-sm text-gray-500 mb-6">
-              This addendum is specific to {proposal.companyName}&apos;s engagement and supersedes the standard Terms &amp; Conditions below where conflicts arise — specifically Section 4.4 (Refund &amp; Credit Policy).
+              This addendum is specific to {proposal.companyName}&apos;s engagement and supersedes the standard Terms &amp; Conditions where conflicts arise — specifically Section 4.4 (Refund &amp; Credit Policy). Full terms available at <a href="https://www.gomega.ai/legal/terms-of-use" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">gomega.ai/legal/terms-of-use</a>.
             </p>
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-4 text-sm text-gray-800 leading-relaxed">
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">1. Scope</h4>
-                <p>The 30-Day Money-Back Guarantee applies to {proposal.companyName}&apos;s {proposal.pricing.term === 'monthly' ? 'Monthly' : proposal.pricing.term === 'quarterly' ? 'Quarterly' : proposal.pricing.term === 'bi_annual' ? 'Bi-Annual' : 'Annual'} plan subscription. This guarantee overrides Section 4.4 of the standard Terms of Use for this account.</p>
+                <p>The {guaranteeDays}-Day Money-Back Guarantee applies to {proposal.companyName}&apos;s {proposal.pricing.term === 'monthly' ? 'Monthly' : proposal.pricing.term === 'quarterly' ? 'Quarterly' : proposal.pricing.term === 'bi_annual' ? 'Bi-Annual' : 'Annual'} plan subscription. This guarantee overrides Section 4.4 of the standard Terms of Use for this account.</p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">2. Guarantee Window</h4>
-                <p>The 30-day guarantee period begins on the date onboarding is complete (not the signing date or payment date). The onboarding completion date will be confirmed in writing by your account manager.</p>
+                <p>The {guaranteeDays}-day guarantee period begins on the date onboarding is complete (not the signing date or payment date). The onboarding completion date will be confirmed in writing by your account manager.</p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">3. How to Invoke</h4>
-                <p>To request a refund under this guarantee, send a written request to <a href="mailto:agents@gomega.ai" className="text-blue-600 underline">agents@gomega.ai</a> within 30 days of the campaign launch date. No reason is required — if you&apos;re not satisfied with performance, the guarantee applies.</p>
+                <p>To request a refund under this guarantee, send a written request to <a href="mailto:agents@gomega.ai" className="text-blue-600 underline">agents@gomega.ai</a> within {guaranteeDays} days of the campaign launch date. No reason is required — if you&apos;re not satisfied with performance, the guarantee applies.</p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">4. Refund Amount &amp; Timeline</h4>
@@ -629,8 +634,8 @@ export default function ProposalClient({ encodedId, showTerms = false }: { encod
           </section>
           )}
 
-          {/* Full Terms & Conditions (only when showTerms is enabled) */}
-          {showTerms && <section data-pdf-block className="border-t-2 border-gray-300 pt-8 mt-12">
+          {/* Full Terms & Conditions — removed per Julien's request, link in addendum instead */}
+          {false && <section data-pdf-block className="border-t-2 border-gray-300 pt-8 mt-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Terms &amp; Conditions</h2>
             <p className="text-sm text-gray-500 mb-6">
               By engaging MEGA AI services, you agree to be bound by the following Terms of Service. Where this proposal offers specific guarantees (such as the 30-Day Money-Back Guarantee above), those terms take precedence over the standard terms below.
