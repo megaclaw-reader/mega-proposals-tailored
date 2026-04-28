@@ -13,6 +13,7 @@ export default async function ProposalSlugPage({
   let encodedProposal: string | null = null;
   let showTerms = false;
   let guaranteeDays = 30;
+  let midpointGuarantee = false;
 
   try {
     const { blobs } = await list({ prefix: `proposals/${slug}.json` });
@@ -30,6 +31,7 @@ export default async function ProposalSlugPage({
         encodedProposal = data.encodedProposal || null;
         showTerms = data.showTerms === true;
         guaranteeDays = data.guaranteeDays || 30;
+        midpointGuarantee = data.midpointGuarantee === true;
       }
     }
   } catch (error) {
@@ -40,5 +42,5 @@ export default async function ProposalSlugPage({
     notFound();
   }
 
-  return <ProposalClient encodedId={encodedProposal} showTerms={showTerms} guaranteeDays={guaranteeDays} />;
+  return <ProposalClient encodedId={encodedProposal} showTerms={showTerms} guaranteeDays={guaranteeDays} midpointGuarantee={midpointGuarantee} />;
 }
