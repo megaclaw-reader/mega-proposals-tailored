@@ -467,7 +467,7 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
         description: "Our CRM Agent is your AI-powered lead conversion assistant. It handles inbound calls instantly, qualifies leads automatically, books appointments, nurtures prospects through multi-channel follow-ups, and keeps your pipeline organized — so your team can focus on closing deals instead of chasing admin work. Use MEGA's built-in CRM or connect the agent to your existing system.",
         highlights: [
           "Dedicated Account Manager: You'll work one-on-one with a dedicated CRM Account Manager available for monthly strategy meetings to review pipeline health, optimize workflows, and improve conversion rates.",
-          "Works With Your Existing CRM: Already using HubSpot, HighLevel, ServiceTitan, or another CRM? Our agent integrates seamlessly. Or use MEGA's built-in CRM at no extra cost — either way, every lead is tracked and nothing falls through the cracks.",
+          "Works With Your Existing CRM: Already using HubSpot, Salesforce, HighLevel, ServiceTitan, or any CRM with an open API? Our agent integrates seamlessly. Or use MEGA's built-in CRM at no extra cost — either way, every lead is tracked and nothing falls through the cracks.",
           "Ongoing Optimization: Our AI continuously analyzes conversations, bookings, and lost leads to improve scripts, timing, and workflows over time. It gets smarter the longer it runs."
         ],
         categories: [
@@ -523,7 +523,7 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
               "Real-time pipeline visibility: metrics, conversion data, deal stages",
               "No manual reporting needed — dashboards update automatically",
               "Log every interaction, update lead status, and sync seamlessly",
-              "Integrates with HubSpot, HighLevel, ServiceTitan, and more",
+              "Integrates with HubSpot, Salesforce, HighLevel, ServiceTitan, and any open API CRM",
               "Or use MEGA's built-in CRM at no additional cost"
             ]
           },
