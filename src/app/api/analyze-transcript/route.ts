@@ -212,19 +212,13 @@ Respond with ONLY the JSON object.`;
   }
 }
 
-/** Fallback: extract basic insights from the summary text without AI */
-function extractInsightsFallback(summary: string): FirefliesInsights {
-  const lines = summary.split('\n').filter(l => l.trim());
-  const bulletPoints = lines.filter(l => l.match(/^[-•*]/));
-  
+/** Fallback: return empty insights so the proposal renders without fake data */
+function extractInsightsFallback(_summary: string): FirefliesInsights {
+  // Better to show nothing than to show garbage (speaker names, raw bullets, etc.)
   return {
-    painPoints: bulletPoints.slice(0, 3).map(l => l.replace(/^[-•*]\s*\*?\*?/, '').replace(/\*\*/g, '').trim()).filter(Boolean),
-    discussionTopics: bulletPoints.slice(3, 7).map(l => l.replace(/^[-•*]\s*\*?\*?/, '').replace(/\*\*/g, '').trim()).filter(Boolean),
-    megaSolutions: [
-      'AI-powered marketing optimization tailored to your specific needs',
-      'End-to-end management with dedicated account support',
-      'Data-driven lead scoring and qualification framework'
-    ],
-    summary: 'Based on our conversation, we\'ve prepared this proposal to address your specific marketing challenges with a data-driven, AI-powered approach that delivers measurable results.'
+    painPoints: [],
+    discussionTopics: [],
+    megaSolutions: [],
+    summary: ''
   };
 }
