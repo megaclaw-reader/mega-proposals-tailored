@@ -14,6 +14,7 @@ export async function POST(request: NextRequest) {
       if (a === 'seo') return 'SEO/GEO';
       if (a === 'paid_ads') return 'Paid Ads';
       if (a === 'website') return 'Website';
+      if (a === 'crm') return 'CRM';
       return a;
     });
 

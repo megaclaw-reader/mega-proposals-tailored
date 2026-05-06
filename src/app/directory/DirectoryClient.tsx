@@ -17,6 +17,7 @@ const AGENT_LABELS: Record<string, string> = {
   seo: 'SEO',
   ads: 'Ads',
   paid_ads: 'Paid Ads',
+  crm: 'CRM',
   website: 'Website',
   social: 'Social',
   email: 'Email',

@@ -10,6 +10,7 @@ const STRIPE_UPFRONT_TOTALS: Record<string, Record<string, number>> = {
   paid_ads: { monthly: 1999, quarterly: 5097, bi_annual: 8996, annual: 16800 },
   seo_paid_combo: { monthly: 2998, quarterly: 7645, bi_annual: 13491, annual: 25200 },
   website: { monthly: 399, quarterly: 1017, bi_annual: 1796, annual: 3348 },
+  crm: { monthly: 999, quarterly: 2547, bi_annual: 4496, annual: 8399 },
 };
 
 // Advertised monthly rates (what we show on proposals)
@@ -38,13 +39,20 @@ const PRICING_TABLE = {
     quarterly: 339,
     monthly: 399,
   },
+  crm: {
+    annual: 699,
+    bi_annual: 749,
+    quarterly: 849,
+    monthly: 999,
+  },
 };
 
-const AGENT_NAMES = {
+const AGENT_NAMES: Record<string, string> = {
   seo: 'SEO & GEO Agent',
   paid_ads: 'Paid Ads Agent',
   seo_paid_combo: 'SEO & Paid Ads Agent',
   website: 'Website Agent',
+  crm: 'CRM Agent',
 };
 
 export function calculatePricing(
@@ -84,6 +92,19 @@ export function calculatePricing(
     subtotal += paidAdsPrice;
   }
 
+  // CRM agent is always separate
+  const hasCRM = selectedAgents.includes('crm');
+  if (hasCRM) {
+    const crmPrice = PRICING_TABLE.crm[contractTerm];
+    agents.push({
+      agent: 'crm' as Agent,
+      name: AGENT_NAMES.crm,
+      basePrice: crmPrice,
+      finalPrice: crmPrice,
+    });
+    subtotal += crmPrice;
+  }
+
   // Website agent is always separate (addon)
   if (hasWebsite) {
     const websitePrice = PRICING_TABLE.website[contractTerm];
@@ -99,7 +120,9 @@ export function calculatePricing(
   // When both SEO + Paid Ads selected, use combo monthly rate for the total
   // (individual prices may be $1 less due to rounding)
   if (hasSEO && hasPaidAds) {
-    subtotal = PRICING_TABLE.seo_paid_combo[contractTerm] + (hasWebsite ? PRICING_TABLE.website[contractTerm] : 0);
+    subtotal = PRICING_TABLE.seo_paid_combo[contractTerm]
+      + (hasWebsite ? PRICING_TABLE.website[contractTerm] : 0)
+      + (hasCRM ? PRICING_TABLE.crm[contractTerm] : 0);
   }
 
   const termMonths = getTermMonths(contractTerm);
@@ -114,6 +137,7 @@ export function calculatePricing(
     if (hasPaidAds) stripeTotal += STRIPE_UPFRONT_TOTALS.paid_ads[contractTerm] || 0;
   }
   if (hasWebsite) stripeTotal += STRIPE_UPFRONT_TOTALS.website[contractTerm] || 0;
+  if (hasCRM) stripeTotal += STRIPE_UPFRONT_TOTALS.crm[contractTerm] || 0;
   baseUpfront = stripeTotal;
 
   // Apply percentage discount to upfront total first
