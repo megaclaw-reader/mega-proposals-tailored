@@ -105,7 +105,7 @@ export function calculatePricing(
     subtotal += crmPrice;
   }
 
-  // Website agent is always separate (addon)
+  // Website agent
   if (hasWebsite) {
     const websitePrice = PRICING_TABLE.website[contractTerm];
     agents.push({

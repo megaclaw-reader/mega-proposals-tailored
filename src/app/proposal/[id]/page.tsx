@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import { Proposal, ContractTerm, TermOption, PricingBreakdown } from '@/lib/types';
 import { calculatePricing, formatPrice, getTermDisplayName, getTermMonths } from '@/lib/pricing';
 import { getServiceScope, getExecutiveSummary, SERVICE_DESCRIPTIONS } from '@/lib/content';
-import { getStripeLink, hasWebsiteAddon, hasAnyDiscount } from '@/lib/stripe-links';
+import { hasAnyDiscount } from '@/lib/stripe-links';
 import { decodeProposal } from '@/lib/encode';
 import { format } from 'date-fns';
 
@@ -310,7 +310,6 @@ export default function ProposalPage() {
               }));
 
               const isSingleTerm = termPricings.length === 1;
-              const showWebsiteNote = hasWebsiteAddon(proposal.selectedAgents);
               const showPromoNote = hasAnyDiscount(terms);
 
               return (
@@ -319,7 +318,6 @@ export default function ProposalPage() {
                   <div className={`grid gap-6 ${termPricings.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : termPricings.length === 2 ? 'grid-cols-1 md:grid-cols-2' : termPricings.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
                     {termPricings.map(({ option, pricing }, termIndex) => {
                       const isBestValue = !isSingleTerm && termIndex === 0;
-                      const stripeLink = getStripeLink(proposal.selectedAgents, option.term);
                       return (
                         <div key={option.term} className={`rounded-lg border-2 p-6 relative flex flex-col ${
                           isBestValue ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'
@@ -375,26 +373,20 @@ export default function ProposalPage() {
                             )}
                           </div>
 
-                          {/* Stripe CTA Button */}
+                          {/* CTA Button */}
                           <div className="mt-auto pt-6">
-                            {stripeLink ? (
-                              <a
-                                href={stripeLink}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={`block w-full text-center py-3 px-6 rounded-lg font-semibold text-white transition-colors ${
-                                  isBestValue
-                                    ? 'bg-blue-600 hover:bg-blue-700'
-                                    : 'bg-gray-800 hover:bg-gray-900'
-                                }`}
-                              >
-                                Get Started
-                              </a>
-                            ) : (
-                              <p className="text-center text-sm text-gray-500">
-                                Contact {proposal.salesRepName} to get started
-                              </p>
-                            )}
+                            <a
+                              href="https://www.gomega.ai/pricing"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`block w-full text-center py-3 px-6 rounded-lg font-semibold text-white transition-colors ${
+                                isBestValue
+                                  ? 'bg-blue-600 hover:bg-blue-700'
+                                  : 'bg-gray-800 hover:bg-gray-900'
+                              }`}
+                            >
+                              Get Started
+                            </a>
                           </div>
                         </div>
                       );
@@ -415,15 +407,6 @@ export default function ProposalPage() {
                       </div>
                     );
                   })()}
-
-                  {/* Website add-on note */}
-                  {showWebsiteNote && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                      <p className="text-blue-800 text-sm">
-                        <span className="font-semibold">Website Agent:</span> The Website Agent will be available as an add-on during checkout. Simply select it when completing your subscription to include it in your plan.
-                      </p>
-                    </div>
-                  )}
 
                   {/* Promo code note — ONLY when discounts exist */}
                   {showPromoNote && (
@@ -455,14 +438,6 @@ export default function ProposalPage() {
                             <li key="promo" className="flex items-start">
                               <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">{step++}</span>
                               <span>Email {proposal.salesRepName} for your promo code before checkout</span>
-                            </li>
-                          );
-                        }
-                        if (showWebsiteNote) {
-                          steps.push(
-                            <li key="website" className="flex items-start">
-                              <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">{step++}</span>
-                              <span>Add the Website Agent during checkout</span>
                             </li>
                           );
                         }

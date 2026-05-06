@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Proposal, ContractTerm, TermOption, PricingBreakdown } from '@/lib/types';
 import { calculatePricing, formatPrice, getTermDisplayName, getTermMonths } from '@/lib/pricing';
 import { getServiceScope, getExecutiveSummary, SERVICE_DESCRIPTIONS } from '@/lib/content';
-import { getStripeLink, hasWebsiteAddon, hasAnyDiscount } from '@/lib/stripe-links';
+import { hasAnyDiscount } from '@/lib/stripe-links';
 import { decodeProposal, encodeProposal } from '@/lib/encode';
 import { format } from 'date-fns';
 
