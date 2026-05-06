@@ -95,7 +95,7 @@ CRITICAL RULES:
 Respond with ONLY the JSON object.`;
 
     // Try with retries and model fallback for rate limits
-    const models = ['claude-sonnet-4-20250514', 'claude-3-5-sonnet-20241022'];
+    const models = ['claude-sonnet-4-6', 'claude-sonnet-4-5-20250929'];
     let data: any = null;
     let lastError = '';
 
