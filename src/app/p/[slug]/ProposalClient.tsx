@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Proposal, ContractTerm, TermOption, PricingBreakdown } from '@/lib/types';
 import { calculatePricing, formatPrice, getTermDisplayName, getTermMonths } from '@/lib/pricing';
 import { getServiceScope, getExecutiveSummary, SERVICE_DESCRIPTIONS } from '@/lib/content';
-import { hasAnyDiscount } from '@/lib/stripe-links';
+import { hasAnyDiscount, getStripeLink, isBundle3 } from '@/lib/stripe-links';
 import { decodeProposal } from '@/lib/encode';
 import { format } from 'date-fns';
 
@@ -419,18 +419,29 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
 
                           {/* CTA Button */}
                           <div className="mt-auto pt-6">
-                            <a
-                              href="https://www.gomega.ai/pricing"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`block w-full text-center py-3 px-6 rounded-lg font-semibold text-white transition-colors ${
-                                isBestValue
-                                  ? 'bg-blue-600 hover:bg-blue-700'
-                                  : 'bg-gray-800 hover:bg-gray-900'
-                              }`}
-                            >
-                              Get Started
-                            </a>
+                            {(() => {
+                              const stripeUrl = getStripeLink(proposal.selectedAgents, option.term);
+                              const bundle3 = isBundle3(proposal.selectedAgents);
+                              return (
+                                <>
+                                  <a
+                                    href={stripeUrl || 'https://www.gomega.ai/pricing'}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className={`block w-full text-center py-3 px-6 rounded-lg font-semibold text-white transition-colors ${
+                                      isBestValue
+                                        ? 'bg-blue-600 hover:bg-blue-700'
+                                        : 'bg-gray-800 hover:bg-gray-900'
+                                    }`}
+                                  >
+                                    Get Started
+                                  </a>
+                                  {bundle3 && (
+                                    <p className="text-xs text-center text-gray-500 mt-2">Use code <span className="font-semibold text-blue-600">BUNDLE3</span> at checkout</p>
+                                  )}
+                                </>
+                              );
+                            })()}
                           </div>
                         </div>
                       );
