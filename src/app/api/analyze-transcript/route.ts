@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       seo: 'SEO/GEO (search engine optimization, content creation, organic traffic growth)',
       paid_ads: 'Paid Advertising (Google Ads, Meta/Facebook/Instagram Ads, AI-optimized campaigns)',
       website: 'Website Development (conversion-optimized web design)',
-      crm: 'Conversion Agent (AI call handling, lead qualification & scoring, appointment booking, pipeline automation, multi-channel nurturing, CRM integration)',
+      crm: 'Conversion Agent (formerly called "CRM Agent" — AI call handling, lead qualification & scoring, appointment booking, pipeline automation, multi-channel nurturing, CRM integration). Note: if the transcript mentions "CRM Agent", that refers to the Conversion Agent.',
     };
     const selectedServices = (selectedAgents as string[] || ['seo', 'paid_ads', 'website'])
       .map(a => agentServiceMap[a] || a)
