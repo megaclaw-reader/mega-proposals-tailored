@@ -52,7 +52,7 @@ const AGENT_NAMES: Record<string, string> = {
   paid_ads: 'Paid Ads Agent',
   seo_paid_combo: 'SEO & Paid Ads Agent',
   website: 'Website Agent',
-  crm: 'CRM Agent',
+  crm: 'Conversion Agent',
 };
 
 export function calculatePricing(
@@ -92,7 +92,7 @@ export function calculatePricing(
     subtotal += paidAdsPrice;
   }
 
-  // CRM agent is always separate
+  // Conversion agent is always separate
   const hasCRM = selectedAgents.includes('crm');
   if (hasCRM) {
     const crmPrice = PRICING_TABLE.crm[contractTerm];

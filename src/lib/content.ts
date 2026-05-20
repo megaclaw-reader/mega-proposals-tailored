@@ -34,7 +34,7 @@ export const SERVICE_DESCRIPTIONS = {
     color: "blue"
   },
   crm: {
-    title: "CRM Agent",
+    title: "Conversion Agent",
     shortDescription: "AI-powered lead conversion assistant that handles calls, qualifies leads, and automates your entire pipeline",
     badge: "CRM",
     color: "blue"
@@ -463,8 +463,8 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
 
     case 'crm':
       return {
-        title: "CRM Agent Services Scope",
-        description: "Our CRM Agent is your AI-powered lead conversion assistant. It handles inbound calls instantly, qualifies leads automatically, books appointments, nurtures prospects through multi-channel follow-ups, and keeps your pipeline organized — so your team can focus on closing deals instead of chasing admin work. Use MEGA's built-in CRM or connect the agent to your existing system.",
+        title: "Conversion Agent Services Scope",
+        description: "Our Conversion Agent is your AI-powered lead conversion assistant. It handles inbound calls instantly, qualifies leads automatically, books appointments, nurtures prospects through multi-channel follow-ups, and keeps your pipeline organized — so your team can focus on closing deals instead of chasing admin work. Use MEGA's built-in CRM or connect the agent to your existing system.",
         highlights: [
           "Dedicated Account Manager: You'll work one-on-one with a dedicated CRM Account Manager available for monthly strategy meetings to review pipeline health, optimize workflows, and improve conversion rates.",
           "Works With Your Existing CRM: Already using HubSpot, Salesforce, HighLevel, ServiceTitan, or any CRM with an open API? Our agent integrates seamlessly. Or use MEGA's built-in CRM at no extra cost — either way, every lead is tracked and nothing falls through the cracks.",
