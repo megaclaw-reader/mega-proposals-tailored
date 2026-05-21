@@ -377,7 +377,6 @@ export default function ProposalPage() {
                           <div className="mt-auto pt-6">
                             {(() => {
                               const stripeUrl = getStripeLink(proposal.selectedAgents, option.term);
-                              const bundle3 = isBundle3(proposal.selectedAgents);
                               return (
                                 <>
                                   <a
@@ -392,8 +391,6 @@ export default function ProposalPage() {
                                   >
                                     Get Started
                                   </a>
-                                  {bundle3 && (
-                                  )}
                                 </>
                               );
                             })()}

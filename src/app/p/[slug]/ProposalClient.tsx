@@ -422,7 +422,6 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                           <div className="mt-auto pt-6">
                             {(() => {
                               const stripeUrl = getStripeLink(proposal.selectedAgents, option.term);
-                              const bundle3 = isBundle3(proposal.selectedAgents);
                               return (
                                 <>
                                   <a
@@ -437,8 +436,6 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                                   >
                                     Get Started
                                   </a>
-                                  {bundle3 && (
-                                  )}
                                 </>
                               );
                             })()}
