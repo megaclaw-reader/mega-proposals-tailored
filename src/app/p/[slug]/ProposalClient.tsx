@@ -438,7 +438,6 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                                     Get Started
                                   </a>
                                   {bundle3 && (
-                                    <p className="text-xs text-center text-gray-500 mt-2">Use code <span className="font-semibold text-blue-600">BUNDLE3</span> at checkout</p>
                                   )}
                                 </>
                               );
