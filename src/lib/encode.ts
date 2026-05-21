@@ -56,6 +56,10 @@ export function encodeProposal(config: Omit<ProposalConfig, 'id' | 'createdAt'>)
     payload.csl = (config as any).customStripeLink;
   }
 
+  if ((config as any).hideCTA) {
+    payload.hcta = true;
+  }
+
   if (!payload.st) {
     // Legacy single-term format
     payload.ct = config.contractTerm;
@@ -128,6 +132,7 @@ export function decodeProposal(encoded: string): ProposalConfig | null {
       startDate: payload.sd || undefined,
       customMonthlyPrice: payload.cmp || undefined,
       customStripeLink: payload.csl || undefined,
+      hideCTA: payload.hcta || false,
     } as any;
   } catch {
     return null;

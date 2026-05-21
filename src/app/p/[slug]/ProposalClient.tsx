@@ -418,6 +418,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                           </div>
 
                           {/* CTA Button */}
+                          {!(proposal as any).hideCTA && (
                           <div className="mt-auto pt-6">
                             {(() => {
                               const stripeUrl = getStripeLink(proposal.selectedAgents, option.term);
@@ -443,6 +444,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                               );
                             })()}
                           </div>
+                          )}
                         </div>
                       );
                     })}
