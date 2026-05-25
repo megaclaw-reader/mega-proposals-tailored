@@ -325,8 +325,26 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                 : [{ term: proposal.contractTerm, discountPercentage: proposal.discountPercentage || 0 }];
               
               const rawCustomPrice = (proposal as any).customMonthlyPrice as number | Record<string, number> | undefined;
+              const customAgentPrices = (proposal as any).customAgentPrices as Record<string, number> | undefined;
               const termPricings: { option: TermOption; pricing: PricingBreakdown }[] = terms.map(opt => {
                 const pricing = calculatePricing(proposal.selectedAgents, opt.term, opt.discountPercentage, opt.discountDollar || 0);
+                
+                // Per-agent custom prices take priority
+                if (customAgentPrices) {
+                  let newTotal = 0;
+                  pricing.agents = pricing.agents.map(a => {
+                    const customPrice = customAgentPrices[a.agent];
+                    if (customPrice !== undefined) {
+                      newTotal += customPrice;
+                      return { ...a, basePrice: customPrice, finalPrice: customPrice };
+                    }
+                    newTotal += a.finalPrice;
+                    return a;
+                  });
+                  pricing.total = newTotal;
+                  pricing.upfrontTotal = newTotal * pricing.termMonths;
+                  pricing.subtotal = newTotal;
+                } else {
                 // Resolve per-term or global custom price
                 const customMonthlyPrice = typeof rawCustomPrice === 'object' && rawCustomPrice !== null
                   ? rawCustomPrice[opt.term]
@@ -346,6 +364,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                     pricing.agents[0].finalPrice = customMonthlyPrice;
                     pricing.agents[0].basePrice = customMonthlyPrice;
                   }
+                }
                 }
                 return { option: opt, pricing };
               });
