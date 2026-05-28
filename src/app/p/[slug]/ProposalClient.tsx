@@ -480,6 +480,17 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                     );
                   })()}
 
+                  {/* Investment Note */}
+                  {(proposal as any).investmentNote && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-5 flex items-start">
+                      <span className="text-2xl mr-3 flex-shrink-0">💡</span>
+                      <div>
+                        <h4 className="font-semibold text-blue-900 mb-1">Note on Ad Spend</h4>
+                        <p className="text-blue-800 text-sm leading-relaxed">{(proposal as any).investmentNote}</p>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Money-Back Guarantee */}
                   {showTerms && (() => {
                     const termCount = proposal.selectedTerms?.length || 1;
