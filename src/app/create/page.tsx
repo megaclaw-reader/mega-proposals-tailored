@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Agent, Template, ContractTerm, TermOption, FirefliesInsights } from '@/lib/types';
+import { Agent, Bundle, Template, ContractTerm, TermOption, FirefliesInsights, BUNDLE_DEFINITIONS } from '@/lib/types';
 import { calculatePricing, formatPrice, getTermDisplayName, getTermMonths } from '@/lib/pricing';
 import { encodeProposal } from '@/lib/encode';
 
@@ -32,6 +32,7 @@ export default function CreateProposal() {
     salesRepName: '',
     salesRepEmail: '',
     businessContext: '',
+    selectedBundle: undefined as Bundle | undefined,
   });
   const [firefliesEntries, setFirefliesEntries] = useState<TranscriptEntry[]>([
     { url: '', status: 'idle', data: null, error: null },
@@ -114,9 +115,26 @@ export default function CreateProposal() {
     setJustcallEntries(prev => prev.map((e, i) => i === index ? { ...e, url } : e));
   };
 
+  const handleBundleSelect = (bundle: Bundle | undefined) => {
+    if (bundle) {
+      const bundleDef = BUNDLE_DEFINITIONS[bundle];
+      setFormData(prev => ({
+        ...prev,
+        selectedBundle: bundle,
+        selectedAgents: [...bundleDef.agents],
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        selectedBundle: undefined,
+      }));
+    }
+  };
+
   const handleAgentToggle = (agent: Agent) => {
     setFormData(prev => ({
       ...prev,
+      selectedBundle: undefined, // Clear bundle when manually toggling agents
       selectedAgents: prev.selectedAgents.includes(agent)
         ? prev.selectedAgents.filter(a => a !== agent)
         : [...prev.selectedAgents, agent]
@@ -282,6 +300,7 @@ export default function CreateProposal() {
         companyName: formData.companyName,
         template: formData.template,
         selectedAgents: formData.selectedAgents,
+        selectedBundle: formData.selectedBundle,
         salesRepName: formData.salesRepName,
         salesRepEmail: formData.salesRepEmail,
         contractTerm: selectedTerms[0]?.term || 'annual',
@@ -524,9 +543,35 @@ export default function CreateProposal() {
               <p className="mt-1 text-xs text-gray-500">Describe what the customer does so the proposal reads specific to their business.</p>
             </div>
 
-            {/* Agents Selection */}
+            {/* Bundle Selection */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">Select Agents to Include *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-3">Quick Select a Bundle</label>
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                {(['convert', 'grow', 'grow_faster'] as Bundle[]).map(bundle => {
+                  const def = BUNDLE_DEFINITIONS[bundle];
+                  const isSelected = formData.selectedBundle === bundle;
+                  return (
+                    <button
+                      key={bundle}
+                      type="button"
+                      onClick={() => handleBundleSelect(isSelected ? undefined : bundle)}
+                      className={`p-3 rounded-lg border-2 text-left transition-all ${
+                        isSelected
+                          ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200'
+                          : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      <div className="font-semibold text-gray-900">{def.name}</div>
+                      <div className="text-xs text-gray-500 mt-1">{def.description}</div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Or Select Individual Agents *
+                {formData.selectedBundle && <span className="text-blue-600 font-normal ml-2">(auto-selected by {BUNDLE_DEFINITIONS[formData.selectedBundle].name} bundle)</span>}
+              </label>
               <div className="space-y-2">
                 {(['seo', 'paid_ads', 'crm', 'website'] as Agent[]).map(agent => {
                   const labels: Record<Agent, string> = { seo: 'SEO & GEO Agent', paid_ads: 'Paid Ads Agent', crm: 'Conversion Agent', website: 'Website Agent' };

@@ -1,4 +1,4 @@
-import { Agent, ContractTerm } from './types';
+import { Agent, Bundle, ContractTerm } from './types';
 
 /**
  * Stripe checkout links mapped by agent combo key and billing term.
@@ -104,6 +104,39 @@ const STRIPE_LINKS: Record<string, Record<string, string>> = {
     annual: 'https://buy.stripe.com/aFa4gzfcf66B5hVbE3bbG2Q',
   },
 };
+
+/**
+ * Stripe checkout links for predefined bundles.
+ */
+const BUNDLE_STRIPE_LINKS: Record<Bundle, Record<string, string>> = {
+  convert: {
+    monthly: 'https://buy.stripe.com/00w3cv4xB66B11FgYnbbG2R',
+    quarterly: 'https://buy.stripe.com/aFa9AT7JNgLf11FgYnbbG2S',
+    bi_annual: 'https://buy.stripe.com/eVqcN5c030MhcKn6jJbbG2T',
+    annual: 'https://buy.stripe.com/eVq7sLe8bdz3eSveQfbbG2U',
+  },
+  grow: {
+    monthly: 'https://buy.stripe.com/3cI5kDc039iNh0DgYnbbG2V',
+    quarterly: 'https://buy.stripe.com/8x2bJ1fcf8eJ25J6jJbbG2W',
+    bi_annual: 'https://buy.stripe.com/00w9ATd4766B9ybfUjbbG2X',
+    annual: 'https://buy.stripe.com/7sYeVde8b3Yt8u737xbbG2Y',
+  },
+  grow_faster: {
+    monthly: 'https://buy.stripe.com/8x2bJ15BFgLf25J6jJbbG30',
+    quarterly: 'https://buy.stripe.com/8x2bJ15BFgLf25J6jJbbG30',
+    bi_annual: 'https://buy.stripe.com/9B6fZhe8bamR39NbE3bbG31',
+    annual: 'https://buy.stripe.com/7sYbJ1fcfgLffWz23tbbG32',
+  },
+};
+
+/**
+ * Get the Stripe checkout link for a predefined bundle and term.
+ */
+export function getBundleStripeLink(bundle: Bundle, term: ContractTerm): string | null {
+  const termLinks = BUNDLE_STRIPE_LINKS[bundle];
+  if (!termLinks) return null;
+  return termLinks[term] || null;
+}
 
 /**
  * Build a sorted combo key from selected agents.

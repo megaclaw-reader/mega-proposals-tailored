@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Proposal, ContractTerm, TermOption, PricingBreakdown } from '@/lib/types';
+import { Proposal, ContractTerm, TermOption, PricingBreakdown, BUNDLE_DEFINITIONS } from '@/lib/types';
 import { calculatePricing, formatPrice, getTermDisplayName, getTermMonths } from '@/lib/pricing';
 import { getServiceScope, getExecutiveSummary, SERVICE_DESCRIPTIONS } from '@/lib/content';
-import { hasAnyDiscount, getStripeLink, isBundle3 } from '@/lib/stripe-links';
+import { hasAnyDiscount, getStripeLink, getBundleStripeLink, isBundle3 } from '@/lib/stripe-links';
 import { decodeProposal } from '@/lib/encode';
 import { format } from 'date-fns';
 
@@ -103,7 +103,9 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
               <img src="/mega-wordmark.svg" alt="MEGA" className="h-10 mb-4" />
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Proposal</h1>
               <p className="text-xl text-blue-600 font-semibold">
-                {proposal.selectedAgents.map(agent => SERVICE_DESCRIPTIONS[agent].title).join(' + ')}
+                {(proposal as any).selectedBundle
+                  ? `${BUNDLE_DEFINITIONS[(proposal as any).selectedBundle as keyof typeof BUNDLE_DEFINITIONS].name} Bundle — ${proposal.selectedAgents.map(agent => SERVICE_DESCRIPTIONS[agent].title).join(' + ')}`
+                  : proposal.selectedAgents.map(agent => SERVICE_DESCRIPTIONS[agent].title).join(' + ')}
               </p>
             </div>
             <div className="text-right text-sm text-gray-700 space-y-1">
@@ -440,7 +442,9 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                           {!(proposal as any).hideCTA && (
                           <div className="mt-auto pt-6">
                             {(() => {
-                              const stripeUrl = getStripeLink(proposal.selectedAgents, option.term);
+                              const stripeUrl = (proposal as any).selectedBundle
+                                ? getBundleStripeLink((proposal as any).selectedBundle, option.term)
+                                : getStripeLink(proposal.selectedAgents, option.term);
                               return (
                                 <>
                                   <a

@@ -68,6 +68,10 @@ export function encodeProposal(config: Omit<ProposalConfig, 'id' | 'createdAt'>)
     payload.invn = (config as any).investmentNote;
   }
 
+  if (config.selectedBundle) {
+    payload.sb = config.selectedBundle;
+  }
+
   if (!payload.st) {
     // Legacy single-term format
     payload.ct = config.contractTerm;
@@ -143,6 +147,7 @@ export function decodeProposal(encoded: string): ProposalConfig | null {
       hideCTA: payload.hcta || false,
       customAgentPrices: payload.cap || undefined,
       investmentNote: payload.invn || undefined,
+      selectedBundle: payload.sb || undefined,
     } as any;
   } catch {
     return null;

@@ -1,5 +1,25 @@
 export type Agent = 'seo' | 'paid_ads' | 'website' | 'crm';
 
+export type Bundle = 'convert' | 'grow' | 'grow_faster';
+
+export const BUNDLE_DEFINITIONS: Record<Bundle, { name: string; agents: Agent[]; description: string }> = {
+  convert: {
+    name: 'Convert',
+    agents: ['crm', 'website'],
+    description: 'Conversion Agent + Website Agent',
+  },
+  grow: {
+    name: 'Grow',
+    agents: ['crm', 'website', 'seo'],
+    description: 'Conversion + Website + SEO',
+  },
+  grow_faster: {
+    name: 'Grow Faster',
+    agents: ['crm', 'website', 'seo', 'paid_ads'],
+    description: 'Conversion + Website + SEO + Ads',
+  },
+};
+
 export type Template = 'leads' | 'ecom';
 
 export type ContractTerm = 'annual' | 'bi_annual' | 'quarterly' | 'monthly';
@@ -25,6 +45,8 @@ export interface ProposalConfig {
   selectedTerms?: TermOption[];
   salesRepName: string;
   salesRepEmail: string;
+  /** If a predefined bundle was selected */
+  selectedBundle?: Bundle;
   salesRepTitle?: string;
   officeAddress?: string;
   /** Fireflies meeting transcript URL for tailored proposals */
