@@ -1,4 +1,4 @@
-import { Agent, ContractTerm, PricingBreakdown } from './types';
+import { Agent, Bundle, ContractTerm, PricingBreakdown } from './types';
 
 /**
  * Stripe upfront totals — these are the EXACT amounts Stripe charges.
@@ -11,6 +11,16 @@ const STRIPE_UPFRONT_TOTALS: Record<string, Record<string, number>> = {
   seo_paid_combo: { monthly: 2998, quarterly: 7645, bi_annual: 13491, annual: 25200 },
   website: { monthly: 399, quarterly: 1017, bi_annual: 1796, annual: 3348 },
   crm: { monthly: 999, quarterly: 2547, bi_annual: 4496, annual: 8399 },
+};
+
+/**
+ * Bundle pricing — combined monthly rates for predefined bundles.
+ * When a bundle is selected, we show the bundle price (not individual agent sum).
+ */
+const BUNDLE_PRICING: Record<string, Record<ContractTerm, number>> = {
+  convert: { monthly: 959, quarterly: 799, bi_annual: 769, annual: 669 },
+  grow: { monthly: 1619, quarterly: 1349, bi_annual: 1295, annual: 1099 },
+  grow_faster: { monthly: 2399, quarterly: 1999, bi_annual: 1899, annual: 1679 },
 };
 
 // Advertised monthly rates (what we show on proposals)
@@ -59,7 +69,8 @@ export function calculatePricing(
   selectedAgents: Agent[],
   contractTerm: ContractTerm,
   discountPercentage: number = 0,
-  discountDollar: number = 0
+  discountDollar: number = 0,
+  selectedBundle?: Bundle
 ): PricingBreakdown {
   const agents = [];
   let subtotal = 0;
@@ -126,6 +137,40 @@ export function calculatePricing(
   }
 
   const termMonths = getTermMonths(contractTerm);
+
+  // Bundle pricing override: use combined bundle price instead of individual agent sum
+  if (selectedBundle && BUNDLE_PRICING[selectedBundle]) {
+    const bundleMonthlyRate = BUNDLE_PRICING[selectedBundle][contractTerm];
+    const bundleUpfront = bundleMonthlyRate * termMonths;
+
+    // Apply discounts on top of bundle price
+    const percentageDiscountAmount = bundleUpfront * (discountPercentage / 100);
+    const afterPercentage = bundleUpfront - percentageDiscountAmount;
+    const dollarDiscountAmount = Math.min(discountDollar, afterPercentage);
+    const upfrontTotal = afterPercentage - dollarDiscountAmount;
+    const total = upfrontTotal / termMonths;
+
+    // Don't show per-agent breakdown for bundles — show agents but no individual prices
+    // Set all agent finalPrices proportionally so they sum to bundle total
+    const agentCount = agents.length;
+    if (agentCount > 0) {
+      const share = total / agentCount;
+      agents.forEach(agent => {
+        agent.basePrice = share;
+        agent.finalPrice = share;
+      });
+    }
+
+    return {
+      agents,
+      subtotal: bundleMonthlyRate,
+      discountAmount: bundleMonthlyRate - total,
+      total,
+      upfrontTotal,
+      termMonths,
+      term: contractTerm,
+    };
+  }
 
   // Start with exact Stripe upfront totals
   let baseUpfront: number;

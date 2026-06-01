@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { put, head } from '@vercel/blob';
 import { calculatePricing } from '@/lib/pricing';
-import { Agent, ContractTerm } from '@/lib/types';
+import { Agent, Bundle, ContractTerm } from '@/lib/types';
 
 /**
  * Validate that insights text doesn't contain pricing that conflicts
@@ -13,12 +13,13 @@ function validateInsightsVsPricing(decoded: Record<string, unknown>): string[] {
   if (!fi) return warnings;
 
   const agents = (decoded.a as Agent[]) || [];
+  const bundle = decoded.sb as Bundle | undefined;
   const terms = (decoded.st as Array<{ t: string; d: number; dd?: number }>) || [];
 
   // Calculate actual prices for all terms
   const actualPrices: { term: string; monthly: number }[] = [];
   for (const t of terms) {
-    const pricing = calculatePricing(agents, t.t as ContractTerm, t.d || 0, t.dd || 0);
+    const pricing = calculatePricing(agents, t.t as ContractTerm, t.d || 0, t.dd || 0, bundle);
     actualPrices.push({ term: t.t, monthly: Math.round(pricing.total) });
   }
 

@@ -24,7 +24,8 @@ export default function ProposalPage() {
         config.selectedAgents,
         config.contractTerm,
         config.discountPercentage || 0,
-        0
+        0,
+        config.selectedBundle
       );
       setProposal({ ...config, pricing });
     }
@@ -306,7 +307,7 @@ export default function ProposalPage() {
               
               const termPricings: { option: TermOption; pricing: PricingBreakdown }[] = terms.map(opt => ({
                 option: opt,
-                pricing: calculatePricing(proposal.selectedAgents, opt.term, opt.discountPercentage, opt.discountDollar || 0),
+                pricing: calculatePricing(proposal.selectedAgents, opt.term, opt.discountPercentage, opt.discountDollar || 0, (proposal as any).selectedBundle),
               }));
 
               const isSingleTerm = termPricings.length === 1;

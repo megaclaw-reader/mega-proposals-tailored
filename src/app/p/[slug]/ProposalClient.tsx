@@ -20,7 +20,9 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
       const pricing = calculatePricing(
         config.selectedAgents,
         config.contractTerm,
-        config.discountPercentage || 0
+        config.discountPercentage || 0,
+        0,
+        config.selectedBundle
       );
       setProposal({ ...config, pricing });
     }
@@ -329,7 +331,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
               const rawCustomPrice = (proposal as any).customMonthlyPrice as number | Record<string, number> | undefined;
               const customAgentPrices = (proposal as any).customAgentPrices as Record<string, number> | undefined;
               const termPricings: { option: TermOption; pricing: PricingBreakdown }[] = terms.map(opt => {
-                const pricing = calculatePricing(proposal.selectedAgents, opt.term, opt.discountPercentage, opt.discountDollar || 0);
+                const pricing = calculatePricing(proposal.selectedAgents, opt.term, opt.discountPercentage, opt.discountDollar || 0, (proposal as any).selectedBundle);
                 
                 // Per-agent custom prices take priority
                 if (customAgentPrices) {
@@ -399,21 +401,32 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
 
                           {/* Per-agent breakdown */}
                           <div className="space-y-3 mb-4">
-                            {pricing.agents.map((agent, i) => (
-                              <div key={i} className="flex justify-between items-center text-sm">
-                                <span className="text-gray-700">{agent.name}</span>
-                                <div className="text-right">
-                                  {(option.discountPercentage > 0 || (option.discountDollar || 0) > 0) ? (
-                                    <>
-                                      <span className="text-gray-400 line-through text-xs mr-1">${Math.round(agent.basePrice).toLocaleString()}</span>
+                            {(proposal as any).selectedBundle ? (
+                              <>
+                                {pricing.agents.map((agent, i) => (
+                                  <div key={i} className="flex items-center text-sm">
+                                    <span className="text-gray-500">✓</span>
+                                    <span className="text-gray-700 ml-2">{agent.name}</span>
+                                  </div>
+                                ))}
+                              </>
+                            ) : (
+                              pricing.agents.map((agent, i) => (
+                                <div key={i} className="flex justify-between items-center text-sm">
+                                  <span className="text-gray-700">{agent.name}</span>
+                                  <div className="text-right">
+                                    {(option.discountPercentage > 0 || (option.discountDollar || 0) > 0) ? (
+                                      <>
+                                        <span className="text-gray-400 line-through text-xs mr-1">${Math.round(agent.basePrice).toLocaleString()}</span>
+                                        <span className="font-semibold text-gray-900">${Math.round(agent.finalPrice).toLocaleString()}/mo</span>
+                                      </>
+                                    ) : (
                                       <span className="font-semibold text-gray-900">${Math.round(agent.finalPrice).toLocaleString()}/mo</span>
-                                    </>
-                                  ) : (
-                                    <span className="font-semibold text-gray-900">${Math.round(agent.finalPrice).toLocaleString()}/mo</span>
-                                  )}
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              ))
+                            )}
                           </div>
 
                           <hr className="my-4" />

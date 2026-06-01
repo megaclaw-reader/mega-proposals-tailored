@@ -25,7 +25,9 @@ export default function EditClient({ encodedId, slug }: { encodedId: string; slu
       const pricing = calculatePricing(
         config.selectedAgents,
         config.contractTerm,
-        config.discountPercentage || 0
+        config.discountPercentage || 0,
+        0,
+        config.selectedBundle
       );
       const p = { ...config, pricing };
       setProposal(p);
@@ -259,8 +261,8 @@ export default function EditClient({ encodedId, slug }: { encodedId: string; slu
             <p className="text-sm text-amber-600 font-medium mb-4">✏️ Add or adjust discounts for each term below. The proposal pricing updates automatically.</p>
             <div className={`grid gap-6 ${editedTerms.length === 1 ? 'grid-cols-1 max-w-md mx-auto' : editedTerms.length === 2 ? 'grid-cols-1 md:grid-cols-2' : editedTerms.length === 3 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4'}`}>
               {editedTerms.map((option, termIndex) => {
-                const pricing = calculatePricing(proposal.selectedAgents, option.term, option.discountPercentage, option.discountDollar || 0);
-                const basePricing = calculatePricing(proposal.selectedAgents, option.term, 0, 0);
+                const pricing = calculatePricing(proposal.selectedAgents, option.term, option.discountPercentage, option.discountDollar || 0, (proposal as any).selectedBundle);
+                const basePricing = calculatePricing(proposal.selectedAgents, option.term, 0, 0, (proposal as any).selectedBundle);
                 const isBestValue = editedTerms.length > 1 && termIndex === 0;
                 const hasDiscount = (option.discountPercentage || 0) > 0 || (option.discountDollar || 0) > 0;
                 return (

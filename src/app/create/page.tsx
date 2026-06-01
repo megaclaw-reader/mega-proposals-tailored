@@ -676,7 +676,7 @@ export default function CreateProposal() {
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Pricing Preview</h3>
                 <div className="space-y-4">
                   {selectedTerms.map(termOpt => {
-                    const pricing = calculatePricing(formData.selectedAgents, termOpt.term, termOpt.discountPercentage, termOpt.discountDollar || 0);
+                    const pricing = calculatePricing(formData.selectedAgents, termOpt.term, termOpt.discountPercentage, termOpt.discountDollar || 0, formData.selectedBundle);
                     return (
                       <div key={termOpt.term} className="border border-gray-200 rounded-lg p-3 bg-white">
                         <div className="flex justify-between items-center mb-2">

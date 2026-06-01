@@ -304,7 +304,7 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
 
   const termPricings = terms.map(opt => ({
     option: opt,
-    pricing: calculatePricing(proposal.selectedAgents, opt.term, opt.discountPercentage, opt.discountDollar || 0),
+    pricing: calculatePricing(proposal.selectedAgents, opt.term, opt.discountPercentage, opt.discountDollar || 0, (proposal as any).selectedBundle),
   }));
   const isSingleTerm = termPricings.length === 1;
 

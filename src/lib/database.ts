@@ -126,7 +126,9 @@ export class ProposalDatabase {
           const pricing = calculatePricing(
             config.selectedAgents,
             config.contractTerm,
-            config.discountPercentage || 0
+            config.discountPercentage || 0,
+            0,
+            config.selectedBundle
           );
 
           const proposal: Proposal = {
