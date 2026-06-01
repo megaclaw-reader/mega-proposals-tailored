@@ -688,17 +688,33 @@ export default function CreateProposal() {
                             <span className="text-green-600 text-sm font-medium">${termOpt.discountDollar?.toLocaleString()} off total</span>
                           )}
                         </div>
-                        {pricing.agents.map((agent, i) => (
-                          <div key={i} className="flex justify-between text-sm text-gray-600">
-                            <span>{agent.name}</span>
-                            <span>${Math.round(agent.finalPrice).toLocaleString()}/mo</span>
-                          </div>
-                        ))}
+                        {formData.selectedBundle ? (
+                          <>
+                            {pricing.agents.map((agent, i) => (
+                              <div key={i} className="text-sm text-gray-600">
+                                ✓ {agent.name}
+                              </div>
+                            ))}
+                          </>
+                        ) : (
+                          pricing.agents.map((agent, i) => (
+                            <div key={i} className="flex justify-between text-sm text-gray-600">
+                              <span>{agent.name}</span>
+                              <span>${Math.round(agent.finalPrice).toLocaleString()}/mo</span>
+                            </div>
+                          ))
+                        )}
                         <hr className="my-2" />
                         <div className="flex justify-between font-bold">
-                          <span>{pricing.term === 'monthly' ? 'Monthly Rate' : `Due Upfront (${pricing.termMonths} mo)`}</span>
-                          <span className="text-blue-600">${Math.round(pricing.upfrontTotal).toLocaleString()}</span>
+                          <span>Monthly Rate</span>
+                          <span className="text-blue-600">${Math.round(pricing.total).toLocaleString()}/mo</span>
                         </div>
+                        {pricing.term !== 'monthly' && (
+                          <div className="flex justify-between text-sm text-gray-500 mt-1">
+                            <span>Due Upfront ({pricing.termMonths} mo)</span>
+                            <span>${Math.round(pricing.upfrontTotal).toLocaleString()}</span>
+                          </div>
+                        )}
                       </div>
                     );
                   })}
