@@ -105,7 +105,9 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
               <img src="/mega-wordmark.svg" alt="MEGA" className="h-10 mb-4" />
               <h1 className="text-3xl font-bold text-gray-900 mb-2">Proposal</h1>
               <p className="text-xl text-blue-600 font-semibold">
-                {(proposal as any).selectedBundle
+                {(proposal as any).packageName
+                  ? `${(proposal as any).packageName} — ${proposal.selectedAgents.map(agent => SERVICE_DESCRIPTIONS[agent].title).join(' + ')}`
+                  : (proposal as any).selectedBundle
                   ? `${BUNDLE_DEFINITIONS[(proposal as any).selectedBundle as keyof typeof BUNDLE_DEFINITIONS].name} Bundle — ${proposal.selectedAgents.map(agent => SERVICE_DESCRIPTIONS[agent].title).join(' + ')}`
                   : proposal.selectedAgents.map(agent => SERVICE_DESCRIPTIONS[agent].title).join(' + ')}
               </p>
@@ -410,7 +412,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
 
                           {/* Per-agent breakdown */}
                           <div className="space-y-3 mb-4">
-                            {(proposal as any).selectedBundle ? (
+                            {((proposal as any).selectedBundle || (proposal as any).packageName) ? (
                               <>
                                 {pricing.agents.map((agent, i) => (
                                   <div key={i} className="flex items-center text-sm">

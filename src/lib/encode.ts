@@ -68,6 +68,10 @@ export function encodeProposal(config: Omit<ProposalConfig, 'id' | 'createdAt'>)
     payload.invn = (config as any).investmentNote;
   }
 
+  if ((config as any).packageName) {
+    payload.pkn = (config as any).packageName;
+  }
+
   if (config.selectedBundle) {
     payload.sb = config.selectedBundle;
   }
@@ -147,6 +151,7 @@ export function decodeProposal(encoded: string): ProposalConfig | null {
       hideCTA: payload.hcta || false,
       customAgentPrices: payload.cap || undefined,
       investmentNote: payload.invn || undefined,
+      packageName: payload.pkn || undefined,
       selectedBundle: payload.sb || undefined,
     } as any;
   } catch {
