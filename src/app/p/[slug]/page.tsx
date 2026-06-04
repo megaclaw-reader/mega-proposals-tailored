@@ -42,5 +42,5 @@ export default async function ProposalSlugPage({
     notFound();
   }
 
-  return <ProposalClient encodedId={encodedProposal} showTerms={showTerms} guaranteeDays={guaranteeDays} midpointGuarantee={midpointGuarantee} />;
+  return <ProposalClient encodedId={encodedProposal} showTerms={showTerms} />;
 }

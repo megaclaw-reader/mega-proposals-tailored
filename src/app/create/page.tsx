@@ -631,29 +631,6 @@ export default function CreateProposal() {
             </div>
 
             {/* Money-Back Guarantee */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Money-Back Guarantee <span className="text-gray-400 font-normal">(optional)</span>
-              </label>
-              <div className="space-y-2">
-                <label className="flex items-center">
-                  <input type="radio" name="guarantee" value="none" checked={guarantee === 'none'}
-                    onChange={() => setGuarantee('none')} className="mr-2 text-blue-600" />
-                  <span>No guarantee</span>
-                </label>
-                <label className="flex items-center">
-                  <input type="radio" name="guarantee" value="30" checked={guarantee === '30'}
-                    onChange={() => setGuarantee('30')} className="mr-2 text-blue-600" />
-                  <span>30-day money-back guarantee</span>
-                </label>
-                <label className="flex items-center">
-                  <input type="radio" name="guarantee" value="60" checked={guarantee === '60'}
-                    onChange={() => setGuarantee('60')} className="mr-2 text-blue-600" />
-                  <span>60-day money-back guarantee</span>
-                </label>
-              </div>
-            </div>
-
             {/* Sales Rep Information */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
