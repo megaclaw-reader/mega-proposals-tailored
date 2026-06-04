@@ -374,7 +374,9 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
           </Svg>
           <Text style={s.coverTitle}>Proposal for {proposal.companyName}</Text>
           <Text style={s.coverAgents}>
-            {proposal.selectedAgents.map(a => SERVICE_DESCRIPTIONS[a].title).join('  |  ')}
+            {(proposal as any).packageName
+              ? `${(proposal as any).packageName} — ${proposal.selectedAgents.map(a => SERVICE_DESCRIPTIONS[a].title).join(' + ')}`
+              : proposal.selectedAgents.map(a => SERVICE_DESCRIPTIONS[a].title).join('  |  ')}
           </Text>
         </View>
 
