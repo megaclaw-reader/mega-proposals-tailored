@@ -230,6 +230,25 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
             </div>
           </section>
 
+          {/* Weekly Strategy Meetings */}
+          <section data-pdf-block>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+              <div className="flex items-start">
+                <div className="flex-shrink-0 w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center mr-4">
+                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Weekly Strategy Meetings</h3>
+                  <p className="text-gray-700 text-sm leading-relaxed">
+                    Every week, you&apos;ll meet with your dedicated account manager to review performance, discuss strategy adjustments, and ensure we&apos;re aligned on your business goals. These aren&apos;t status updates — they&apos;re working sessions where we review data, make decisions, and plan the next week&apos;s priorities together.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
           {/* Service Scope Sections */}
           {proposal.selectedAgents.map((agent) => {
             const serviceContent = getServiceScope(agent, proposal.template);

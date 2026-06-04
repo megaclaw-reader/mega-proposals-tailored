@@ -417,6 +417,21 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
           ))}
         </View>
 
+        {/* Weekly Strategy Meetings */}
+        <View style={{ backgroundColor: BRAND_BLUE_LIGHT, borderWidth: 1, borderColor: BRAND_BLUE_MEDIUM, borderRadius: 8, padding: 14, marginBottom: 16 }} wrap={false}>
+          <View style={{ flexDirection: 'row' as const, alignItems: 'flex-start' as const }}>
+            <View style={{ width: 28, height: 28, borderRadius: 6, backgroundColor: BRAND_BLUE, marginRight: 10, alignItems: 'center' as const, justifyContent: 'center' as const }}>
+              <Text style={{ color: '#ffffff', fontSize: 12, fontWeight: 700 }}>W</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: 11, fontWeight: 600, color: G900, marginBottom: 4 }}>Weekly Strategy Meetings</Text>
+              <Text style={{ fontSize: 8, color: G700, lineHeight: 1.6 }}>
+                Every week, you'll meet with your dedicated account manager to review performance, discuss strategy adjustments, and ensure we're aligned on your business goals. These aren't status updates — they're working sessions where we review data, make decisions, and plan the next week's priorities together.
+              </Text>
+            </View>
+          </View>
+        </View>
+
         {/* Why Mega */}
         <Text style={[s.secTitle, { marginTop: 4 }]}>Why Mega</Text>
         <View style={s.secBar} />
