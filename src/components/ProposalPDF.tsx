@@ -494,20 +494,29 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
                 <Text style={s.pTermName}>{getTermDisplayName(option.term)}</Text>
                 <Text style={s.pTermMonths}>{option.term === 'monthly' ? 'Month-to-month commitment' : `${getTermMonths(option.term)} months`}</Text>
 
-                {pricing.agents.map((ag, i) => (
-                  <View key={i} style={{ marginBottom: 6 }}>
-                    <View style={s.pAgentRow}>
-                      <Text style={s.pAgentName}>{ag.name}</Text>
-                      <Text style={s.pPrice}>${Math.round(ag.finalPrice).toLocaleString()}/mo</Text>
+                {((proposal as any).selectedBundle || (proposal as any).packageName) ? (
+                  pricing.agents.map((ag, i) => (
+                    <View key={i} style={{ flexDirection: 'row' as const, alignItems: 'center' as const, marginBottom: 4 }}>
+                      <Text style={{ fontSize: 8, color: BRAND_BLUE, marginRight: 5 }}>✓</Text>
+                      <Text style={{ fontSize: 8, color: G700 }}>{ag.name}</Text>
                     </View>
-                    {(option.discountPercentage > 0 || (option.discountDollar || 0) > 0) && (
-                      <Text style={[s.pStrike, { textAlign: 'right' as const }]}>was ${ag.basePrice.toLocaleString()}/mo</Text>
-                    )}
-                    {!option.discountPercentage && !(option.discountDollar || 0) && anyDiscount && (
-                      <Text style={{ fontSize: 6.5, color: '#ffffff' }}>-</Text>
-                    )}
-                  </View>
-                ))}
+                  ))
+                ) : (
+                  pricing.agents.map((ag, i) => (
+                    <View key={i} style={{ marginBottom: 6 }}>
+                      <View style={s.pAgentRow}>
+                        <Text style={s.pAgentName}>{ag.name}</Text>
+                        <Text style={s.pPrice}>${Math.round(ag.finalPrice).toLocaleString()}/mo</Text>
+                      </View>
+                      {(option.discountPercentage > 0 || (option.discountDollar || 0) > 0) && (
+                        <Text style={[s.pStrike, { textAlign: 'right' as const }]}>was ${ag.basePrice.toLocaleString()}/mo</Text>
+                      )}
+                      {!option.discountPercentage && !(option.discountDollar || 0) && anyDiscount && (
+                        <Text style={{ fontSize: 6.5, color: '#ffffff' }}>-</Text>
+                      )}
+                    </View>
+                  ))
+                )}
 
                 <View style={s.pDivider} />
 
