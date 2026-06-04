@@ -302,10 +302,59 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
       ? proposal.selectedTerms
       : [{ term: proposal.contractTerm, discountPercentage: proposal.discountPercentage || 0 }];
 
-  const termPricings = terms.map(opt => ({
-    option: opt,
-    pricing: calculatePricing(proposal.selectedAgents, opt.term, opt.discountPercentage, opt.discountDollar || 0, (proposal as any).selectedBundle),
-  }));
+  const rawCustomPrice = (proposal as any).customMonthlyPrice as number | Record<string, number> | undefined;
+  const customAgentPrices = (proposal as any).customAgentPrices as Record<string, number> | undefined;
+
+  const termPricings = terms.map(opt => {
+    const pricing = calculatePricing(proposal.selectedAgents, opt.term, opt.discountPercentage, opt.discountDollar || 0, (proposal as any).selectedBundle);
+
+    // Per-agent custom prices take priority (mirrors web view logic)
+    const resolvedAgentPrices: Record<string, number> | null = (() => {
+      if (!customAgentPrices) return null;
+      const termEntry = (customAgentPrices as any)[opt.term];
+      if (termEntry && typeof termEntry === 'object') return termEntry as Record<string, number>;
+      const firstVal = Object.values(customAgentPrices)[0];
+      if (typeof firstVal === 'number') return customAgentPrices as Record<string, number>;
+      return null;
+    })();
+    if (resolvedAgentPrices) {
+      let newTotal = 0;
+      pricing.agents = pricing.agents.map(a => {
+        const customPrice = resolvedAgentPrices[a.agent];
+        if (customPrice !== undefined) {
+          newTotal += customPrice;
+          return { ...a, basePrice: customPrice, finalPrice: customPrice };
+        }
+        newTotal += a.finalPrice;
+        return a;
+      });
+      pricing.total = newTotal;
+      pricing.upfrontTotal = newTotal * pricing.termMonths;
+      pricing.subtotal = newTotal;
+    } else {
+      // Resolve per-term or global custom price
+      const customMonthlyPrice = typeof rawCustomPrice === 'object' && rawCustomPrice !== null
+        ? rawCustomPrice[opt.term]
+        : rawCustomPrice;
+      if (customMonthlyPrice) {
+        const ratio = customMonthlyPrice / pricing.total;
+        pricing.total = customMonthlyPrice;
+        pricing.upfrontTotal = customMonthlyPrice * pricing.termMonths;
+        pricing.subtotal = customMonthlyPrice;
+        pricing.agents = pricing.agents.map(a => ({
+          ...a,
+          basePrice: a.basePrice * ratio,
+          finalPrice: a.finalPrice * ratio,
+        }));
+        if (pricing.agents.length === 1) {
+          pricing.agents[0].finalPrice = customMonthlyPrice;
+          pricing.agents[0].basePrice = customMonthlyPrice;
+        }
+      }
+    }
+
+    return { option: opt, pricing };
+  });
   const isSingleTerm = termPricings.length === 1;
 
   return (
