@@ -230,7 +230,8 @@ export default function ProposalClient({ encodedId, showTerms = false }: { encod
             </div>
           </section>
 
-          {/* Weekly Strategy Meetings */}
+          {/* Weekly Strategy Meetings — only for proposals with weeklyMeetings flag */}
+          {(proposal as any).weeklyMeetings && (
           <section data-pdf-block>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
               <div className="flex items-start">
@@ -248,6 +249,7 @@ export default function ProposalClient({ encodedId, showTerms = false }: { encod
               </div>
             </div>
           </section>
+          )}
 
           {/* Service Scope Sections */}
           {proposal.selectedAgents.map((agent) => {

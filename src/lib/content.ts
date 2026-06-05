@@ -48,7 +48,7 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
         title: "SEO/GEO Agent Services Scope",
         description: "Our SEO/GEO Agent deploys AI directly into your content and search strategy — creating 20-25 optimized pages per month, updating existing content daily, and adapting to algorithm changes in real time. Where traditional agencies review your SEO quarterly, our agents are optimizing every single day.",
         highlights: [
-          "Dedicated Account Manager & Weekly Meetings: You'll work one-on-one with a dedicated SEO/GEO Account Manager with weekly strategy meetings to review performance, discuss goals, and align on priorities.",
+          "Dedicated Account Manager: You'll work one-on-one with a dedicated SEO/GEO Account Manager who reviews performance, discusses goals, and aligns on priorities with your team.",
           "Daily Optimization, Not Monthly Reviews: Our AI agents update and optimize your content every day — adapting to algorithm changes, search trend shifts, and competitor movements as they happen. Traditional agencies check in once a month; we never stop.",
           "20-25 Pages Per Month: Most agencies deliver 4-8 blog posts per month. Our AI content engine produces 20-25 fully optimized pages — building topical authority 3-5x faster than conventional approaches."
         ],
@@ -170,7 +170,7 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
         title: "Paid Ads Agent Services Scope",
         description: "Our Paid Ads Agent deploys AI directly inside your ad accounts — optimizing bids, reallocating budgets, and refreshing creative continuously, not just during weekly check-ins. The result: faster learning, lower cost per qualified lead, and every dollar of your budget working harder than it would at a traditional agency.",
         highlights: [
-          "Dedicated Paid Ads Expert: You'll work one-on-one with a dedicated Paid Ads Expert and Account Manager with weekly strategy meetings to review performance, discuss goals, and align on priorities.",
+          "Dedicated Paid Ads Expert: You'll work one-on-one with a dedicated Paid Ads Expert and Account Manager who reviews performance, discusses goals, and aligns on priorities with your team.",
           "Optimized for CPQL, Not Just CPL: We don't just chase cheap leads. Our AI optimizes for Cost Per Qualified Lead (CPQL) — focusing your budget on the leads that actually convert into revenue, not just form fills.",
           "Always-On Optimization: Our AI agents live inside your ad accounts 24/7 — adjusting bids, shifting budget to top performers, and pausing underperformers in real time. Traditional agencies review campaigns weekly or biweekly. We optimize continuously.",
           "AI-Powered Creative at Zero Extra Cost: Agencies charge $500-$2,000 per ad creative. Our AI generates and tests multiple creative variations at no additional cost — so 100% of your ad budget goes to media spend, not production fees."
@@ -276,7 +276,7 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
         title: "Paid Ads Agent Services Scope",
         description: "Our Paid Ads Agent deploys AI directly inside your ad accounts — optimizing bids, reallocating budgets, and generating fresh creative continuously. For eCommerce, creative volume is everything: Meta's algorithm needs variety to find winners. Our AI produces more creative variations in a week than most agencies produce in a quarter, at zero additional production cost — so every dollar of your ad spend goes to driving revenue.",
         highlights: [
-          "Dedicated Paid Ads Expert: You'll work one-on-one with a dedicated Paid Ads Expert and Account Manager with weekly strategy meetings to review performance, discuss goals, and align on priorities.",
+          "Dedicated Paid Ads Expert: You'll work one-on-one with a dedicated Paid Ads Expert and Account Manager who reviews performance, discusses goals, and aligns on priorities with your team.",
           "Optimized for ROAS & CAC: We don't just chase clicks. Our AI optimizes for Return on Ad Spend (ROAS) and Customer Acquisition Cost (CAC) — focusing your budget on driving profitable revenue, not just traffic.",
           "Always-On Optimization: Our AI agents live inside your ad accounts 24/7 — adjusting bids, shifting budget to top-performing products and audiences, and pausing underperformers in real time. Agencies review campaigns weekly; we never stop.",
           "AI Creative Engine: The #1 reason eCommerce ads decline is creative fatigue. Our AI generates fresh creative variations continuously — testing new hooks, angles, and formats at a pace no human team can match. You get more creative variety AND 100% of your budget goes to media spend, not production fees."
@@ -466,7 +466,7 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
         title: "Conversion Agent Services Scope",
         description: "Our Conversion Agent is your AI-powered lead conversion assistant. It handles inbound calls instantly, qualifies leads automatically, books appointments, nurtures prospects through multi-channel follow-ups, and keeps your pipeline organized — so your team can focus on closing deals instead of chasing admin work. Use MEGA's built-in CRM or connect the agent to your existing system.",
         highlights: [
-          "Dedicated Account Manager: You'll work one-on-one with a dedicated CRM Account Manager with weekly strategy meetings to review pipeline health, optimize workflows, and improve conversion rates.",
+          "Dedicated Account Manager: You'll work one-on-one with a dedicated CRM Account Manager who reviews pipeline health, optimizes workflows, and improves conversion rates with your team.",
           "Works With Your Existing CRM: Already using HubSpot, Salesforce, HighLevel, ServiceTitan, or any CRM with an open API? Our agent integrates seamlessly. Or use MEGA's built-in CRM at no extra cost — either way, every lead is tracked and nothing falls through the cracks.",
           "Ongoing Optimization: Our AI continuously analyzes conversations, bookings, and lost leads to improve scripts, timing, and workflows over time. It gets smarter the longer it runs."
         ],

@@ -417,7 +417,8 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
           ))}
         </View>
 
-        {/* Weekly Strategy Meetings */}
+        {/* Weekly Strategy Meetings — only when flag is set */}
+        {(proposal as any).weeklyMeetings && (
         <View style={{ backgroundColor: BRAND_BLUE_LIGHT, borderWidth: 1, borderColor: BRAND_BLUE_MEDIUM, borderRadius: 8, padding: 14, marginBottom: 16 }} wrap={false}>
           <View style={{ flexDirection: 'row' as const, alignItems: 'flex-start' as const }}>
             <View style={{ width: 28, height: 28, borderRadius: 6, backgroundColor: BRAND_BLUE, marginRight: 10, alignItems: 'center' as const, justifyContent: 'center' as const }}>
@@ -431,6 +432,7 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
             </View>
           </View>
         </View>
+        )}
 
         {/* Why Mega */}
         <Text style={[s.secTitle, { marginTop: 4 }]}>Why Mega</Text>
