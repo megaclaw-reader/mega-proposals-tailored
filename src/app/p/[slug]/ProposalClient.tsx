@@ -8,7 +8,7 @@ import { hasAnyDiscount, getStripeLink, getBundleStripeLink, isBundle3 } from '@
 import { decodeProposal } from '@/lib/encode';
 import { format } from 'date-fns';
 
-export default function ProposalClient({ encodedId, showTerms = false }: { encodedId: string; showTerms?: boolean }) {
+export default function ProposalClient({ encodedId, showTerms = false, customNotes = [] }: { encodedId: string; showTerms?: boolean; customNotes?: string[] }) {
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -597,6 +597,18 @@ export default function ProposalClient({ encodedId, showTerms = false }: { encod
               );
             })()}
           </section>
+
+          {/* Custom Notes (per-proposal extras stored in blob) */}
+          {customNotes && customNotes.length > 0 && (
+            <section data-pdf-block className="border-t-2 border-green-600 pt-8 mt-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">🎁 Special Offer</h2>
+              <ul className="space-y-3">
+                {customNotes.map((note: string, i: number) => (
+                  <li key={`note-${i}`} className="text-gray-700 text-base leading-relaxed pl-2 border-l-4 border-green-500 py-2 bg-green-50 rounded-r-lg px-4" dangerouslySetInnerHTML={{ __html: note }} />
+                ))}
+              </ul>
+            </section>
+          )}
 
           {/* Agreement Terms (when present) */}
           {proposal.agreementSections && proposal.agreementSections.length > 0 && (
