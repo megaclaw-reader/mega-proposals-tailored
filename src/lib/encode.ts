@@ -131,7 +131,7 @@ export function decodeProposal(encoded: string): ProposalConfig | null {
     }
 
     return {
-      id: encoded.slice(0, 12),
+      id: `MEGA-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`,
       customerName: payload.cn,
       companyName: payload.co,
       template: payload.t as Template,
