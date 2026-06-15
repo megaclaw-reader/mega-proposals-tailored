@@ -16,6 +16,7 @@ export default async function ProposalSlugPage({
   let midpointGuarantee = false;
   let customNotes: string[] = [];
   let currency: 'USD' | 'CAD' = 'USD';
+  let currencyRate = 1;
 
   try {
     const { blobs } = await list({ prefix: `proposals/${slug}.json` });
@@ -36,6 +37,7 @@ export default async function ProposalSlugPage({
         midpointGuarantee = data.midpointGuarantee === true;
         customNotes = data.customNotes || [];
         currency = data.currency || 'USD';
+        currencyRate = data.currencyRate || 1;
       }
     }
   } catch (error) {
@@ -46,5 +48,5 @@ export default async function ProposalSlugPage({
     notFound();
   }
 
-  return <ProposalClient encodedId={encodedProposal} showTerms={showTerms} customNotes={customNotes} currency={currency} />;
+  return <ProposalClient encodedId={encodedProposal} showTerms={showTerms} customNotes={customNotes} currency={currency} currencyRate={currencyRate} />;
 }
