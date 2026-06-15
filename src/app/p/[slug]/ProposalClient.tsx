@@ -8,7 +8,9 @@ import { hasAnyDiscount, getStripeLink, getBundleStripeLink, isBundle3 } from '@
 import { decodeProposal } from '@/lib/encode';
 import { format } from 'date-fns';
 
-export default function ProposalClient({ encodedId, showTerms = false, customNotes = [] }: { encodedId: string; showTerms?: boolean; customNotes?: string[] }) {
+export default function ProposalClient({ encodedId, showTerms = false, customNotes = [], currency = 'USD' }: { encodedId: string; showTerms?: boolean; customNotes?: string[]; currency?: 'USD' | 'CAD' }) {
+  const cs = currency === 'CAD' ? 'C$' : '$';
+  const cc = currency;
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -449,11 +451,11 @@ export default function ProposalClient({ encodedId, showTerms = false, customNot
                                   <div className="text-right">
                                     {(option.discountPercentage > 0 || (option.discountDollar || 0) > 0) ? (
                                       <>
-                                        <span className="text-gray-400 line-through text-xs mr-1">${Math.round(agent.basePrice).toLocaleString()}</span>
-                                        <span className="font-semibold text-gray-900">${Math.round(agent.finalPrice).toLocaleString()}/mo</span>
+                                        <span className="text-gray-400 line-through text-xs mr-1">{cs}{Math.round(agent.basePrice).toLocaleString()}</span>
+                                        <span className="font-semibold text-gray-900">{cs}{Math.round(agent.finalPrice).toLocaleString()}/mo</span>
                                       </>
                                     ) : (
-                                      <span className="font-semibold text-gray-900">${Math.round(agent.finalPrice).toLocaleString()}/mo</span>
+                                      <span className="font-semibold text-gray-900">{cs}{Math.round(agent.finalPrice).toLocaleString()}/mo</span>
                                     )}
                                   </div>
                                 </div>
@@ -466,18 +468,18 @@ export default function ProposalClient({ encodedId, showTerms = false, customNot
                           {/* Monthly total */}
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-gray-700 font-medium">Monthly Rate</span>
-                            <span className="text-lg font-bold text-gray-900">${Math.round(pricing.total).toLocaleString()}/mo</span>
+                            <span className="text-lg font-bold text-gray-900">{cs}{Math.round(pricing.total).toLocaleString()}/mo</span>
                           </div>
 
                           {/* Upfront total */}
                           <div className="bg-gray-100 rounded-lg p-4 text-center mt-4">
                             <p className="text-sm text-gray-500 mb-1">{option.term === 'monthly' ? 'Month-to-Month' : 'Total Due Upfront'}</p>
-                            <p className="text-3xl font-bold text-blue-600">${Math.round(pricing.upfrontTotal).toLocaleString()}{option.term === 'monthly' ? '/mo' : ''}</p>
+                            <p className="text-3xl font-bold text-blue-600">{cs}{Math.round(pricing.upfrontTotal).toLocaleString()}{option.term === 'monthly' ? '/mo' : ''}</p>
                             {(option.discountPercentage > 0 || (option.discountDollar || 0) > 0) && (
                               <p className="text-green-600 text-sm mt-1 font-medium">
                                 {option.discountPercentage > 0 && `${option.discountPercentage}% discount`}
                                 {option.discountPercentage > 0 && (option.discountDollar || 0) > 0 && ' + '}
-                                {(option.discountDollar || 0) > 0 && `$${option.discountDollar?.toLocaleString()} discount`}
+                                {(option.discountDollar || 0) > 0 && `${cs}${option.discountDollar?.toLocaleString()} discount`}
                                 {' applied'}
                               </p>
                             )}
@@ -523,7 +525,7 @@ export default function ProposalClient({ encodedId, showTerms = false, customNot
                     return (
                       <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
                         <p className="text-green-800 font-medium">
-                          Save <span className="font-bold">${monthlySavings.toLocaleString()}/mo</span> by choosing {getTermDisplayName(longestTerm.option.term)} over {getTermDisplayName(shortestTerm.option.term)}
+                          Save <span className="font-bold">{cs}{monthlySavings.toLocaleString()}/mo</span> by choosing {getTermDisplayName(longestTerm.option.term)} over {getTermDisplayName(shortestTerm.option.term)}
                         </p>
                       </div>
                     );
@@ -748,10 +750,10 @@ export default function ProposalClient({ encodedId, showTerms = false, customNot
                 <p className="mb-3">All billing concerns or cancellation requests must be addressed directly with us in writing at agents@gomega.ai. Filing a chargeback or payment dispute through your bank without first contacting us constitutes a breach of this Agreement. We reserve the right to suspend or terminate your account and/or pursue legal remedies if you initiate a chargeback in violation of this policy.</p>
                 <h4 className="font-semibold text-gray-800 mb-1">4.6 Website Buyout Plan &amp; Transfer of Ownership</h4>
                 <ul className="list-disc ml-5 space-y-1">
-                  <li>Termination/Buyout within Year 1 (Months 1–12): $6,000.00 USD</li>
-                  <li>Termination/Buyout within Year 2 (Months 13–24): $3,000.00 USD</li>
-                  <li>Termination/Buyout within Year 3 (Months 25–36): $2,000.00 USD</li>
-                  <li>Termination/Buyout after Year 4 (Month 48+): $0.00 USD (Ownership Transfer at no extra cost)</li>
+                  <li>Termination/Buyout within Year 1 (Months 1–12): {cs}6,000.00 {cc}</li>
+                  <li>Termination/Buyout within Year 2 (Months 13–24): {cs}3,000.00 {cc}</li>
+                  <li>Termination/Buyout within Year 3 (Months 25–36): {cs}2,000.00 {cc}</li>
+                  <li>Termination/Buyout after Year 4 (Month 48+): {cs}0.00 {cc} (Ownership Transfer at no extra cost)</li>
                 </ul>
               </div>
 
