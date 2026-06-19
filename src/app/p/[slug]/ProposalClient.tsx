@@ -8,7 +8,7 @@ import { hasAnyDiscount, getStripeLink, getBundleStripeLink, isBundle3 } from '@
 import { decodeProposal } from '@/lib/encode';
 import { format } from 'date-fns';
 
-export default function ProposalClient({ encodedId, showTerms = false, customNotes = [], currency = 'USD', currencyRate = 1 }: { encodedId: string; showTerms?: boolean; customNotes?: string[]; currency?: 'USD' | 'CAD'; currencyRate?: number }) {
+export default function ProposalClient({ encodedId, showTerms = false, customNotes = [], currency = 'USD', currencyRate = 1, customStripeLinks }: { encodedId: string; showTerms?: boolean; customNotes?: string[]; currency?: 'USD' | 'CAD'; currencyRate?: number; customStripeLinks?: Record<string, string> }) {
   const cs = currency === 'CAD' ? 'CA$' : '$';
   const cc = currency;
   const cr = currencyRate;
@@ -492,9 +492,10 @@ export default function ProposalClient({ encodedId, showTerms = false, customNot
                           {!(proposal as any).hideCTA && (
                           <div className="mt-auto pt-6">
                             {(() => {
-                              const stripeUrl = (proposal as any).selectedBundle
-                                ? getBundleStripeLink((proposal as any).selectedBundle, option.term)
-                                : getStripeLink(proposal.selectedAgents, option.term);
+                              const stripeUrl = customStripeLinks?.[option.term]
+                                || ((proposal as any).selectedBundle
+                                  ? getBundleStripeLink((proposal as any).selectedBundle, option.term)
+                                  : getStripeLink(proposal.selectedAgents, option.term));
                               return (
                                 <>
                                   <a

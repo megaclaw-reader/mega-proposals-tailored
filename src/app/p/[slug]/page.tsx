@@ -17,6 +17,7 @@ export default async function ProposalSlugPage({
   let customNotes: string[] = [];
   let currency: 'USD' | 'CAD' = 'USD';
   let currencyRate = 1;
+  let customStripeLinks: Record<string, string> | undefined;
 
   try {
     const { blobs } = await list({ prefix: `proposals/${slug}.json` });
@@ -38,6 +39,7 @@ export default async function ProposalSlugPage({
         customNotes = data.customNotes || [];
         currency = data.currency || 'USD';
         currencyRate = data.currencyRate || 1;
+        customStripeLinks = data.customStripeLinks || undefined;
       }
     }
   } catch (error) {
@@ -48,5 +50,5 @@ export default async function ProposalSlugPage({
     notFound();
   }
 
-  return <ProposalClient encodedId={encodedProposal} showTerms={showTerms} customNotes={customNotes} currency={currency} currencyRate={currencyRate} />;
+  return <ProposalClient encodedId={encodedProposal} showTerms={showTerms} customNotes={customNotes} currency={currency} currencyRate={currencyRate} customStripeLinks={customStripeLinks} />;
 }
