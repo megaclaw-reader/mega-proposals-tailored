@@ -15,6 +15,7 @@ export default async function ProposalSlugPage({
   let guaranteeDays = 30;
   let midpointGuarantee = false;
   let customNotes: string[] = [];
+  let customNotesTitle: string | undefined;
   let currency: 'USD' | 'CAD' = 'USD';
   let currencyRate = 1;
   let customStripeLinks: Record<string, string> | undefined;
@@ -37,6 +38,7 @@ export default async function ProposalSlugPage({
         guaranteeDays = data.guaranteeDays || 30;
         midpointGuarantee = data.midpointGuarantee === true;
         customNotes = data.customNotes || [];
+        customNotesTitle = data.customNotesTitle || undefined;
         currency = data.currency || 'USD';
         currencyRate = data.currencyRate || 1;
         customStripeLinks = data.customStripeLinks || undefined;
@@ -50,5 +52,5 @@ export default async function ProposalSlugPage({
     notFound();
   }
 
-  return <ProposalClient encodedId={encodedProposal} showTerms={showTerms} customNotes={customNotes} currency={currency} currencyRate={currencyRate} customStripeLinks={customStripeLinks} />;
+  return <ProposalClient encodedId={encodedProposal} showTerms={showTerms} customNotes={customNotes} customNotesTitle={customNotesTitle} currency={currency} currencyRate={currencyRate} customStripeLinks={customStripeLinks} />;
 }

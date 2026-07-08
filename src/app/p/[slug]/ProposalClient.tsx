@@ -8,7 +8,7 @@ import { hasAnyDiscount, getStripeLink, getBundleStripeLink, isBundle3 } from '@
 import { decodeProposal } from '@/lib/encode';
 import { format } from 'date-fns';
 
-export default function ProposalClient({ encodedId, showTerms = false, customNotes = [], currency = 'USD', currencyRate = 1, customStripeLinks }: { encodedId: string; showTerms?: boolean; customNotes?: string[]; currency?: 'USD' | 'CAD'; currencyRate?: number; customStripeLinks?: Record<string, string> }) {
+export default function ProposalClient({ encodedId, showTerms = false, customNotes = [], customNotesTitle, currency = 'USD', currencyRate = 1, customStripeLinks }: { encodedId: string; showTerms?: boolean; customNotes?: string[]; customNotesTitle?: string; currency?: 'USD' | 'CAD'; currencyRate?: number; customStripeLinks?: Record<string, string> }) {
   const cs = currency === 'CAD' ? 'CA$' : '$';
   const cc = currency;
   const cr = currencyRate;
@@ -606,11 +606,11 @@ export default function ProposalClient({ encodedId, showTerms = false, customNot
 
           {/* Custom Notes (per-proposal extras stored in blob) */}
           {customNotes && customNotes.length > 0 && (
-            <section data-pdf-block className="border-t-2 border-green-600 pt-8 mt-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">🎁 Special Offer</h2>
+            <section data-pdf-block className={`border-t-2 ${customNotesTitle ? 'border-blue-600' : 'border-green-600'} pt-8 mt-8`}>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">{customNotesTitle || '🎁 Special Offer'}</h2>
               <ul className="space-y-3">
                 {customNotes.map((note: string, i: number) => (
-                  <li key={`note-${i}`} className="text-gray-700 text-base leading-relaxed pl-2 border-l-4 border-green-500 py-2 bg-green-50 rounded-r-lg px-4" dangerouslySetInnerHTML={{ __html: note }} />
+                  <li key={`note-${i}`} className={`text-gray-700 text-base leading-relaxed pl-2 border-l-4 ${customNotesTitle ? 'border-blue-500 bg-blue-50' : 'border-green-500 bg-green-50'} py-2 rounded-r-lg px-4`} dangerouslySetInnerHTML={{ __html: note }} />
                 ))}
               </ul>
             </section>
