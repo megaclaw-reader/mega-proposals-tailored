@@ -8,7 +8,7 @@ import { hasAnyDiscount, getStripeLink, getBundleStripeLink, isBundle3 } from '@
 import { decodeProposal } from '@/lib/encode';
 import { format } from 'date-fns';
 
-export default function ProposalClient({ encodedId, showTerms = false, customNotes = [], customNotesTitle, currency = 'USD', currencyRate = 1, customStripeLinks }: { encodedId: string; showTerms?: boolean; customNotes?: string[]; customNotesTitle?: string; currency?: 'USD' | 'CAD'; currencyRate?: number; customStripeLinks?: Record<string, string> }) {
+export default function ProposalClient({ encodedId, showTerms = false, guaranteeDays = 30, midpointGuarantee = false, customNotes = [], customNotesTitle, currency = 'USD', currencyRate = 1, customStripeLinks }: { encodedId: string; showTerms?: boolean; guaranteeDays?: number; midpointGuarantee?: boolean; customNotes?: string[]; customNotesTitle?: string; currency?: 'USD' | 'CAD'; currencyRate?: number; customStripeLinks?: Record<string, string> }) {
   const cs = currency === 'CAD' ? 'CA$' : '$';
   const cc = currency;
   const cr = currencyRate;
@@ -546,6 +546,38 @@ export default function ProposalClient({ encodedId, showTerms = false, customNot
                     </div>
                   )}
 
+                  {/* Money-Back Guarantee */}
+                  {showTerms && (() => {
+                    const termCount = proposal.selectedTerms?.length || 1;
+                    const planLabel = termCount > 1
+                      ? 'your subscription (regardless of which plan you choose)'
+                      : `your ${proposal.pricing.term === 'monthly' ? 'Monthly' : proposal.pricing.term === 'quarterly' ? 'Quarterly' : proposal.pricing.term === 'bi_annual' ? 'Bi-Annual' : 'Annual'} plan`;
+                    return (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-5 flex items-start">
+                    <span className="text-2xl mr-3 flex-shrink-0">🛡️</span>
+                    <div>
+                      <h4 className="font-semibold text-green-900 mb-1">{guaranteeDays}-Day Money-Back Guarantee</h4>
+                      <p className="text-green-800 text-sm leading-relaxed">
+                        We are offering a {guaranteeDays}-day money-back guarantee on {planLabel}. If you&apos;re not happy with the performance in the first {guaranteeDays === 30 ? 'month' : `${guaranteeDays} days`}, we&apos;re happy to issue a full refund. See the formal addendum below for full details — this guarantee is legally binding and supersedes our standard refund policy.
+                      </p>
+                    </div>
+                  </div>
+                    );
+                  })()}
+
+                  {/* Midpoint Performance Guarantee */}
+                  {midpointGuarantee && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-5 flex items-start">
+                    <span className="text-2xl mr-3 flex-shrink-0">📊</span>
+                    <div>
+                      <h4 className="font-semibold text-green-900 mb-1">6-Month Performance Check-In Guarantee</h4>
+                      <p className="text-green-800 text-sm leading-relaxed">
+                        At the midpoint of your contract, we&apos;ll conduct an in-depth review of results and performance together. If for any reason — whether service-related or results-related — you&apos;re not satisfied, you&apos;ll have the option to cancel and receive a full refund of the remaining 6 months of your term. See the formal addendum below for full details.
+                      </p>
+                    </div>
+                  </div>
+                  )}
+
                   {/* Promo code note — ONLY when discounts exist */}
                   {showPromoNote && (
                     <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
@@ -666,6 +698,82 @@ export default function ProposalClient({ encodedId, showTerms = false, customNot
               ))}
             </>
           )}
+          {/* Addendum — Money-Back Guarantee */}
+          {showTerms && (() => {
+            const termCount = proposal.selectedTerms?.length || 1;
+            const scopeLabel = termCount > 1
+              ? `${proposal.companyName}'s subscription under any selected plan`
+              : `${proposal.companyName}'s ${proposal.pricing.term === 'monthly' ? 'Monthly' : proposal.pricing.term === 'quarterly' ? 'Quarterly' : proposal.pricing.term === 'bi_annual' ? 'Bi-Annual' : 'Annual'} plan subscription`;
+            return (
+          <section data-pdf-block className="border-t-2 border-blue-400 pt-8 mt-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Addendum: {guaranteeDays}-Day Money-Back Guarantee</h2>
+            <p className="text-sm text-gray-500 mb-6">
+              This addendum is specific to {proposal.companyName}&apos;s engagement and supersedes the standard Terms &amp; Conditions where conflicts arise — specifically Section 4.4 (Refund &amp; Credit Policy). Full terms available at <a href="https://www.gomega.ai/legal/terms-of-use" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">gomega.ai/legal/terms-of-use</a>.
+            </p>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-4 text-sm text-gray-800 leading-relaxed">
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">1. Scope</h4>
+                <p>The {guaranteeDays}-Day Money-Back Guarantee applies to {scopeLabel}. This guarantee overrides Section 4.4 of the standard Terms of Use for this account.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">2. Guarantee Window</h4>
+                <p>The {guaranteeDays}-day guarantee period begins on the date onboarding is complete (not the signing date or payment date). The onboarding completion date will be confirmed in writing by your account manager.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">3. How to Invoke</h4>
+                <p>To request a refund under this guarantee, send a written request to <a href="mailto:agents@gomega.ai" className="text-blue-600 underline">agents@gomega.ai</a> within {guaranteeDays} days of the campaign launch date. No reason is required — if you&apos;re not satisfied with performance, the guarantee applies.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">4. Refund Amount &amp; Timeline</h4>
+                <p>The full subscription amount is refundable. The refund will be processed to the original payment method within 10 business days of the written request being received.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">5. Precedence</h4>
+                <p>In the event of any conflict between this addendum and the standard Terms of Use (including but not limited to Sections 4.1, 4.4, and 15), this addendum shall take precedence for {proposal.companyName}&apos;s account.</p>
+              </div>
+            </div>
+          </section>
+            );
+          })()}
+
+          {/* Addendum — Midpoint Performance Guarantee */}
+          {midpointGuarantee && (
+          <section data-pdf-block className="border-t-2 border-blue-400 pt-8 mt-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Addendum: 6-Month Performance Check-In Guarantee</h2>
+            <p className="text-sm text-gray-500 mb-6">
+              This addendum is specific to {proposal.companyName}&apos;s engagement and supersedes the standard Terms &amp; Conditions where conflicts arise — specifically Section 4.4 (Refund &amp; Credit Policy). Full terms available at <a href="https://www.gomega.ai/legal/terms-of-use" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">gomega.ai/legal/terms-of-use</a>.
+            </p>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-4 text-sm text-gray-800 leading-relaxed">
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">1. Scope</h4>
+                <p>The 6-Month Performance Check-In Guarantee applies to {proposal.companyName}&apos;s Annual plan subscription. This guarantee overrides Section 4.4 of the standard Terms of Use for this account.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">2. Midpoint Review</h4>
+                <p>At the 6-month mark of the engagement (measured from the onboarding completion date), MEGA AI and {proposal.companyName} will conduct an in-depth performance review covering all active services, key metrics, and results achieved to date.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">3. Cancellation Right</h4>
+                <p>Following the 6-month performance review, if {proposal.companyName} is not satisfied with the results or service for any reason — whether related to performance, service quality, or any other factor — {proposal.companyName} may elect to cancel the remaining term of the agreement.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">4. Refund Amount &amp; Timeline</h4>
+                <p>If cancellation is elected under this guarantee, MEGA AI will refund the remaining 6 months of the subscription term. The refund will be processed to the original payment method within 10 business days of the written cancellation request.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">5. How to Invoke</h4>
+                <p>To exercise this guarantee, send a written request to <a href="mailto:agents@gomega.ai" className="text-blue-600 underline">agents@gomega.ai</a> within 14 days of the 6-month performance review. No specific reason is required beyond dissatisfaction with results or service.</p>
+              </div>
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-1">6. Precedence</h4>
+                <p>In the event of any conflict between this addendum and the standard Terms of Use (including but not limited to Sections 4.1, 4.4, and 15), this addendum shall take precedence for {proposal.companyName}&apos;s account.</p>
+              </div>
+            </div>
+          </section>
+          )}
+
           {/* Full Terms & Conditions — removed per Julien's request, link in addendum instead */}
           {false && <section data-pdf-block className="border-t-2 border-gray-300 pt-8 mt-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Terms &amp; Conditions</h2>
