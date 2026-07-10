@@ -122,7 +122,7 @@ const BUNDLE_STRIPE_LINKS: Record<Bundle, Record<string, string>> = {
     annual: 'https://buy.stripe.com/7sYeVde8b3Yt8u737xbbG2Y',
   },
   grow_faster: {
-    monthly: 'https://buy.stripe.com/8x2bJ15BFgLf25J6jJbbG30',
+    monthly: 'https://buy.stripe.com/fZufZh0hl52xcKneQfbbG2Z',
     quarterly: 'https://buy.stripe.com/8x2bJ15BFgLf25J6jJbbG30',
     bi_annual: 'https://buy.stripe.com/9B6fZhe8bamR39NbE3bbG31',
     annual: 'https://buy.stripe.com/7sYbJ1fcfgLffWz23tbbG32',
