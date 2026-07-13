@@ -8,7 +8,7 @@ import { hasAnyDiscount, getStripeLink, getBundleStripeLink, isBundle3 } from '@
 import { decodeProposal } from '@/lib/encode';
 import { format } from 'date-fns';
 
-export default function ProposalClient({ encodedId, showTerms = false, guaranteeDays = 30, midpointGuarantee = false, customNotes = [], customNotesTitle, currency = 'USD', currencyRate = 1, customStripeLinks }: { encodedId: string; showTerms?: boolean; guaranteeDays?: number; midpointGuarantee?: boolean; customNotes?: string[]; customNotesTitle?: string; currency?: 'USD' | 'CAD'; currencyRate?: number; customStripeLinks?: Record<string, string> }) {
+export default function ProposalClient({ encodedId, showTerms = false, guaranteeDays = 30, midpointGuarantee = false, guaranteePlans, customNotes = [], customNotesTitle, currency = 'USD', currencyRate = 1, customStripeLinks }: { encodedId: string; showTerms?: boolean; guaranteeDays?: number; midpointGuarantee?: boolean; guaranteePlans?: string[]; customNotes?: string[]; customNotesTitle?: string; currency?: 'USD' | 'CAD'; currencyRate?: number; customStripeLinks?: Record<string, string> }) {
   const cs = currency === 'CAD' ? 'CA$' : '$';
   const cc = currency;
   const cr = currencyRate;
@@ -548,17 +548,22 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
 
                   {/* Money-Back Guarantee */}
                   {showTerms && (() => {
-                    const termCount = proposal.selectedTerms?.length || 1;
-                    const planLabel = termCount > 1
-                      ? 'your subscription (regardless of which plan you choose)'
-                      : `your ${proposal.pricing.term === 'monthly' ? 'Monthly' : proposal.pricing.term === 'quarterly' ? 'Quarterly' : proposal.pricing.term === 'bi_annual' ? 'Bi-Annual' : 'Annual'} plan`;
+                    const termNameMap: Record<string, string> = { monthly: 'Monthly', quarterly: 'Quarterly', bi_annual: 'Bi-Annual', annual: 'Annual' };
+                    const planLabel = guaranteePlans && guaranteePlans.length > 0
+                      ? guaranteePlans.map(p => termNameMap[p] || p).join(' or ')
+                      : (proposal.selectedTerms?.length || 1) > 1
+                        ? 'your subscription (regardless of which plan you choose)'
+                        : `your ${termNameMap[proposal.pricing.term] || proposal.pricing.term} plan`;
+                    const planRestriction = guaranteePlans && guaranteePlans.length > 0
+                      ? ` This guarantee applies exclusively to the ${guaranteePlans.map(p => termNameMap[p] || p).join(' and ')} plan${guaranteePlans.length > 1 ? 's' : ''}.`
+                      : '';
                     return (
                   <div className="bg-green-50 border border-green-200 rounded-lg p-5 flex items-start">
                     <span className="text-2xl mr-3 flex-shrink-0">🛡️</span>
                     <div>
-                      <h4 className="font-semibold text-green-900 mb-1">{guaranteeDays}-Day Money-Back Guarantee</h4>
+                      <h4 className="font-semibold text-green-900 mb-1">{guaranteeDays}-Day Money-Back Guarantee{guaranteePlans ? ` — ${guaranteePlans.map(p => termNameMap[p] || p).join(' & ')} Plans` : ''}</h4>
                       <p className="text-green-800 text-sm leading-relaxed">
-                        We are offering a {guaranteeDays}-day money-back guarantee on {planLabel}. If you&apos;re not happy with the performance in the first {guaranteeDays === 30 ? 'month' : `${guaranteeDays} days`}, we&apos;re happy to issue a full refund. See the formal addendum below for full details — this guarantee is legally binding and supersedes our standard refund policy.
+                        We are offering a {guaranteeDays}-day money-back guarantee on {planLabel}. If you&apos;re not happy with the performance in the first {guaranteeDays === 30 ? 'month' : `${guaranteeDays} days`}, we&apos;re happy to issue a full refund.{planRestriction} See the formal addendum below for full details — this guarantee is legally binding and supersedes our standard refund policy.
                       </p>
                     </div>
                   </div>
@@ -570,9 +575,9 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                   <div className="bg-green-50 border border-green-200 rounded-lg p-5 flex items-start">
                     <span className="text-2xl mr-3 flex-shrink-0">📊</span>
                     <div>
-                      <h4 className="font-semibold text-green-900 mb-1">6-Month Performance Check-In Guarantee</h4>
+                      <h4 className="font-semibold text-green-900 mb-1">6-Month Performance Reevaluation — Annual Plan</h4>
                       <p className="text-green-800 text-sm leading-relaxed">
-                        At the midpoint of your contract, we&apos;ll conduct an in-depth review of results and performance together. If for any reason — whether service-related or results-related — you&apos;re not satisfied, you&apos;ll have the option to cancel and receive a full refund of the remaining 6 months of your term. See the formal addendum below for full details.
+                        For the Annual plan, at the 6-month mark we&apos;ll conduct an in-depth review of results and performance together. If for any reason — whether service-related or results-related — you&apos;re not satisfied, you&apos;ll have the option to cancel and receive a full refund of the remaining 6 months of your term. This guarantee applies exclusively to the Annual plan. See the formal addendum below for full details.
                       </p>
                     </div>
                   </div>
@@ -700,13 +705,15 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
           )}
           {/* Addendum — Money-Back Guarantee */}
           {showTerms && (() => {
-            const termCount = proposal.selectedTerms?.length || 1;
-            const scopeLabel = termCount > 1
-              ? `${proposal.companyName}'s subscription under any selected plan`
-              : `${proposal.companyName}'s ${proposal.pricing.term === 'monthly' ? 'Monthly' : proposal.pricing.term === 'quarterly' ? 'Quarterly' : proposal.pricing.term === 'bi_annual' ? 'Bi-Annual' : 'Annual'} plan subscription`;
+            const termNameMap2: Record<string, string> = { monthly: 'Monthly', quarterly: 'Quarterly', bi_annual: 'Bi-Annual', annual: 'Annual' };
+            const scopeLabel = guaranteePlans && guaranteePlans.length > 0
+              ? `${proposal.companyName}'s ${guaranteePlans.map(p => termNameMap2[p] || p).join(' and ')} plan subscription${guaranteePlans.length > 1 ? 's' : ''}`
+              : (proposal.selectedTerms?.length || 1) > 1
+                ? `${proposal.companyName}'s subscription under any selected plan`
+                : `${proposal.companyName}'s ${termNameMap2[proposal.pricing.term] || proposal.pricing.term} plan subscription`;
             return (
           <section data-pdf-block className="border-t-2 border-blue-400 pt-8 mt-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Addendum: {guaranteeDays}-Day Money-Back Guarantee</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Addendum: {guaranteeDays}-Day Money-Back Guarantee{guaranteePlans ? ` — ${guaranteePlans.map(p => termNameMap2[p] || p).join(' & ')} Plans` : ''}</h2>
             <p className="text-sm text-gray-500 mb-6">
               This addendum is specific to {proposal.companyName}&apos;s engagement and supersedes the standard Terms &amp; Conditions where conflicts arise — specifically Section 4.4 (Refund &amp; Credit Policy). Full terms available at <a href="https://www.gomega.ai/legal/terms-of-use" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">gomega.ai/legal/terms-of-use</a>.
             </p>
@@ -740,7 +747,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
           {/* Addendum — Midpoint Performance Guarantee */}
           {midpointGuarantee && (
           <section data-pdf-block className="border-t-2 border-blue-400 pt-8 mt-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Addendum: 6-Month Performance Check-In Guarantee</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Addendum: 6-Month Performance Reevaluation — Annual Plan</h2>
             <p className="text-sm text-gray-500 mb-6">
               This addendum is specific to {proposal.companyName}&apos;s engagement and supersedes the standard Terms &amp; Conditions where conflicts arise — specifically Section 4.4 (Refund &amp; Credit Policy). Full terms available at <a href="https://www.gomega.ai/legal/terms-of-use" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">gomega.ai/legal/terms-of-use</a>.
             </p>
