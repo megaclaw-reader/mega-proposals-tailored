@@ -372,19 +372,37 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                   return null;
                 })();
                 if (resolvedAgentPrices) {
-                  let newTotal = 0;
+                  let baseTotal = 0;
+                  const discPct = opt.discountPercentage || 0;
+                  const discDollar = opt.discountDollar || 0;
                   pricing.agents = pricing.agents.map(a => {
                     const customPrice = resolvedAgentPrices[a.agent];
                     if (customPrice !== undefined) {
-                      newTotal += customPrice;
+                      baseTotal += customPrice;
                       return { ...a, basePrice: customPrice, finalPrice: customPrice };
                     }
-                    newTotal += a.finalPrice;
+                    baseTotal += a.finalPrice;
                     return a;
                   });
-                  pricing.total = newTotal;
-                  pricing.upfrontTotal = newTotal * pricing.termMonths;
-                  pricing.subtotal = newTotal;
+                  // Apply term discount on top of custom base prices
+                  if (discPct > 0 || discDollar > 0) {
+                    const baseUpfront = baseTotal * pricing.termMonths;
+                    const afterPct = baseUpfront * (1 - discPct / 100);
+                    const afterDollar = afterPct - Math.min(discDollar, afterPct);
+                    const discountedMonthly = afterDollar / pricing.termMonths;
+                    const ratio = baseTotal > 0 ? discountedMonthly / baseTotal : 1;
+                    pricing.agents = pricing.agents.map(a => ({
+                      ...a,
+                      finalPrice: a.basePrice * ratio,
+                    }));
+                    pricing.total = discountedMonthly;
+                    pricing.upfrontTotal = afterDollar;
+                    pricing.subtotal = baseTotal;
+                  } else {
+                    pricing.total = baseTotal;
+                    pricing.upfrontTotal = baseTotal * pricing.termMonths;
+                    pricing.subtotal = baseTotal;
+                  }
                 } else {
                 // Resolve per-term or global custom price
                 const customMonthlyPrice = typeof rawCustomPrice === 'object' && rawCustomPrice !== null
