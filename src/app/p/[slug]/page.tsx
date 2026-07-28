@@ -20,6 +20,9 @@ export default async function ProposalSlugPage({
   let currency: 'USD' | 'CAD' = 'USD';
   let currencyRate = 1;
   let customStripeLinks: Record<string, string> | undefined;
+  let customAddendum: Array<{ title: string; body: string }> | undefined;
+  let customAddendumTitle: string | undefined;
+  let customAddendumSubtitle: string | undefined;
 
   try {
     const { blobs } = await list({ prefix: `proposals/${slug}.json` });
@@ -44,6 +47,9 @@ export default async function ProposalSlugPage({
         currency = data.currency || 'USD';
         currencyRate = data.currencyRate || 1;
         customStripeLinks = data.customStripeLinks || undefined;
+        customAddendum = data.customAddendum || undefined;
+        customAddendumTitle = data.customAddendumTitle || undefined;
+        customAddendumSubtitle = data.customAddendumSubtitle || undefined;
       }
     }
   } catch (error) {
@@ -54,5 +60,5 @@ export default async function ProposalSlugPage({
     notFound();
   }
 
-  return <ProposalClient encodedId={encodedProposal} showTerms={showTerms} guaranteeDays={guaranteeDays} midpointGuarantee={midpointGuarantee} guaranteePlans={guaranteePlans} customNotes={customNotes} customNotesTitle={customNotesTitle} currency={currency} currencyRate={currencyRate} customStripeLinks={customStripeLinks} />;
+  return <ProposalClient encodedId={encodedProposal} showTerms={showTerms} guaranteeDays={guaranteeDays} midpointGuarantee={midpointGuarantee} guaranteePlans={guaranteePlans} customNotes={customNotes} customNotesTitle={customNotesTitle} currency={currency} currencyRate={currencyRate} customStripeLinks={customStripeLinks} customAddendum={customAddendum} customAddendumTitle={customAddendumTitle} customAddendumSubtitle={customAddendumSubtitle} />;
 }

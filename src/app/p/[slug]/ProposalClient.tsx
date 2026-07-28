@@ -8,7 +8,7 @@ import { hasAnyDiscount, getStripeLink, getBundleStripeLink, isBundle3 } from '@
 import { decodeProposal } from '@/lib/encode';
 import { format } from 'date-fns';
 
-export default function ProposalClient({ encodedId, showTerms = false, guaranteeDays = 30, midpointGuarantee = false, guaranteePlans, customNotes = [], customNotesTitle, currency = 'USD', currencyRate = 1, customStripeLinks }: { encodedId: string; showTerms?: boolean; guaranteeDays?: number; midpointGuarantee?: boolean; guaranteePlans?: string[]; customNotes?: string[]; customNotesTitle?: string; currency?: 'USD' | 'CAD'; currencyRate?: number; customStripeLinks?: Record<string, string> }) {
+export default function ProposalClient({ encodedId, showTerms = false, guaranteeDays = 30, midpointGuarantee = false, guaranteePlans, customNotes = [], customNotesTitle, currency = 'USD', currencyRate = 1, customStripeLinks, customAddendum, customAddendumTitle, customAddendumSubtitle }: { encodedId: string; showTerms?: boolean; guaranteeDays?: number; midpointGuarantee?: boolean; guaranteePlans?: string[]; customNotes?: string[]; customNotesTitle?: string; currency?: 'USD' | 'CAD'; currencyRate?: number; customStripeLinks?: Record<string, string>; customAddendum?: Array<{ title: string; body: string }>; customAddendumTitle?: string; customAddendumSubtitle?: string }) {
   const cs = currency === 'CAD' ? 'CA$' : '$';
   const cc = currency;
   const cr = currencyRate;
@@ -729,6 +729,32 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
               : (proposal.selectedTerms?.length || 1) > 1
                 ? `${proposal.companyName}'s subscription under any selected plan`
                 : `${proposal.companyName}'s ${termNameMap2[proposal.pricing.term] || proposal.pricing.term} plan subscription`;
+
+            // Custom addendum overrides the default hardcoded one
+            if (customAddendum && customAddendum.length > 0) {
+              return (
+                <section data-pdf-block className="border-t-2 border-blue-400 pt-8 mt-12">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">{customAddendumTitle || `Addendum: ${guaranteeDays}-Day Money-Back Guarantee`}</h2>
+                  {customAddendumSubtitle && (
+                    <p className="text-sm text-gray-500 mb-6">{customAddendumSubtitle}</p>
+                  )}
+                  {!customAddendumSubtitle && (
+                    <p className="text-sm text-gray-500 mb-6">
+                      This addendum is specific to {proposal.companyName}&apos;s engagement and supersedes the standard Terms &amp; Conditions where conflicts arise. Full terms available at <a href="https://www.gomega.ai/legal/terms-of-use" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">gomega.ai/legal/terms-of-use</a>.
+                    </p>
+                  )}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-4 text-sm text-gray-800 leading-relaxed">
+                    {customAddendum.map((section, idx) => (
+                      <div key={idx}>
+                        <h4 className="font-semibold text-gray-900 mb-1">{section.title}</h4>
+                        <p dangerouslySetInnerHTML={{ __html: section.body }} />
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              );
+            }
+
             return (
           <section data-pdf-block className="border-t-2 border-blue-400 pt-8 mt-12">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Addendum: {guaranteeDays}-Day Money-Back Guarantee{guaranteePlans ? ` — ${guaranteePlans.map(p => termNameMap2[p] || p).join(' & ')} Plans` : ''}</h2>
