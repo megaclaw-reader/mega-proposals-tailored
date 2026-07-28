@@ -158,6 +158,7 @@ export function decodeProposal(encoded: string): ProposalConfig | null {
       investmentNote: payload.invn || undefined,
       packageName: payload.pkn || undefined,
       selectedBundle: payload.sb || undefined,
+      legalEntityName: payload.len || undefined,
     } as any;
   } catch {
     return null;

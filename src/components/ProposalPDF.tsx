@@ -702,6 +702,14 @@ export function ProposalPDF({ proposal, showTerms = false, guaranteeDays = 30, c
             {/* MEGA AI signature */}
             <View>
               <Text style={[s.body, { fontWeight: 600, marginBottom: 8 }]}>MEGA AI</Text>
+              {(proposal as any).legalEntityName && (
+                <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                  <Text style={[s.body, { width: 80 }]}>Legal Entity:</Text>
+                  <View style={{ flex: 1, borderBottomWidth: 0.75, borderBottomColor: G400, paddingBottom: 2 }}>
+                    <Text style={s.body}>{(proposal as any).legalEntityName}</Text>
+                  </View>
+                </View>
+              )}
               <View style={{ flexDirection: 'row', marginBottom: 6 }}>
                 <Text style={[s.body, { width: 80 }]}>Name:</Text>
                 <View style={{ flex: 1, borderBottomWidth: 0.75, borderBottomColor: G400, paddingBottom: 2 }}>
