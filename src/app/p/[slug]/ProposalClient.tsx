@@ -42,7 +42,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
       const { ProposalPDF } = await import('@/components/ProposalPDF');
       const React = await import('react');
 
-      const doc = React.createElement(ProposalPDF, { proposal }) as any;
+      const doc = React.createElement(ProposalPDF, { proposal, showTerms, guaranteeDays, customAddendum, customAddendumTitle } as any) as any;
       const blob = await pdf(doc).toBlob();
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');

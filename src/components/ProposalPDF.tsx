@@ -296,7 +296,7 @@ function TailoredAssessment({ insights, companyName }: { insights: FirefliesInsi
   );
 }
 
-export function ProposalPDF({ proposal }: { proposal: Proposal }) {
+export function ProposalPDF({ proposal, showTerms = false, guaranteeDays = 30, customAddendum, customAddendumTitle }: { proposal: Proposal; showTerms?: boolean; guaranteeDays?: number; customAddendum?: Array<{ title: string; body: string }>; customAddendumTitle?: string }) {
   const terms: TermOption[] =
     proposal.selectedTerms && proposal.selectedTerms.length > 0
       ? proposal.selectedTerms
@@ -577,6 +577,51 @@ export function ProposalPDF({ proposal }: { proposal: Proposal }) {
           </Text>
         </View>
       </Page>
+
+      {/* ===== MONEY-BACK GUARANTEE ADDENDUM ===== */}
+      {showTerms && (
+        <Page size="LETTER" style={s.page} wrap>
+          <Footer />
+          <Text style={s.secTitle}>{customAddendumTitle || `Addendum: ${guaranteeDays}-Day Money-Back Guarantee`}</Text>
+          <View style={s.secBar} />
+          <Text style={[s.body, { color: '#6b7280', marginBottom: 14, fontSize: 8 }]}>
+            This addendum is specific to {proposal.companyName}&apos;s engagement and supersedes the standard Terms &amp; Conditions where conflicts arise. Full terms available at gomega.ai/legal/terms-of-use.
+          </Text>
+          <View style={{ backgroundColor: '#eff6ff', borderRadius: 4, borderWidth: 0.5, borderColor: '#bfdbfe', padding: 14 }}>
+            {customAddendum && customAddendum.length > 0 ? (
+              customAddendum.map((section, idx) => (
+                <View key={idx} style={{ marginBottom: idx < customAddendum.length - 1 ? 10 : 0 }}>
+                  <Text style={[s.body, { fontWeight: 600, marginBottom: 3 }]}>{section.title}</Text>
+                  <Text style={s.body}>{section.body.replace(/<[^>]*>/g, '')}</Text>
+                </View>
+              ))
+            ) : (
+              <>
+                <View style={{ marginBottom: 10 }}>
+                  <Text style={[s.body, { fontWeight: 600, marginBottom: 3 }]}>1. Scope</Text>
+                  <Text style={s.body}>The {guaranteeDays}-Day Money-Back Guarantee applies to {proposal.companyName}&apos;s subscription. This guarantee overrides Section 4.4 of the standard Terms of Use for this account.</Text>
+                </View>
+                <View style={{ marginBottom: 10 }}>
+                  <Text style={[s.body, { fontWeight: 600, marginBottom: 3 }]}>2. Guarantee Window</Text>
+                  <Text style={s.body}>The {guaranteeDays}-day guarantee period begins on the date onboarding is complete (not the signing date or payment date). The onboarding completion date will be confirmed in writing by your account manager.</Text>
+                </View>
+                <View style={{ marginBottom: 10 }}>
+                  <Text style={[s.body, { fontWeight: 600, marginBottom: 3 }]}>3. How to Invoke</Text>
+                  <Text style={s.body}>To request a refund under this guarantee, send a written request to agents@gomega.ai within {guaranteeDays} days of the campaign launch date. No reason is required — if you&apos;re not satisfied with performance, the guarantee applies.</Text>
+                </View>
+                <View style={{ marginBottom: 10 }}>
+                  <Text style={[s.body, { fontWeight: 600, marginBottom: 3 }]}>4. Refund Amount &amp; Timeline</Text>
+                  <Text style={s.body}>The full subscription amount is refundable. The refund will be processed to the original payment method within 10 business days of the written request being received.</Text>
+                </View>
+                <View>
+                  <Text style={[s.body, { fontWeight: 600, marginBottom: 3 }]}>5. Precedence</Text>
+                  <Text style={s.body}>In the event of any conflict between this addendum and the standard Terms of Use (including but not limited to Sections 4.1, 4.4, and 15), this addendum shall take precedence for {proposal.companyName}&apos;s account.</Text>
+                </View>
+              </>
+            )}
+          </View>
+        </Page>
+      )}
 
       {/* ===== AGREEMENT TERMS (when present) ===== */}
       {proposal.agreementSections && proposal.agreementSections.length > 0 && (
