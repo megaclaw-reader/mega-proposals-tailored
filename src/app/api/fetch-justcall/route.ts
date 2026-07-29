@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+export const maxDuration = 30;
+
 /**
  * Fetches JustCall call transcript from a shared voice link.
  * Extracts the token from the URL and calls the JustCall transcript API.

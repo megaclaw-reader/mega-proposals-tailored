@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { FirefliesInsights } from '@/lib/types';
 
+export const maxDuration = 60;
+
 const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 export async function POST(request: NextRequest) {

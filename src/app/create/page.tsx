@@ -48,7 +48,7 @@ export default function CreateProposal() {
   });
   const [guarantee, setGuarantee] = useState<'none' | '30' | '60'>('none');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [analysisStatus, setAnalysisStatus] = useState<'idle' | 'fetching' | 'analyzing' | 'done'>('idle');
+  const [analysisStatus, setAnalysisStatus] = useState<'idle' | 'fetching' | 'analyzing' | 'done' | 'error'>('idle');
   const [generatedLinks, setGeneratedLinks] = useState<{ share: string; edit: string } | null>(null);
 
   const fetchTranscript = useCallback(async (index: number, url: string) => {
@@ -262,10 +262,17 @@ export default function CreateProposal() {
               const { insights } = await analyzeRes.json();
               firefliesInsights = insights;
               setAnalysisStatus('done');
+            } else {
+              const errData = await analyzeRes.json().catch(() => ({ error: `HTTP ${analyzeRes.status}` }));
+              console.error('Analyze transcript failed:', errData);
+              setAnalysisStatus('error');
+              alert(`⚠️ Transcript analysis returned an error: ${errData.error || analyzeRes.status}. The proposal will be created without tailored insights.`);
             }
           }
         } catch (err) {
-          console.warn('Transcript analysis error:', err);
+          console.error('Transcript analysis error:', err);
+          setAnalysisStatus('error');
+          alert(`⚠️ Transcript analysis failed: ${err instanceof Error ? err.message : 'Unknown error'}. The proposal will be created without tailored insights. You can try again.`);
         }
       }
 
