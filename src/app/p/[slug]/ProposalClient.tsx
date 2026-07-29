@@ -495,7 +495,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                           {/* Upfront total */}
                           <div className="bg-gray-100 rounded-lg p-4 text-center mt-4">
                             <p className="text-sm text-gray-500 mb-1">{option.term === 'monthly' ? 'Month-to-Month' : 'Total Due Upfront'}</p>
-                            <p className="text-3xl font-bold text-blue-600">{cs}{fp2(pricing.upfrontTotal)}{option.term === 'monthly' ? '/mo' : ''}</p>
+                            <p className="text-3xl font-bold text-blue-600">{cs}{fp2(pricing.upfrontTotal)}</p>
                             {(option.discountPercentage > 0 || (option.discountDollar || 0) > 0) && (
                               <p className="text-green-600 text-sm mt-1 font-medium">
                                 {option.discountPercentage > 0 && `${option.discountPercentage}% discount`}
