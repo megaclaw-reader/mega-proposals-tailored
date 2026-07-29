@@ -16,6 +16,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Truncate very long transcripts to avoid API timeouts
+    // Keep first 18K + last 4K chars to preserve beginning context and closing discussion
+    let processedTranscript = transcriptSummary;
+    if (processedTranscript.length > 22000) {
+      console.log(`Truncating transcript from ${processedTranscript.length} to ~22K chars`);
+      processedTranscript = processedTranscript.slice(0, 18000) 
+        + '\n\n[... middle of conversation condensed ...]\n\n' 
+        + processedTranscript.slice(-4000);
+    }
+
     if (!ANTHROPIC_API_KEY) {
       console.error('ANTHROPIC_API_KEY not configured');
       return NextResponse.json(
@@ -54,7 +64,7 @@ Selected services: ${selectedServices}${excludeNote}
 ${sourceDescription}
 
 --- START TRANSCRIPT DATA ---
-${transcriptSummary}
+${processedTranscript}
 --- END TRANSCRIPT DATA ---
 
 Your job: Extract the MOST SPECIFIC, CONCRETE insights from these transcripts. Generic marketing speak = failure. Every point must reference something the prospect actually said, their specific situation, or their industry reality.
