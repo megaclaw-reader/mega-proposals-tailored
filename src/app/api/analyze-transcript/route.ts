@@ -17,10 +17,11 @@ export async function POST(request: NextRequest) {
     }
 
     if (!ANTHROPIC_API_KEY) {
-      console.warn('ANTHROPIC_API_KEY not configured, using fallback');
-      return NextResponse.json({
-        insights: extractInsightsFallback(transcriptSummary)
-      });
+      console.error('ANTHROPIC_API_KEY not configured');
+      return NextResponse.json(
+        { error: 'AI analysis not configured (missing API key)' },
+        { status: 500 }
+      );
     }
 
     const sourceDescription = sourceType === 'justcall'
@@ -142,24 +143,29 @@ Respond with ONLY the JSON object.`;
 
     if (!data) {
       console.error('All Anthropic API attempts failed:', lastError);
-      return NextResponse.json({
-        insights: extractInsightsFallback(transcriptSummary),
-      });
+      return NextResponse.json(
+        { error: `AI analysis failed after retries: ${lastError}` },
+        { status: 502 }
+      );
     }
     const analysisText = data.content?.[0]?.text;
 
     if (!analysisText) {
-      return NextResponse.json({
-        insights: extractInsightsFallback(transcriptSummary)
-      });
+      console.error('Anthropic returned empty analysis text');
+      return NextResponse.json(
+        { error: 'AI returned empty response' },
+        { status: 502 }
+      );
     }
 
     // Parse JSON from Claude's response
     const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      return NextResponse.json({
-        insights: extractInsightsFallback(transcriptSummary)
-      });
+      console.error('Could not parse JSON from analysis:', analysisText.substring(0, 200));
+      return NextResponse.json(
+        { error: 'AI response format error — could not parse insights' },
+        { status: 502 }
+      );
     }
 
     const insights: FirefliesInsights = JSON.parse(jsonMatch[0]);

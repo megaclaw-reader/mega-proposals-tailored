@@ -260,8 +260,15 @@ export default function CreateProposal() {
             });
             if (analyzeRes.ok) {
               const { insights } = await analyzeRes.json();
-              firefliesInsights = insights;
-              setAnalysisStatus('done');
+              // Only use insights if they actually contain content (not empty fallback)
+              if (insights && insights.painPoints?.length > 0 && insights.summary) {
+                firefliesInsights = insights;
+                setAnalysisStatus('done');
+              } else {
+                console.warn('Analysis returned empty insights — transcript may not have been processed');
+                setAnalysisStatus('error');
+                alert('⚠️ The transcript was fetched but the AI analysis returned empty results. The proposal will be created without tailored insights. Try creating it again — this is usually a one-time issue.');
+              }
             } else {
               const errData = await analyzeRes.json().catch(() => ({ error: `HTTP ${analyzeRes.status}` }));
               console.error('Analyze transcript failed:', errData);
