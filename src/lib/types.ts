@@ -1,6 +1,6 @@
 export type Agent = 'seo' | 'paid_ads' | 'website' | 'crm';
 
-export type Bundle = 'convert' | 'grow' | 'grow_faster';
+export type Bundle = 'convert' | 'grow' | 'grow_faster' | 'grow_faster_ecom';
 
 export const BUNDLE_DEFINITIONS: Record<Bundle, { name: string; agents: Agent[]; description: string }> = {
   convert: {
@@ -17,6 +17,11 @@ export const BUNDLE_DEFINITIONS: Record<Bundle, { name: string; agents: Agent[];
     name: 'Grow Faster',
     agents: ['crm', 'website', 'seo', 'paid_ads'],
     description: 'Conversion + Website + SEO + Ads',
+  },
+  grow_faster_ecom: {
+    name: 'Grow Faster',
+    agents: ['website', 'seo', 'paid_ads'],
+    description: 'Website + SEO + Ads (eCommerce)',
   },
 };
 

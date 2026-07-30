@@ -115,6 +115,22 @@ export default function CreateProposal() {
     setJustcallEntries(prev => prev.map((e, i) => i === index ? { ...e, url } : e));
   };
 
+  const handleTemplateChange = (template: Template) => {
+    setFormData(prev => {
+      let newBundle = prev.selectedBundle;
+      let newAgents = prev.selectedAgents;
+      // Swap grow_faster variants when template changes
+      if (template === 'ecom' && prev.selectedBundle === 'grow_faster') {
+        newBundle = 'grow_faster_ecom' as Bundle;
+        newAgents = [...BUNDLE_DEFINITIONS[newBundle].agents];
+      } else if (template === 'leads' && prev.selectedBundle === ('grow_faster_ecom' as Bundle)) {
+        newBundle = 'grow_faster';
+        newAgents = [...BUNDLE_DEFINITIONS[newBundle].agents];
+      }
+      return { ...prev, template, selectedBundle: newBundle, selectedAgents: newAgents };
+    });
+  };
+
   const handleBundleSelect = (bundle: Bundle | undefined) => {
     if (bundle) {
       const bundleDef = BUNDLE_DEFINITIONS[bundle];
@@ -529,13 +545,13 @@ export default function CreateProposal() {
               <div className="space-y-2">
                 <label className="flex items-center">
                   <input type="radio" name="template" value="leads" checked={formData.template === 'leads'}
-                    onChange={(e) => setFormData(prev => ({ ...prev, template: e.target.value as Template }))}
+                    onChange={() => handleTemplateChange('leads')}
                     className="mr-2 text-blue-600" />
                   <span>Leads-based (Optimized for lead generation)</span>
                 </label>
                 <label className="flex items-center">
                   <input type="radio" name="template" value="ecom" checked={formData.template === 'ecom'}
-                    onChange={(e) => setFormData(prev => ({ ...prev, template: e.target.value as Template }))}
+                    onChange={() => handleTemplateChange('ecom')}
                     className="mr-2 text-blue-600" />
                   <span>eCom-based (Optimized for eCommerce)</span>
                 </label>
@@ -561,7 +577,9 @@ export default function CreateProposal() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">Quick Select a Bundle</label>
               <div className="grid grid-cols-3 gap-3 mb-4">
-                {(['convert', 'grow', 'grow_faster'] as Bundle[]).map(bundle => {
+                {((formData.template === 'ecom'
+                  ? ['convert', 'grow', 'grow_faster_ecom']
+                  : ['convert', 'grow', 'grow_faster']) as Bundle[]).map(bundle => {
                   const def = BUNDLE_DEFINITIONS[bundle];
                   const isSelected = formData.selectedBundle === bundle;
                   return (

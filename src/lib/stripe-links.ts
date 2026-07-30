@@ -127,6 +127,12 @@ const BUNDLE_STRIPE_LINKS: Record<Bundle, Record<string, string>> = {
     bi_annual: 'https://buy.stripe.com/9B6fZhe8bamR39NbE3bbG31',
     annual: 'https://buy.stripe.com/7sYbJ1fcfgLffWz23tbbG32',
   },
+  grow_faster_ecom: {
+    monthly: 'https://buy.stripe.com/3cI14nc03eD725J23tbbG3w',
+    quarterly: 'https://buy.stripe.com/3cI14n1lp3YtbGjdMbbbG3x',
+    bi_annual: 'https://buy.stripe.com/bJeaEXaVZ7aFh0D9vVbbG3y',
+    annual: 'https://buy.stripe.com/28EcN54xB9iNcKneQfbbG3z',
+  },
 };
 
 /**
