@@ -21,6 +21,7 @@ const BUNDLE_PRICING: Record<string, Record<ContractTerm, number>> = {
   convert: { monthly: 959, quarterly: 799, bi_annual: 769, annual: 669 },
   grow: { monthly: 1619, quarterly: 1349, bi_annual: 1295, annual: 1099 },
   grow_faster: { monthly: 2399, quarterly: 1999, bi_annual: 1899, annual: 1679 },
+  grow_faster_ecom: { monthly: 2399, quarterly: 1999, bi_annual: 1899, annual: 1679 },
 };
 
 // Advertised monthly rates (what we show on proposals)
