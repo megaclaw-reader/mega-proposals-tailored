@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Agent, Bundle, Template, ContractTerm, TermOption, FirefliesInsights, BUNDLE_DEFINITIONS } from '@/lib/types';
+import { Agent, Bundle, Template, ContractTerm, TermOption, FirefliesInsights, BUNDLE_DEFINITIONS, QuoteOption } from '@/lib/types';
 import { calculatePricing, formatPrice, getTermDisplayName, getTermMonths } from '@/lib/pricing';
 import { encodeProposal } from '@/lib/encode';
 
@@ -46,6 +46,17 @@ export default function CreateProposal() {
     quarterly: { selected: false, discount: '', discountType: 'percent' },
     monthly: { selected: false, discount: '', discountType: 'percent' },
   });
+  const [multiOptionMode, setMultiOptionMode] = useState(false);
+  const [quoteOptionsList, setQuoteOptionsList] = useState<Array<{
+    label: string;
+    agents: Agent[];
+    bundle?: Bundle;
+    recommended: boolean;
+    termOptions: Record<ContractTerm, { selected: boolean; discount: string; discountType: 'percent' | 'dollar' }>;
+  }>>([
+    { label: '', agents: [], bundle: undefined, recommended: false, termOptions: { annual: { selected: true, discount: '', discountType: 'percent' }, bi_annual: { selected: false, discount: '', discountType: 'percent' }, quarterly: { selected: false, discount: '', discountType: 'percent' }, monthly: { selected: false, discount: '', discountType: 'percent' } } },
+    { label: '', agents: [], bundle: undefined, recommended: false, termOptions: { annual: { selected: true, discount: '', discountType: 'percent' }, bi_annual: { selected: false, discount: '', discountType: 'percent' }, quarterly: { selected: false, discount: '', discountType: 'percent' }, monthly: { selected: false, discount: '', discountType: 'percent' } } },
+  ]);
   const [guarantee, setGuarantee] = useState<'none' | '30' | '60'>('none');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [analysisStatus, setAnalysisStatus] = useState<'idle' | 'fetching' | 'analyzing' | 'done' | 'error'>('idle');
@@ -325,21 +336,37 @@ export default function CreateProposal() {
       // Use first Fireflies URL for backward compatibility
       const firstFirefliesUrl = firefliesEntries.find(e => e.url.includes('fireflies.ai'))?.url;
 
+      // Build quote options if multi-option mode is on
+      const quoteOptions: QuoteOption[] | undefined = multiOptionMode && quoteOptionsList.length >= 2
+        ? quoteOptionsList.map(qo => ({
+            label: qo.label,
+            agents: qo.agents,
+            bundle: qo.bundle,
+            recommended: qo.recommended,
+            terms: AVAILABLE_TERMS.filter(t => qo.termOptions[t].selected).map(t => ({
+              term: t,
+              discountPercentage: qo.termOptions[t].discountType === 'percent' ? (parseFloat(qo.termOptions[t].discount) || 0) : 0,
+              discountDollar: qo.termOptions[t].discountType === 'dollar' ? (parseFloat(qo.termOptions[t].discount) || 0) : 0,
+            })),
+          }))
+        : undefined;
+
       const encoded = encodeProposal({
         customerName: formData.customerName,
         companyName: formData.companyName,
         template: formData.template,
-        selectedAgents: formData.selectedAgents,
-        selectedBundle: formData.selectedBundle,
+        selectedAgents: multiOptionMode ? (quoteOptionsList[0]?.agents || formData.selectedAgents) : formData.selectedAgents,
+        selectedBundle: multiOptionMode ? undefined : formData.selectedBundle,
         salesRepName: formData.salesRepName,
         salesRepEmail: formData.salesRepEmail,
         contractTerm: selectedTerms[0]?.term || 'annual',
-        selectedTerms,
+        selectedTerms: multiOptionMode ? (quoteOptions?.[0]?.terms || selectedTerms) : selectedTerms,
         firefliesUrl: firstFirefliesUrl || undefined,
         firefliesInsights,
         businessContext: formData.businessContext || undefined,
         customExecutiveSummary,
-      });
+        ...(quoteOptions ? { quoteOptions } : {}),
+      } as any);
 
       // Save proposal with a clean slug and get the professional URL
       try {
@@ -377,8 +404,12 @@ export default function CreateProposal() {
   };
 
   const selectedTerms = getSelectedTerms();
-  const hasAgents = formData.selectedAgents.length > 0;
-  const hasTerms = selectedTerms.length > 0;
+  const hasAgents = multiOptionMode
+    ? quoteOptionsList.length >= 2 && quoteOptionsList.every(qo => qo.agents.length > 0)
+    : formData.selectedAgents.length > 0;
+  const hasTerms = multiOptionMode
+    ? quoteOptionsList.length >= 2 && quoteOptionsList.every(qo => Object.values(qo.termOptions).some(t => t.selected))
+    : selectedTerms.length > 0;
   const fetchedCount = firefliesEntries.filter(e => e.status === 'fetched').length + justcallEntries.filter(e => e.status === 'fetched').length;
 
   if (generatedLinks) {
@@ -573,8 +604,8 @@ export default function CreateProposal() {
               <p className="mt-1 text-xs text-gray-500">Describe what the customer does so the proposal reads specific to their business.</p>
             </div>
 
-            {/* Bundle Selection */}
-            <div>
+            {/* Bundle Selection — hidden in multi-option mode */}
+            {!multiOptionMode && <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">Quick Select a Bundle</label>
               <div className="grid grid-cols-3 gap-3 mb-4">
                 {((formData.template === 'ecom'
@@ -616,10 +647,10 @@ export default function CreateProposal() {
                   );
                 })}
               </div>
-            </div>
+            </div>}
 
-            {/* Commitment Options */}
-            <div>
+            {/* Commitment Options — hidden in multi-option mode */}
+            {!multiOptionMode && <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
                 Commitment Options * <span className="text-gray-400 font-normal">(select one or more to show as pricing tiers)</span>
               </label>
@@ -660,6 +691,117 @@ export default function CreateProposal() {
                   </div>
                 ))}
               </div>
+            </div>}
+
+            {/* Multi-Option Quote Toggle */}
+            <div>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" checked={multiOptionMode} onChange={() => setMultiOptionMode(!multiOptionMode)} className="text-blue-600 w-4 h-4" />
+                <span className="text-sm font-medium text-gray-700">Multiple quote options</span>
+                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">NEW</span>
+                <span className="text-xs text-gray-400">(show side-by-side or tabbed comparison)</span>
+              </label>
+
+              {multiOptionMode && (
+                <div className="mt-4 space-y-6">
+                  {quoteOptionsList.map((qo, qIdx) => (
+                    <div key={qIdx} className="border border-gray-200 rounded-lg p-5 bg-gray-50 relative">
+                      {quoteOptionsList.length > 2 && (
+                        <button type="button" onClick={() => setQuoteOptionsList(prev => prev.filter((_, i) => i !== qIdx))}
+                          className="absolute top-3 right-3 text-red-400 hover:text-red-600 text-lg font-bold" title="Remove option">×</button>
+                      )}
+                      <div className="text-sm font-semibold text-gray-600 mb-3">Option {String.fromCharCode(65 + qIdx)}</div>
+
+                      {/* Label */}
+                      <div className="mb-3">
+                        <input type="text" value={qo.label} placeholder={`e.g. "SEO + Paid Ads" or "Grow Faster Bundle"`}
+                          onChange={(e) => setQuoteOptionsList(prev => prev.map((o, i) => i === qIdx ? { ...o, label: e.target.value } : o))}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      </div>
+
+                      {/* Bundle dropdown */}
+                      <div className="mb-3">
+                        <select value={qo.bundle || ''} onChange={(e) => {
+                          const bundle = (e.target.value || undefined) as Bundle | undefined;
+                          setQuoteOptionsList(prev => prev.map((o, i) => {
+                            if (i !== qIdx) return o;
+                            if (bundle) {
+                              return { ...o, bundle, agents: [...BUNDLE_DEFINITIONS[bundle].agents] };
+                            }
+                            return { ...o, bundle: undefined };
+                          }));
+                        }} className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                          <option value="">No bundle (à la carte)</option>
+                          {(['convert', 'grow', 'grow_faster', 'grow_faster_ecom'] as Bundle[]).map(b => (
+                            <option key={b} value={b}>{BUNDLE_DEFINITIONS[b].name} — {BUNDLE_DEFINITIONS[b].description}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Agent checkboxes */}
+                      <div className="flex flex-wrap gap-4 mb-3">
+                        {(['seo', 'paid_ads', 'crm', 'website'] as Agent[]).map(agent => {
+                          const labels: Record<Agent, string> = { seo: 'SEO', paid_ads: 'Paid Ads', crm: 'CRM', website: 'Website' };
+                          return (
+                            <label key={agent} className="flex items-center text-sm gap-1.5">
+                              <input type="checkbox" checked={qo.agents.includes(agent)}
+                                onChange={() => setQuoteOptionsList(prev => prev.map((o, i) => {
+                                  if (i !== qIdx) return o;
+                                  const agents = o.agents.includes(agent) ? o.agents.filter(a => a !== agent) : [...o.agents, agent];
+                                  return { ...o, agents, bundle: undefined };
+                                }))} className="text-blue-600" />
+                              {labels[agent]}
+                            </label>
+                          );
+                        })}
+                      </div>
+
+                      {/* Recommended */}
+                      <label className="flex items-center gap-2 text-sm mb-3">
+                        <input type="checkbox" checked={qo.recommended}
+                          onChange={() => setQuoteOptionsList(prev => prev.map((o, i) => i === qIdx ? { ...o, recommended: !o.recommended } : { ...o, recommended: false }))}
+                          className="text-blue-600" />
+                        ★ Recommended
+                      </label>
+
+                      {/* Term options */}
+                      <div className="space-y-2">
+                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Terms</span>
+                        {AVAILABLE_TERMS.map(term => (
+                          <div key={term} className="flex items-center gap-3">
+                            <label className="flex items-center gap-1.5 text-sm w-28">
+                              <input type="checkbox" checked={qo.termOptions[term].selected}
+                                onChange={() => setQuoteOptionsList(prev => prev.map((o, i) => {
+                                  if (i !== qIdx) return o;
+                                  return { ...o, termOptions: { ...o.termOptions, [term]: { ...o.termOptions[term], selected: !o.termOptions[term].selected } } };
+                                }))} className="text-blue-600" />
+                              {getTermDisplayName(term)}
+                            </label>
+                            {qo.termOptions[term].selected && (
+                              <div className="flex items-center gap-1.5">
+                                <div className="flex border border-gray-300 rounded overflow-hidden">
+                                  <button type="button" onClick={() => setQuoteOptionsList(prev => prev.map((o, i) => i === qIdx ? { ...o, termOptions: { ...o.termOptions, [term]: { ...o.termOptions[term], discountType: 'percent', discount: '' } } } : o))}
+                                    className={`px-1.5 py-0.5 text-xs font-medium ${qo.termOptions[term].discountType === 'percent' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}>%</button>
+                                  <button type="button" onClick={() => setQuoteOptionsList(prev => prev.map((o, i) => i === qIdx ? { ...o, termOptions: { ...o.termOptions, [term]: { ...o.termOptions[term], discountType: 'dollar', discount: '' } } } : o))}
+                                    className={`px-1.5 py-0.5 text-xs font-medium ${qo.termOptions[term].discountType === 'dollar' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}>$</button>
+                                </div>
+                                <input type="number" min="0" step="1" value={qo.termOptions[term].discount} placeholder="0"
+                                  onChange={(e) => setQuoteOptionsList(prev => prev.map((o, i) => i === qIdx ? { ...o, termOptions: { ...o.termOptions, [term]: { ...o.termOptions[term], discount: e.target.value } } } : o))}
+                                  className="w-20 border border-gray-300 rounded px-2 py-1 text-xs" />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+
+                  <button type="button" onClick={() => setQuoteOptionsList(prev => [...prev, { label: '', agents: [], bundle: undefined, recommended: false, termOptions: { annual: { selected: true, discount: '', discountType: 'percent' }, bi_annual: { selected: false, discount: '', discountType: 'percent' }, quarterly: { selected: false, discount: '', discountType: 'percent' }, monthly: { selected: false, discount: '', discountType: 'percent' } } }])}
+                    className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
+                    <span className="text-lg leading-none">+</span> Add another option
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Money-Back Guarantee */}
@@ -697,7 +839,7 @@ export default function CreateProposal() {
             </div>
 
             {/* Pricing Preview */}
-            {hasAgents && hasTerms && (
+            {!multiOptionMode && hasAgents && hasTerms && (
               <div className="bg-gray-50 rounded-lg p-4">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Pricing Preview</h3>
                 <div className="space-y-4">

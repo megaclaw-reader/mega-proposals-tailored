@@ -1,4 +1,4 @@
-import { ProposalConfig, Agent, Template, ContractTerm, TermOption, FirefliesInsights, AgreementSection } from './types';
+import { ProposalConfig, Agent, Template, ContractTerm, TermOption, FirefliesInsights, AgreementSection, QuoteOption, Bundle } from './types';
 
 /**
  * Encode proposal config into a compact URL-safe string.
@@ -80,6 +80,16 @@ export function encodeProposal(config: Omit<ProposalConfig, 'id' | 'createdAt'>)
     payload.sb = config.selectedBundle;
   }
 
+  if ((config as any).quoteOptions && (config as any).quoteOptions.length > 0) {
+    payload.qo = (config as any).quoteOptions.map((opt: QuoteOption) => ({
+      l: opt.label,
+      a: opt.agents,
+      ...(opt.bundle ? { b: opt.bundle } : {}),
+      ...(opt.recommended ? { r: true } : {}),
+      ts: opt.terms.map(t => ({ t: t.term, d: t.discountPercentage || 0, dd: t.discountDollar || 0 })),
+    }));
+  }
+
   if (!payload.st) {
     // Legacy single-term format
     payload.ct = config.contractTerm;
@@ -159,6 +169,17 @@ export function decodeProposal(encoded: string): ProposalConfig | null {
       packageName: payload.pkn || undefined,
       selectedBundle: payload.sb || undefined,
       legalEntityName: payload.len || undefined,
+      quoteOptions: payload.qo ? payload.qo.map((opt: any) => ({
+        label: opt.l,
+        agents: opt.a as Agent[],
+        bundle: opt.b as Bundle | undefined,
+        recommended: opt.r || false,
+        terms: (opt.ts || []).map((t: any) => ({
+          term: t.t as ContractTerm,
+          discountPercentage: t.d || 0,
+          discountDollar: t.dd || 0,
+        })),
+      })) : undefined,
     } as any;
   } catch {
     return null;

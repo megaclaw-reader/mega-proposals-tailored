@@ -8,28 +8,27 @@ import { Agent, Bundle, ContractTerm } from './types';
 const STRIPE_LINKS: Record<string, Record<string, string>> = {
   // === Single Agents ===
   crm: {
-    monthly: 'https://buy.stripe.com/aFa8wP5BFdz3fWzdMbbbG1T',
-    quarterly: 'https://buy.stripe.com/9B64gz9RV1Ql7q35fFbbG1U',
-    bi_annual: 'https://buy.stripe.com/9B66oH5BF8eJ39N5fFbbG1V',
-    annual: 'https://buy.stripe.com/cNi4gz6FJ52x39N8rRbbG1W',
+    monthly: 'https://buy.stripe.com/9B6eVdfcf1Ql11F8rRbbG3t',
+    quarterly: 'https://buy.stripe.com/fZufZhe8beD76lZdMbbbG3d',
+    bi_annual: 'https://buy.stripe.com/eVq00jd479iNdOrgYnbbG3e',
+    annual: 'https://buy.stripe.com/14A00j8NR3YtaCfbE3bbG3f',
   },
   paid_ads: {
-    monthly: 'https://buy.stripe.com/fZuaEX5BFdz39ybgYnbbG1X',
-    quarterly: 'https://buy.stripe.com/3cI9AT5BF7aFcKncI7bbG1Y',
-    bi_annual: 'https://buy.stripe.com/dRm6oHggj8eJ8u79vVbbG1Z',
-    annual: 'https://buy.stripe.com/fZu4gz8NRamR25JeQfbbG20',
+    monthly: 'https://buy.stripe.com/dRmeVd8NR66B8u723tbbG3v',
+    quarterly: 'https://buy.stripe.com/9B6eVd1lpeD79yb9vVbbG3a',
+    bi_annual: 'https://buy.stripe.com/fZufZh8NR66BfWzeQfbbG3b',
+    annual: 'https://buy.stripe.com/00weVd5BF7aFaCffUjbbG3c',
   },
   seo: {
-    monthly: 'https://buy.stripe.com/eVq5kD8NR9iN11FfUjbbG21',
-    quarterly: 'https://buy.stripe.com/6oUbJ1d472UpeSveQfbbG22',
-    bi_annual: 'https://buy.stripe.com/5kQ6oH9RVcuZ11FgYnbbG23',
-    annual: 'https://buy.stripe.com/fZucN5ggjbqVfWz23tbbG24',
+    monthly: 'https://buy.stripe.com/8x2bJ12pt52xbGj6jJbbG3r',
+    quarterly: 'https://buy.stripe.com/bJe00j0hlcuZ8u7dMbbbG37',
+    bi_annual: 'https://buy.stripe.com/6oUfZhaVZ52xdOr37xbbG38',
+    annual: 'https://buy.stripe.com/5kQdR96FJ52x9ybfUjbbG39',
   },
   website: {
-    monthly: 'https://buy.stripe.com/4gM28r4xBfHbfWzfUjbbG25',
-    quarterly: 'https://buy.stripe.com/00w7sLc03amR9yb6jJbbG26',
-    bi_annual: 'https://buy.stripe.com/5kQ5kD8NRcuZ11F37xbbG27',
-    annual: 'https://buy.stripe.com/3cIdR9d47eD74dRgYnbbG28',
+    quarterly: 'https://buy.stripe.com/bJeeVdd477aF6lZgYnbbG3g',
+    bi_annual: 'https://buy.stripe.com/eVqbJ1fcf66BdOr5fFbbG3h',
+    annual: 'https://buy.stripe.com/28E5kDfcfgLfaCf9vVbbG3i',
   },
 
   // === 2-Agent Combos ===

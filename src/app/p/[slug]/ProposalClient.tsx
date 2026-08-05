@@ -1,12 +1,192 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Proposal, ContractTerm, TermOption, PricingBreakdown, BUNDLE_DEFINITIONS } from '@/lib/types';
+import { Proposal, ContractTerm, TermOption, PricingBreakdown, BUNDLE_DEFINITIONS, QuoteOption, Agent, Bundle } from '@/lib/types';
 import { calculatePricing, formatPrice, getTermDisplayName, getTermMonths } from '@/lib/pricing';
 import { getServiceScope, getExecutiveSummary, SERVICE_DESCRIPTIONS } from '@/lib/content';
-import { hasAnyDiscount, getStripeLink, getBundleStripeLink, isBundle3 } from '@/lib/stripe-links';
+import { hasAnyDiscount, getBundleStripeLink, isBundle3 } from '@/lib/stripe-links';
 import { decodeProposal } from '@/lib/encode';
 import { format } from 'date-fns';
+
+/* ─── Multi-Option Quote Comparison Component ─── */
+function MultiOptionQuotes({ quoteOptions, proposal, cs, fp, fp2, customStripeLinks }: {
+  quoteOptions: QuoteOption[];
+  proposal: Proposal;
+  cs: string;
+  fp: (n: number) => string;
+  fp2: (n: number) => string;
+  customStripeLinks?: Record<string, string>;
+}) {
+  const [activeTab, setActiveTab] = useState(() => {
+    const recIdx = quoteOptions.findIndex(o => o.recommended);
+    return recIdx >= 0 ? recIdx : 0;
+  });
+
+  // Calculate pricing for a single option's terms
+  const calcOptionPricings = (opt: QuoteOption) => {
+    return opt.terms.map(t => {
+      const pricing = calculatePricing(opt.agents, t.term, t.discountPercentage, t.discountDollar || 0, opt.bundle);
+      return { option: t, pricing };
+    });
+  };
+
+  // Render pricing cards row for one option
+  const renderPricingCards = (opt: QuoteOption, termPricings: { option: TermOption; pricing: PricingBreakdown }[]) => {
+    const isSingleTerm = termPricings.length === 1;
+    // Find shortest term for savings comparison
+    const shortestPricing = termPricings[termPricings.length - 1];
+
+    return (
+      <div className={`grid gap-4 ${termPricings.length === 1 ? 'grid-cols-1 max-w-sm mx-auto' : termPricings.length === 2 ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-3'}`}>
+        {termPricings.map(({ option: termOpt, pricing }, termIndex) => {
+          const isBestValue = !isSingleTerm && termIndex === 0;
+          const yearlySavings = !isSingleTerm && termIndex < termPricings.length - 1
+            ? Math.round((shortestPricing.pricing.total - pricing.total) * 12)
+            : 0;
+
+          return (
+            <div key={termOpt.term} className={`rounded-xl border-2 p-6 relative text-center ${isBestValue ? 'border-[#2454FF] bg-[#FAFBFF]' : 'border-gray-200 bg-white'}`}>
+              {isBestValue && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <span className="bg-[#2454FF] text-white px-3 py-0.5 rounded-full text-xs font-semibold">Best Value</span>
+                </div>
+              )}
+              <div className="text-sm font-semibold text-gray-500 mb-3">{getTermDisplayName(termOpt.term)}</div>
+              <div className="text-4xl font-extrabold text-gray-900">{cs}{fp(pricing.total)}<span className="text-base font-normal text-gray-400">/mo</span></div>
+              <div className="text-sm text-gray-400 mt-1 mb-4">
+                {termOpt.term === 'monthly' ? 'Month-to-month' : `${cs}${fp2(pricing.upfrontTotal)} billed ${termOpt.term === 'quarterly' ? 'every 3 months' : termOpt.term === 'bi_annual' ? 'every 6 months' : 'annually'}`}
+              </div>
+              {yearlySavings > 0 && (
+                <div className="inline-block text-xs font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-md mb-4">
+                  Save {cs}{fp(yearlySavings)}/yr vs {getTermDisplayName(shortestPricing.option.term).toLowerCase()}
+                </div>
+              )}
+              {/* CTA */}
+              {!(proposal as any).hideCTA && (() => {
+                const staticUrl = customStripeLinks?.[termOpt.term]
+                  || (opt.bundle ? getBundleStripeLink(opt.bundle, termOpt.term) : null);
+                if (staticUrl) {
+                  return (
+                    <a href={staticUrl} target="_blank" rel="noopener noreferrer"
+                      className={`block w-full py-3 rounded-lg font-semibold text-white transition-colors ${isBestValue ? 'bg-[#2454FF] hover:bg-blue-700' : 'bg-gray-800 hover:bg-gray-900'}`}>
+                      Get Started
+                    </a>
+                  );
+                }
+                return (
+                  <button
+                    onClick={async (e) => {
+                      const btn = e.currentTarget;
+                      btn.textContent = 'Loading...'; btn.disabled = true;
+                      try {
+                        const res = await fetch('/api/create-checkout', {
+                          method: 'POST', headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ agentIds: opt.agents, term: termOpt.term }),
+                        });
+                        const data = await res.json();
+                        if (data.url) window.open(data.url, '_blank');
+                        else alert('Could not create checkout session. Please contact us.');
+                      } catch { alert('Could not create checkout session. Please contact us.'); }
+                      finally { btn.textContent = 'Get Started'; btn.disabled = false; }
+                    }}
+                    className={`block w-full py-3 rounded-lg font-semibold text-white transition-colors cursor-pointer ${isBestValue ? 'bg-[#2454FF] hover:bg-blue-700' : 'bg-gray-800 hover:bg-gray-900'}`}>
+                    Get Started
+                  </button>
+                );
+              })()}
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  // ── 2 options: side-by-side layout ──
+  if (quoteOptions.length === 2) {
+    return (
+      <div className="space-y-2">
+        {quoteOptions.map((opt, idx) => {
+          const termPricings = calcOptionPricings(opt);
+          const label = idx === 0 ? 'Option A' : 'Option B';
+          return (
+            <div key={idx}>
+              {idx === 1 && (
+                <div className="flex items-center gap-4 my-2 text-gray-300 text-sm font-medium">
+                  <div className="flex-1 h-px bg-gray-200" />
+                  <span>or</span>
+                  <div className="flex-1 h-px bg-gray-200" />
+                </div>
+              )}
+              <div className={`rounded-2xl p-8 relative ${opt.recommended ? 'border-2 border-[#2454FF] bg-white shadow-sm' : 'border border-gray-200 bg-white shadow-sm'}`}>
+                {opt.recommended && (
+                  <div className="absolute -top-3.5 left-8">
+                    <span className="bg-[#2454FF] text-white text-sm font-semibold px-4 py-1 rounded-full">★ Recommended</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-xs font-semibold text-[#2454FF] bg-indigo-50 px-3 py-1 rounded-md uppercase tracking-wide">{label}</span>
+                  <span className="text-xl font-bold text-gray-900">{opt.label}</span>
+                </div>
+                <div className="text-sm text-gray-400 mb-6">
+                  {opt.agents.map(a => SERVICE_DESCRIPTIONS[a]?.title || a).join('  ·  ')}
+                </div>
+                {renderPricingCards(opt, termPricings)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // ── 3+ options: tab switcher layout ──
+  const activeOpt = quoteOptions[activeTab];
+  const activeTermPricings = calcOptionPricings(activeOpt);
+
+  return (
+    <div className="space-y-8">
+      {/* Tab bar */}
+      <div className="flex justify-center">
+        <div className="inline-flex gap-1 bg-gray-100 rounded-xl p-1">
+          {quoteOptions.map((opt, idx) => (
+            <button key={idx} type="button" onClick={() => setActiveTab(idx)}
+              className={`px-5 py-3 rounded-lg text-sm font-semibold transition-all text-center leading-snug ${activeTab === idx ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
+              {opt.label}
+              <span className={`block text-xs font-normal mt-0.5 ${activeTab === idx ? 'text-[#2454FF]' : 'text-gray-400'}`}>
+                {opt.agents.length} agent{opt.agents.length !== 1 ? 's' : ''}
+              </span>
+              {opt.recommended && <span className="inline-block ml-1 text-[9px] font-bold text-white bg-[#2454FF] px-1.5 py-0.5 rounded uppercase tracking-wide align-middle">★</span>}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Active tab content */}
+      <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-sm">
+        <div className="text-center mb-8">
+          <h3 className="text-2xl font-bold text-gray-900 mb-1">{activeOpt.label}</h3>
+          <div className="text-sm text-gray-400">
+            {activeOpt.agents.map(a => SERVICE_DESCRIPTIONS[a]?.title || a).join('  ·  ')}
+          </div>
+        </div>
+
+        {/* What's included */}
+        <div className="flex flex-wrap justify-center gap-6 mb-8">
+          {activeOpt.agents.map(a => (
+            <div key={a} className="flex items-center gap-2 text-sm text-gray-600">
+              <span className="w-5 h-5 bg-indigo-50 rounded-full flex items-center justify-center text-[#2454FF] text-xs font-bold flex-shrink-0">✓</span>
+              {SERVICE_DESCRIPTIONS[a]?.title || a}
+            </div>
+          ))}
+        </div>
+
+        <div className="h-px bg-gray-200 mb-8" />
+
+        {renderPricingCards(activeOpt, activeTermPricings)}
+      </div>
+    </div>
+  );
+}
 
 export default function ProposalClient({ encodedId, showTerms = false, guaranteeDays = 30, midpointGuarantee = false, guaranteePlans, customNotes = [], customNotesTitle, currency = 'USD', currencyRate = 1, customStripeLinks, customAddendum, customAddendumTitle, customAddendumSubtitle }: { encodedId: string; showTerms?: boolean; guaranteeDays?: number; midpointGuarantee?: boolean; guaranteePlans?: string[]; customNotes?: string[]; customNotesTitle?: string; currency?: 'USD' | 'CAD'; currencyRate?: number; customStripeLinks?: Record<string, string>; customAddendum?: Array<{ title: string; body: string }>; customAddendumTitle?: string; customAddendumSubtitle?: string }) {
   const cs = currency === 'CAD' ? 'CA$' : '$';
@@ -351,7 +531,20 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
           <section data-pdf-block className="space-y-8 break-before-page">
             <h2 className="text-2xl font-bold text-gray-900">Investment Summary</h2>
 
+            {/* Multi-Option Quote Comparison */}
             {(() => {
+              const quoteOptions: QuoteOption[] | undefined = (proposal as any).quoteOptions;
+              if (quoteOptions && quoteOptions.length >= 2) {
+                return <MultiOptionQuotes quoteOptions={quoteOptions} proposal={proposal} cs={cs} fp={fp} fp2={fp2} customStripeLinks={customStripeLinks} />;
+              }
+              return null;
+            })()}
+
+            {/* Single-option (default) pricing */}
+            {(() => {
+              const quoteOptions: QuoteOption[] | undefined = (proposal as any).quoteOptions;
+              if (quoteOptions && quoteOptions.length >= 2) return null;
+
               const terms: TermOption[] = proposal.selectedTerms && proposal.selectedTerms.length > 0
                 ? proposal.selectedTerms
                 : [{ term: proposal.contractTerm, discountPercentage: proposal.discountPercentage || 0 }];
@@ -510,14 +703,16 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                           {!(proposal as any).hideCTA && (
                           <div className="mt-auto pt-6">
                             {(() => {
-                              const stripeUrl = customStripeLinks?.[option.term]
+                              // Use static links for custom overrides and bundles
+                              const staticUrl = customStripeLinks?.[option.term]
                                 || ((proposal as any).selectedBundle
                                   ? getBundleStripeLink((proposal as any).selectedBundle, option.term)
-                                  : getStripeLink(proposal.selectedAgents, option.term));
-                              return (
-                                <>
+                                  : null);
+
+                              if (staticUrl) {
+                                return (
                                   <a
-                                    href={stripeUrl || 'https://www.gomega.ai/pricing'}
+                                    href={staticUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className={`block w-full text-center py-3 px-6 rounded-lg font-semibold text-white transition-colors ${
@@ -528,7 +723,47 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                                   >
                                     Get Started
                                   </a>
-                                </>
+                                );
+                              }
+
+                              // Dynamic checkout for à la carte combos
+                              return (
+                                <button
+                                  onClick={async (e) => {
+                                    const btn = e.currentTarget;
+                                    const origText = btn.textContent;
+                                    btn.textContent = 'Loading...';
+                                    btn.disabled = true;
+                                    try {
+                                      const res = await fetch('/api/create-checkout', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                          agentIds: proposal.selectedAgents,
+                                          term: option.term,
+                                        }),
+                                      });
+                                      const data = await res.json();
+                                      if (data.url) {
+                                        window.open(data.url, '_blank');
+                                      } else {
+                                        alert('Could not create checkout session. Please contact us.');
+                                      }
+                                    } catch {
+                                      alert('Could not create checkout session. Please contact us.');
+                                    } finally {
+                                      btn.textContent = origText;
+                                      btn.disabled = false;
+                                    }
+                                  }}
+                                  className={`block w-full text-center py-3 px-6 rounded-lg font-semibold text-white transition-colors cursor-pointer ${
+                                    isBestValue
+                                      ? 'bg-blue-600 hover:bg-blue-700'
+                                      : 'bg-gray-800 hover:bg-gray-900'
+                                  }`}
+                                >
+                                  Get Started
+                                </button>
                               );
                             })()}
                           </div>
@@ -610,53 +845,35 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                     </div>
                   )}
 
-                  {/* Next Steps */}
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Next Steps</h3>
-                    <p className="text-gray-700 mb-4">
-                      We&apos;re excited to partner with {proposal.companyName} and drive meaningful results. Here&apos;s how to get started:
-                    </p>
-                    <ol className="space-y-3 text-sm text-gray-700">
-                      {(() => {
-                        let step = 1;
-                        const steps = [];
-                        steps.push(
-                          <li key="select" className="flex items-start">
-                            <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">{step++}</span>
-                            <span>Select your preferred plan above and click <strong>Get Started</strong></span>
-                          </li>
-                        );
-                        if (showPromoNote) {
-                          steps.push(
-                            <li key="promo" className="flex items-start">
-                              <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">{step++}</span>
-                              <span>Email {proposal.salesRepName} for your promo code before checkout</span>
-                            </li>
-                          );
-                        }
-                        steps.push(
-                          <li key="onboard" className="flex items-start">
-                            <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">{step++}</span>
-                            <span>Complete the onboarding flow after signing up</span>
-                          </li>
-                        );
-                        steps.push(
-                          <li key="call" className="flex items-start">
-                            <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">{step++}</span>
-                            <span>Schedule a call with your dedicated account manager to kick things off</span>
-                          </li>
-                        );
-                        return steps;
-                      })()}
-                    </ol>
-                    <p className="text-sm text-gray-600 mt-4">
-                      Questions? Contact <span className="font-semibold">{proposal.salesRepName}</span> at{' '}
-                      <a href={`mailto:${proposal.salesRepEmail}`} className="text-blue-600 underline">{proposal.salesRepEmail}</a>
-                    </p>
-                  </div>
                 </>
               );
             })()}
+
+            {/* Next Steps — shown for both multi-option and single-option */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Next Steps</h3>
+              <p className="text-gray-700 mb-4">
+                We&apos;re excited to partner with {proposal.companyName} and drive meaningful results. Here&apos;s how to get started:
+              </p>
+              <ol className="space-y-3 text-sm text-gray-700">
+                <li className="flex items-start">
+                  <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">1</span>
+                  <span>Select your preferred plan above and click <strong>Get Started</strong></span>
+                </li>
+                <li className="flex items-start">
+                  <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">2</span>
+                  <span>Complete the onboarding flow after signing up</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 flex-shrink-0 mt-0.5">3</span>
+                  <span>Schedule a call with your dedicated account manager to kick things off</span>
+                </li>
+              </ol>
+              <p className="text-sm text-gray-600 mt-4">
+                Questions? Contact <span className="font-semibold">{proposal.salesRepName}</span> at{' '}
+                <a href={`mailto:${proposal.salesRepEmail}`} className="text-blue-600 underline">{proposal.salesRepEmail}</a>
+              </p>
+            </div>
           </section>
 
           {/* Custom Notes (per-proposal extras stored in blob) */}

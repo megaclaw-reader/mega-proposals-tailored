@@ -6,11 +6,11 @@ import { Agent, Bundle, ContractTerm, PricingBreakdown } from './types';
  * This ensures our proposal numbers match checkout exactly.
  */
 const STRIPE_UPFRONT_TOTALS: Record<string, Record<string, number>> = {
-  seo: { monthly: 999, quarterly: 2547, bi_annual: 4496, annual: 8399 },
-  paid_ads: { monthly: 1999, quarterly: 5097, bi_annual: 8996, annual: 16800 },
-  seo_paid_combo: { monthly: 2998, quarterly: 7645, bi_annual: 13491, annual: 25200 },
-  website: { monthly: 399, quarterly: 1017, bi_annual: 1796, annual: 3348 },
-  crm: { monthly: 999, quarterly: 2547, bi_annual: 4496, annual: 8399 },
+  seo: { monthly: 999, quarterly: 2397, bi_annual: 4554, annual: 8148 },
+  paid_ads: { monthly: 1799, quarterly: 4797, bi_annual: 9114, annual: 16308 },
+  seo_paid_combo: { monthly: 2798, quarterly: 7194, bi_annual: 13668, annual: 24456 },
+  website: { quarterly: 1197, bi_annual: 2274, annual: 4068 },
+  crm: { monthly: 999, quarterly: 2397, bi_annual: 4554, annual: 8148 },
 };
 
 /**
@@ -27,33 +27,33 @@ const BUNDLE_PRICING: Record<string, Record<ContractTerm, number>> = {
 // Advertised monthly rates (what we show on proposals)
 const PRICING_TABLE = {
   seo: {
-    annual: 699,
-    bi_annual: 749,
-    quarterly: 849,
+    annual: 679,
+    bi_annual: 759,
+    quarterly: 799,
     monthly: 999,
   },
   paid_ads: {
-    annual: 1399,
-    bi_annual: 1499,
-    quarterly: 1699,
-    monthly: 1999,
+    annual: 1359,
+    bi_annual: 1519,
+    quarterly: 1599,
+    monthly: 1799,
   },
   seo_paid_combo: {
-    annual: 2099,
-    bi_annual: 2249,
-    quarterly: 2548,
-    monthly: 2998,
+    annual: 2038,
+    bi_annual: 2278,
+    quarterly: 2398,
+    monthly: 2798,
   },
   website: {
-    annual: 279,
-    bi_annual: 299,
-    quarterly: 339,
-    monthly: 399,
+    annual: 339,
+    bi_annual: 379,
+    quarterly: 399,
+    monthly: 0,
   },
   crm: {
-    annual: 699,
-    bi_annual: 749,
-    quarterly: 849,
+    annual: 679,
+    bi_annual: 759,
+    quarterly: 799,
     monthly: 999,
   },
 };

@@ -80,10 +80,13 @@ Return a JSON object with these fields:
    - GOOD: "Currently getting ~20 leads/month from their website but only 3-4 are qualified — spending time on tire-kickers who aren't ready to buy"
 
 2. "megaSolutions" (array of 3-5 strings) — How we specifically solve each pain point. Rules:
-   - Each solution MUST directly map to a pain point above
+   - Each solution MUST directly map to a pain point above (same index = same topic)
    - Reference their specific situation, not generic capabilities
    - Mention concrete deliverables and expected outcomes
+   - **CRITICAL: Match each solution to the CORRECT service/agent.** If the pain point is about lead follow-up, speed-to-lead, appointment booking, lead qualification, call handling, CRM, or pipeline management → the solution MUST reference the Conversion Agent (AI call handling, automated lead follow-up, appointment booking, lead scoring, pipeline automation). Do NOT respond to a lead management challenge with an SEO or paid ads solution. If the pain point is about search visibility or organic traffic → use SEO/GEO. If about ad performance → use Paid Ads. The solution must solve the ACTUAL problem stated in the pain point.
+   - BAD: Pain point about slow lead follow-up → solution talks about SEO strategy
    - BAD: "AI-powered optimization to improve lead quality"
+   - GOOD: Pain point about slow lead follow-up → "Our Conversion Agent calls back every form lead within 1 minute — 24/7, including after hours and weekends. It qualifies the lead, books the appointment directly into your calendar, and follows up with prospects who aren't ready yet through automated multi-channel nurturing."
    - GOOD: "Our AI agents will restructure your campaigns around qualified-lead signals — optimizing for the homeowners actually ready to hire a contractor, not just anyone clicking an ad. Expect CPQL to drop 30-40% within 60 days as the AI learns your ideal customer profile."
 
 3. "summary" (string, 2-3 sentences) — A personalized executive summary that:

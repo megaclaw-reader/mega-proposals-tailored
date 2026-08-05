@@ -68,6 +68,14 @@ export interface ProposalConfig {
   agreementSections?: AgreementSection[];
 }
 
+export interface QuoteOption {
+  label: string;
+  agents: Agent[];
+  bundle?: Bundle;
+  recommended?: boolean;
+  terms: TermOption[];
+}
+
 export interface AgreementSubsection {
   title: string;
   description?: string;
