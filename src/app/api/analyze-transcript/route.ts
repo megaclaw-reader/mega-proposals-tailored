@@ -189,7 +189,7 @@ Respond with ONLY the JSON object.`;
     const hasPaidAds = agents.includes('paid_ads');
     const hasSeo = agents.includes('seo');
 
-    const paidAdsTerms = /\b(paid ad|google ads?|meta ads?|facebook ads?|instagram ads?|ad account|ad spend|ad budget|advertising budget|cost per click|CPC|ROAS|bidding|ad creative|ad campaign|paid campaign|paid advertising|campaign optimization|campaign coordination|ad targeting)\b/gi;
+    const paidAdsTerms = /\b(paid ad|google ads?|meta ads?|facebook ads?|instagram ads?|ad account|ad spend|ad budget|advertising budget|cost per click|CPC|ROAS|ad creative|ad campaign|paid campaign|paid advertising|ad targeting)\b/gi;
     const seoTerms = /\b(SEO|organic traffic|keyword ranking|backlink|search engine optimization|content strategy|blog post|topical authority)\b/gi;
 
     function scrubText(text: string): string {
@@ -217,9 +217,35 @@ Respond with ONLY the JSON object.`;
       return arr.map(scrubText);
     }
 
-    insights.painPoints = scrubArray(insights.painPoints);
-    insights.megaSolutions = scrubArray(insights.megaSolutions);
-    insights.discussionTopics = scrubArray(insights.discussionTopics);
+    // Scrub pain points and solutions as PAIRS — never independently.
+    // If a solution gets removed, its paired pain point must go too (and vice versa),
+    // otherwise indices get misaligned and solutions show as blank.
+    if (!hasPaidAds && insights.painPoints.length > 0) {
+      const pairs: { pain: string; solution: string }[] = [];
+      for (let i = 0; i < insights.painPoints.length; i++) {
+        const pain = insights.painPoints[i];
+        const solution = insights.megaSolutions[i] || '';
+        const painLower = pain.toLowerCase();
+        const solLower = solution.toLowerCase();
+        const isPainAboutPaidAds = painLower.includes('google ads') || painLower.includes('ad account') || 
+                                    painLower.includes('ad spend') || painLower.includes('paid advertising') ||
+                                    painLower.includes('cost per click') || painLower.includes('ad campaign');
+        const isSolAboutPaidAds = solLower.includes('google ads') || solLower.includes('ad account') || 
+                                   solLower.includes('ad spend') || solLower.includes('paid advertising') ||
+                                   solLower.includes('cost per click') || solLower.includes('ad campaign');
+        if (isPainAboutPaidAds || isSolAboutPaidAds) {
+          console.warn(`[SCRUB] Removed paid-ads pair ${i}: "${pain.substring(0, 60)}..." / "${solution.substring(0, 60)}..."`);
+          continue;
+        }
+        pairs.push({ pain: scrubText(pain), solution: scrubText(solution) });
+      }
+      insights.painPoints = pairs.map(p => p.pain);
+      insights.megaSolutions = pairs.map(p => p.solution);
+    } else {
+      insights.painPoints = insights.painPoints.map(scrubText);
+      insights.megaSolutions = insights.megaSolutions.map(scrubText);
+    }
+    insights.discussionTopics = insights.discussionTopics.map(scrubText);
     insights.summary = scrubText(insights.summary);
 
     return NextResponse.json({ insights });

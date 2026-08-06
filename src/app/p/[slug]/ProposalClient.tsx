@@ -324,6 +324,8 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
               <div className="space-y-6">
                 {proposal.firefliesInsights.painPoints.map((point, index) => {
                   const solution = proposal.firefliesInsights!.megaSolutions[index];
+                  // Skip pairs where solution is empty — don't show a blank "Our Approach" column
+                  if (!solution || solution.trim().length === 0) return null;
                   return (
                     <div key={index} className="bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
                       <div className="grid grid-cols-1 md:grid-cols-2">
