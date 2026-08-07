@@ -48,7 +48,7 @@ const PRICING_TABLE = {
     annual: 339,
     bi_annual: 379,
     quarterly: 399,
-    monthly: 0,
+    monthly: 499,
   },
   crm: {
     annual: 679,
