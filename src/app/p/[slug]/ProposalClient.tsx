@@ -188,7 +188,7 @@ function MultiOptionQuotes({ quoteOptions, proposal, cs, fp, fp2, customStripeLi
   );
 }
 
-export default function ProposalClient({ encodedId, showTerms = false, guaranteeDays = 30, midpointGuarantee = false, guaranteePlans, customNotes = [], customNotesTitle, currency = 'USD', currencyRate = 1, customStripeLinks, customAddendum, customAddendumTitle, customAddendumSubtitle }: { encodedId: string; showTerms?: boolean; guaranteeDays?: number; midpointGuarantee?: boolean; guaranteePlans?: string[]; customNotes?: string[]; customNotesTitle?: string; currency?: 'USD' | 'CAD'; currencyRate?: number; customStripeLinks?: Record<string, string>; customAddendum?: Array<{ title: string; body: string }>; customAddendumTitle?: string; customAddendumSubtitle?: string }) {
+export default function ProposalClient({ encodedId, showTerms = false, guaranteeDays = 30, midpointGuarantee = false, guaranteePlans, customNotes = [], customNotesTitle, currency = 'USD', currencyRate = 1, customStripeLinks, customAddendum, customAddendumTitle, customAddendumSubtitle, monthlyBilling = false }: { encodedId: string; showTerms?: boolean; guaranteeDays?: number; midpointGuarantee?: boolean; guaranteePlans?: string[]; customNotes?: string[]; customNotesTitle?: string; currency?: 'USD' | 'CAD'; currencyRate?: number; customStripeLinks?: Record<string, string>; customAddendum?: Array<{ title: string; body: string }>; customAddendumTitle?: string; customAddendumSubtitle?: string; monthlyBilling?: boolean }) {
   const cs = currency === 'CAD' ? 'CA$' : '$';
   const cc = currency;
   const cr = currencyRate;
@@ -687,10 +687,13 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                             <span className="text-lg font-bold text-gray-900">{cs}{fp(pricing.total)}/mo</span>
                           </div>
 
-                          {/* Upfront total */}
+                          {/* Upfront total / Monthly billing */}
                           <div className="bg-gray-100 rounded-lg p-4 text-center mt-4">
-                            <p className="text-sm text-gray-500 mb-1">{option.term === 'monthly' ? 'Month-to-Month' : 'Total Due Upfront'}</p>
-                            <p className="text-3xl font-bold text-blue-600">{cs}{fp2(pricing.upfrontTotal)}</p>
+                            <p className="text-sm text-gray-500 mb-1">{option.term === 'monthly' ? 'Month-to-Month' : monthlyBilling ? 'Billed Monthly' : 'Total Due Upfront'}</p>
+                            <p className="text-3xl font-bold text-blue-600">{monthlyBilling || option.term === 'monthly' ? <>{cs}{fp(pricing.total)}<span className="text-base font-normal text-gray-400">/mo</span></> : <>{cs}{fp2(pricing.upfrontTotal)}</>}</p>
+                            {monthlyBilling && option.term !== 'monthly' && (
+                              <p className="text-xs text-gray-500 mt-1">{getTermMonths(option.term)}-month commitment</p>
+                            )}
                             {(option.discountPercentage > 0 || (option.discountDollar || 0) > 0) && (
                               <p className="text-green-600 text-sm mt-1 font-medium">
                                 {option.discountPercentage > 0 && `${option.discountPercentage}% discount`}
@@ -789,6 +792,15 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                       </div>
                     );
                   })()}
+
+                  {/* Monthly Billing Commitment Note */}
+                  {monthlyBilling && !isSingleTerm && (
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                      <p className="text-gray-600 text-sm">
+                        All plans are billed monthly. By selecting a quarterly, bi-annual, or annual plan, you agree to maintain your engagement for the full duration of the selected commitment period.
+                      </p>
+                    </div>
+                  )}
 
                   {/* Investment Note */}
                   {(proposal as any).investmentNote && (
