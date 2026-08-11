@@ -9,13 +9,14 @@ import { decodeProposal } from '@/lib/encode';
 import { format } from 'date-fns';
 
 /* ─── Multi-Option Quote Comparison Component ─── */
-function MultiOptionQuotes({ quoteOptions, proposal, cs, fp, fp2, customStripeLinks }: {
+function MultiOptionQuotes({ quoteOptions, proposal, cs, fp, fp2, customStripeLinks, discountExpired = false }: {
   quoteOptions: QuoteOption[];
   proposal: Proposal;
   cs: string;
   fp: (n: number) => string;
   fp2: (n: number) => string;
   customStripeLinks?: Record<string, string>;
+  discountExpired?: boolean;
 }) {
   const [activeTab, setActiveTab] = useState(() => {
     const recIdx = quoteOptions.findIndex(o => o.recommended);
@@ -25,7 +26,9 @@ function MultiOptionQuotes({ quoteOptions, proposal, cs, fp, fp2, customStripeLi
   // Calculate pricing for a single option's terms
   const calcOptionPricings = (opt: QuoteOption) => {
     return opt.terms.map(t => {
-      const pricing = calculatePricing(opt.agents, t.term, t.discountPercentage, t.discountDollar || 0, opt.bundle);
+      const effDisc = discountExpired ? 0 : t.discountPercentage;
+      const effDollar = discountExpired ? 0 : (t.discountDollar || 0);
+      const pricing = calculatePricing(opt.agents, t.term, effDisc, effDollar, opt.bundle);
       return { option: t, pricing };
     });
   };
@@ -188,7 +191,7 @@ function MultiOptionQuotes({ quoteOptions, proposal, cs, fp, fp2, customStripeLi
   );
 }
 
-export default function ProposalClient({ encodedId, showTerms = false, guaranteeDays = 30, midpointGuarantee = false, guaranteePlans, customNotes = [], customNotesTitle, currency = 'USD', currencyRate = 1, customStripeLinks, customAddendum, customAddendumTitle, customAddendumSubtitle, monthlyBilling = false }: { encodedId: string; showTerms?: boolean; guaranteeDays?: number; midpointGuarantee?: boolean; guaranteePlans?: string[]; customNotes?: string[]; customNotesTitle?: string; currency?: 'USD' | 'CAD'; currencyRate?: number; customStripeLinks?: Record<string, string>; customAddendum?: Array<{ title: string; body: string }>; customAddendumTitle?: string; customAddendumSubtitle?: string; monthlyBilling?: boolean }) {
+export default function ProposalClient({ encodedId, showTerms = false, guaranteeDays = 30, midpointGuarantee = false, guaranteePlans, customNotes = [], customNotesTitle, currency = 'USD', currencyRate = 1, customStripeLinks, customAddendum, customAddendumTitle, customAddendumSubtitle, monthlyBilling = false, discountExpiresAt }: { encodedId: string; showTerms?: boolean; guaranteeDays?: number; midpointGuarantee?: boolean; guaranteePlans?: string[]; customNotes?: string[]; customNotesTitle?: string; currency?: 'USD' | 'CAD'; currencyRate?: number; customStripeLinks?: Record<string, string>; customAddendum?: Array<{ title: string; body: string }>; customAddendumTitle?: string; customAddendumSubtitle?: string; monthlyBilling?: boolean; discountExpiresAt?: string }) {
   const cs = currency === 'CAD' ? 'CA$' : '$';
   const cc = currency;
   const cr = currencyRate;
@@ -198,6 +201,33 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const proposalRef = useRef<HTMLDivElement>(null);
+
+  // Discount expiration logic
+  const [discountExpired, setDiscountExpired] = useState(false);
+  const [timeLeft, setTimeLeft] = useState('');
+  useEffect(() => {
+    if (!discountExpiresAt) return;
+    const check = () => {
+      const now = new Date().getTime();
+      const exp = new Date(discountExpiresAt).getTime();
+      const diff = exp - now;
+      if (diff <= 0) {
+        setDiscountExpired(true);
+        setTimeLeft('');
+        return;
+      }
+      setDiscountExpired(false);
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      if (days > 0) setTimeLeft(`${days}d ${hours}h remaining`);
+      else if (hours > 0) setTimeLeft(`${hours}h ${mins}m remaining`);
+      else setTimeLeft(`${mins}m remaining`);
+    };
+    check();
+    const interval = setInterval(check, 60000);
+    return () => clearInterval(interval);
+  }, [discountExpiresAt]);
 
   useEffect(() => {
     const config = decodeProposal(encodedId);
@@ -533,11 +563,30 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
           <section data-pdf-block className="space-y-8 break-before-page">
             <h2 className="text-2xl font-bold text-gray-900">Investment Summary</h2>
 
+            {/* Discount Expiration Banner */}
+            {discountExpiresAt && !discountExpired && timeLeft && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">⏰</span>
+                  <div>
+                    <p className="text-amber-900 font-semibold text-sm">Limited-Time Pricing</p>
+                    <p className="text-amber-700 text-sm">These discounted rates expire on {new Date(discountExpiresAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                  </div>
+                </div>
+                <span className="bg-amber-100 text-amber-800 px-3 py-1 rounded-full text-sm font-semibold whitespace-nowrap">{timeLeft}</span>
+              </div>
+            )}
+            {discountExpiresAt && discountExpired && (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                <p className="text-gray-600 text-sm">The promotional pricing for this proposal has expired. The rates below reflect standard pricing.</p>
+              </div>
+            )}
+
             {/* Multi-Option Quote Comparison */}
             {(() => {
               const quoteOptions: QuoteOption[] | undefined = (proposal as any).quoteOptions;
               if (quoteOptions && quoteOptions.length >= 2) {
-                return <MultiOptionQuotes quoteOptions={quoteOptions} proposal={proposal} cs={cs} fp={fp} fp2={fp2} customStripeLinks={customStripeLinks} />;
+                return <MultiOptionQuotes quoteOptions={quoteOptions} proposal={proposal} cs={cs} fp={fp} fp2={fp2} customStripeLinks={customStripeLinks} discountExpired={discountExpired} />;
               }
               return null;
             })()}
@@ -553,7 +602,9 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
               
               const rawCustomPrice = (proposal as any).customMonthlyPrice as number | Record<string, number> | undefined;
               const customAgentPrices = (proposal as any).customAgentPrices as Record<string, number> | undefined;
-              const termPricings: { option: TermOption; pricing: PricingBreakdown }[] = terms.map(opt => {
+              // When discount has expired, zero out all discounts
+              const effectiveTerms = discountExpired ? terms.map(t => ({ ...t, discountPercentage: 0, discountDollar: 0 })) : terms;
+              const termPricings: { option: TermOption; pricing: PricingBreakdown }[] = effectiveTerms.map(opt => {
                 const pricing = calculatePricing(proposal.selectedAgents, opt.term, opt.discountPercentage, opt.discountDollar || 0, (proposal as any).selectedBundle);
                 
                 // Per-agent custom prices take priority

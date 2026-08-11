@@ -58,6 +58,8 @@ export default function CreateProposal() {
     { label: '', agents: [], bundle: undefined, recommended: false, termOptions: { annual: { selected: true, discount: '', discountType: 'percent' }, bi_annual: { selected: false, discount: '', discountType: 'percent' }, quarterly: { selected: false, discount: '', discountType: 'percent' }, monthly: { selected: false, discount: '', discountType: 'percent' } } },
   ]);
   const [guarantee, setGuarantee] = useState<'none' | '30' | '60'>('none');
+  const [discountExpiresAt, setDiscountExpiresAt] = useState('');
+  const [monthlyBillingOption, setMonthlyBillingOption] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [analysisStatus, setAnalysisStatus] = useState<'idle' | 'fetching' | 'analyzing' | 'done' | 'error'>('idle');
   const [generatedLinks, setGeneratedLinks] = useState<{ share: string; edit: string } | null>(null);
@@ -377,6 +379,8 @@ export default function CreateProposal() {
             encodedProposal: encoded,
             companyName: formData.companyName,
             ...(guarantee !== 'none' && { guaranteeDays: parseInt(guarantee) }),
+            ...(discountExpiresAt && { discountExpiresAt: new Date(discountExpiresAt + 'T23:59:59').toISOString() }),
+            ...(monthlyBillingOption && { monthlyBilling: true }),
           }),
         });
 
@@ -820,6 +824,25 @@ export default function CreateProposal() {
                 ))}
               </div>
               <p className="text-xs text-gray-500 mt-1">Adds a money-back guarantee badge and legal addendum to the proposal.</p>
+            </div>
+
+            {/* Discount Expiration */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Discount Expiration Date</label>
+              <input type="date" value={discountExpiresAt}
+                onChange={(e) => setDiscountExpiresAt(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              <p className="text-xs text-gray-500 mt-1">If set, discounted pricing reverts to standard rates after this date. Shows a countdown on the proposal.</p>
+            </div>
+
+            {/* Monthly Billing */}
+            <div>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" checked={monthlyBillingOption} onChange={() => setMonthlyBillingOption(!monthlyBillingOption)} className="text-blue-600 w-4 h-4" />
+                <span className="text-sm font-medium text-gray-700">Monthly Billing (pay monthly instead of upfront for longer terms)</span>
+              </label>
+              <p className="text-xs text-gray-500 mt-1 ml-7">Shows monthly rate with commitment period instead of lump-sum upfront total.</p>
             </div>
 
             {/* Sales Rep Information */}
