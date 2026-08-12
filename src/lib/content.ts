@@ -381,6 +381,72 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
       };
 
     case 'website':
+      if (template === 'ecom') {
+        return {
+          title: "Website Agent Services Scope",
+          description: "Our Website Agent serves as your dedicated webmaster — handling ongoing site improvements, conversion optimization, and technical maintenance so your ecommerce store stays fast, functional, and optimized for sales. We focus on enhancing what you've already built, not rebuilding from scratch.",
+          highlights: [
+            "Dedicated Web Expert: You'll work one-on-one with a dedicated Web Development Expert who understands your ecommerce platform and business goals.",
+            "Unlimited Ongoing Updates: Need product page tweaks, layout changes, banner updates, or new landing pages? Unlimited requests with 2 business-day turnaround."
+          ],
+          categories: [
+            {
+              name: "Ongoing Site Optimization",
+              items: [
+                "Product page layout and design improvements",
+                "Conversion rate optimization (CRO) updates",
+                "Homepage and collection page enhancements",
+                "Mobile experience fine-tuning",
+                "Promotional banner and seasonal content updates"
+              ]
+            },
+            {
+              name: "Search & Conversion Ready",
+              items: [
+                "SEO-optimized page structure and meta tags",
+                "Conversion tracking setup and configuration",
+                "Tracking pixel implementation and testing",
+                "Schema markup optimization for product rich snippets",
+                "Site speed optimization for better rankings"
+              ]
+            },
+            {
+              name: "Analytics Dashboard",
+              items: [
+                "Google Analytics 4 setup and configuration",
+                "Custom conversion goal tracking",
+                "Performance monitoring dashboard setup"
+              ]
+            },
+            {
+              name: "Performance & Reliability",
+              items: [
+                "99.9% uptime guarantee with monitoring",
+                "Fast loading speeds (Core Web Vitals optimization)",
+                "CDN implementation for global performance",
+                "Regular performance audits and optimization"
+              ]
+            },
+            {
+              name: "Content & Landing Pages",
+              items: [
+                "AI-powered content creation and optimization",
+                "Landing page development and optimization",
+                "A/B testing support for key pages"
+              ]
+            },
+            {
+              name: "Ongoing Maintenance",
+              items: [
+                "Plugin and theme updates",
+                "Security monitoring and patching",
+                "Broken link and error monitoring",
+                "Regular site health checks"
+              ]
+            }
+          ]
+        };
+      }
       return {
         title: "Website Agent Services Scope",
         description: "Our Website Agent delivers professional, AI-optimized websites designed for maximum conversion and seamless integration with your marketing ecosystem. From custom development to ongoing maintenance, we ensure your digital presence drives results.",

@@ -7,7 +7,7 @@ const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
 
 export async function POST(request: NextRequest) {
   try {
-    const { transcriptSummary, meetingTitle, companyName, sourceType, selectedAgents } = await request.json();
+    const { transcriptSummary, meetingTitle, companyName, sourceType, selectedAgents, template } = await request.json();
 
     if (!transcriptSummary || transcriptSummary.trim().length === 0) {
       return NextResponse.json(
@@ -44,7 +44,9 @@ export async function POST(request: NextRequest) {
     const agentServiceMap: Record<string, string> = {
       seo: 'SEO/GEO (search engine optimization, content creation, organic traffic growth)',
       paid_ads: 'Paid Advertising (Google Ads, Meta/Facebook/Instagram Ads, AI-optimized campaigns)',
-      website: 'Website Development (conversion-optimized web design)',
+      website: template === 'ecom'
+        ? 'Website Agent — Webmaster Services (ongoing site improvements, conversion optimization, product page tweaks, design updates — NOT full site builds or rebuilds for ecommerce)'
+        : 'Website Development (conversion-optimized web design)',
       crm: 'Conversion Agent (formerly called "CRM Agent" — AI call handling, lead qualification & scoring, appointment booking, pipeline automation, multi-channel nurturing, CRM integration). Note: if the transcript mentions "CRM Agent", that refers to the Conversion Agent.',
     };
     const selectedServices = (selectedAgents as string[] || ['seo', 'paid_ads', 'website'])

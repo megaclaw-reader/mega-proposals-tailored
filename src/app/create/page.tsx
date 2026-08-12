@@ -285,6 +285,7 @@ export default function CreateProposal() {
                 companyName: formData.companyName,
                 sourceType,
                 selectedAgents: formData.selectedAgents,
+                template: formData.template,
               }),
             });
             if (analyzeRes.ok) {

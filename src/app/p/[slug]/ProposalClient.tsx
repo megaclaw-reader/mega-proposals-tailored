@@ -440,7 +440,9 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                     {SERVICE_DESCRIPTIONS[agent].title}
                   </h3>
                   <p className="text-gray-600 text-sm">
-                    {SERVICE_DESCRIPTIONS[agent].shortDescription}
+                    {agent === 'website' && proposal.template === 'ecom'
+                      ? 'Dedicated webmaster for ongoing site improvements, conversion optimization, and technical maintenance'
+                      : SERVICE_DESCRIPTIONS[agent].shortDescription}
                   </p>
                 </div>
               ))}
