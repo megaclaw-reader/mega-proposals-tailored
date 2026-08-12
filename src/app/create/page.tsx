@@ -58,6 +58,7 @@ export default function CreateProposal() {
     { label: '', agents: [], bundle: undefined, recommended: false, termOptions: { annual: { selected: true, discount: '', discountType: 'percent' }, bi_annual: { selected: false, discount: '', discountType: 'percent' }, quarterly: { selected: false, discount: '', discountType: 'percent' }, monthly: { selected: false, discount: '', discountType: 'percent' } } },
   ]);
   const [guarantee, setGuarantee] = useState<'none' | '30' | '60'>('none');
+  const [midTermReview, setMidTermReview] = useState(false);
   const [discountExpiresAt, setDiscountExpiresAt] = useState('');
   const [monthlyBillingOption, setMonthlyBillingOption] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -380,6 +381,7 @@ export default function CreateProposal() {
             encodedProposal: encoded,
             companyName: formData.companyName,
             ...(guarantee !== 'none' && { guaranteeDays: parseInt(guarantee) }),
+            ...(midTermReview && { midpointGuarantee: true }),
             ...(discountExpiresAt && { discountExpiresAt: new Date(discountExpiresAt + 'T23:59:59').toISOString() }),
             ...(monthlyBillingOption && { monthlyBilling: true }),
           }),
@@ -825,6 +827,22 @@ export default function CreateProposal() {
                 ))}
               </div>
               <p className="text-xs text-gray-500 mt-1">Adds a money-back guarantee badge and legal addendum to the proposal.</p>
+            </div>
+
+            {/* Mid-Term Review */}
+            <div>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={midTermReview}
+                  onChange={(e) => setMidTermReview(e.target.checked)}
+                  className="w-4 h-4 text-blue-600 focus:ring-blue-500 rounded"
+                />
+                <span className="text-sm font-medium text-gray-700">Mid-Term Review</span>
+              </label>
+              <p className="text-xs text-gray-500 mt-1 ml-7">
+                Bi-Annual: performance review at 3 months with option to cancel and receive a refund of half the initial investment. Annual: same at 6 months.
+              </p>
             </div>
 
             {/* Discount Expiration */}
