@@ -60,7 +60,8 @@ export async function POST(request: NextRequest) {
     formData.append('signers[1][email_address]', salesRepEmail);
     formData.append('signers[1][name]', salesRepName);
     formData.append('signers[1][order]', '1');
-    formData.append('test_mode', process.env.NODE_ENV === 'production' ? '0' : '1');
+    // TODO: Switch to '0' once HelloSign paid plan is active
+    formData.append('test_mode', '1');
 
     // Attach the generated PDF
     const pdfBlob = new Blob([new Uint8Array(pdfBuffer)], { type: 'application/pdf' });
