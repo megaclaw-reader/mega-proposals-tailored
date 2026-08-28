@@ -76,6 +76,14 @@ export function encodeProposal(config: Omit<ProposalConfig, 'id' | 'createdAt'>)
     payload.pkn = (config as any).packageName;
   }
 
+  if ((config as any).minimumTermMonths) {
+    payload.mtm = (config as any).minimumTermMonths;
+  }
+
+  if ((config as any).requiresAgreement) {
+    payload.ra = true;
+  }
+
   if (config.selectedBundle) {
     payload.sb = config.selectedBundle;
   }
@@ -169,6 +177,8 @@ export function decodeProposal(encoded: string): ProposalConfig | null {
       packageName: payload.pkn || undefined,
       selectedBundle: payload.sb || undefined,
       legalEntityName: payload.len || undefined,
+      minimumTermMonths: payload.mtm || undefined,
+      requiresAgreement: payload.ra || false,
       quoteOptions: payload.qo ? payload.qo.map((opt: any) => ({
         label: opt.l,
         agents: opt.a as Agent[],

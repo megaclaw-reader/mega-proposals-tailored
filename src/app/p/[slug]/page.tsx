@@ -25,6 +25,7 @@ export default async function ProposalSlugPage({
   let customAddendumSubtitle: string | undefined;
   let monthlyBilling = false;
   let discountExpiresAt: string | undefined;
+  let signedAgreement: { signedAt: string; signatureRequestId: string; minimumTermMonths?: number } | undefined;
 
   try {
     const { blobs } = await list({ prefix: `proposals/${slug}.json` });
@@ -54,6 +55,7 @@ export default async function ProposalSlugPage({
         customAddendumSubtitle = data.customAddendumSubtitle || undefined;
         monthlyBilling = data.monthlyBilling === true;
         discountExpiresAt = data.discountExpiresAt || undefined;
+        signedAgreement = data.signedAgreement || undefined;
       }
     }
   } catch (error) {
@@ -64,5 +66,5 @@ export default async function ProposalSlugPage({
     notFound();
   }
 
-  return <ProposalClient encodedId={encodedProposal} showTerms={showTerms} guaranteeDays={guaranteeDays} midpointGuarantee={midpointGuarantee} guaranteePlans={guaranteePlans} customNotes={customNotes} customNotesTitle={customNotesTitle} currency={currency} currencyRate={currencyRate} customStripeLinks={customStripeLinks} customAddendum={customAddendum} customAddendumTitle={customAddendumTitle} customAddendumSubtitle={customAddendumSubtitle} monthlyBilling={monthlyBilling} discountExpiresAt={discountExpiresAt} />;
+  return <ProposalClient encodedId={encodedProposal} showTerms={showTerms} guaranteeDays={guaranteeDays} midpointGuarantee={midpointGuarantee} guaranteePlans={guaranteePlans} customNotes={customNotes} customNotesTitle={customNotesTitle} currency={currency} currencyRate={currencyRate} customStripeLinks={customStripeLinks} customAddendum={customAddendum} customAddendumTitle={customAddendumTitle} customAddendumSubtitle={customAddendumSubtitle} monthlyBilling={monthlyBilling} discountExpiresAt={discountExpiresAt} signedAgreement={signedAgreement} proposalSlug={slug} />;
 }

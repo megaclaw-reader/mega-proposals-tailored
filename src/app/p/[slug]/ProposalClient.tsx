@@ -191,7 +191,7 @@ function MultiOptionQuotes({ quoteOptions, proposal, cs, fp, fp2, customStripeLi
   );
 }
 
-export default function ProposalClient({ encodedId, showTerms = false, guaranteeDays = 30, midpointGuarantee = false, guaranteePlans, customNotes = [], customNotesTitle, currency = 'USD', currencyRate = 1, customStripeLinks, customAddendum, customAddendumTitle, customAddendumSubtitle, monthlyBilling = false, discountExpiresAt }: { encodedId: string; showTerms?: boolean; guaranteeDays?: number; midpointGuarantee?: boolean; guaranteePlans?: string[]; customNotes?: string[]; customNotesTitle?: string; currency?: 'USD' | 'CAD'; currencyRate?: number; customStripeLinks?: Record<string, string>; customAddendum?: Array<{ title: string; body: string }>; customAddendumTitle?: string; customAddendumSubtitle?: string; monthlyBilling?: boolean; discountExpiresAt?: string }) {
+export default function ProposalClient({ encodedId, showTerms = false, guaranteeDays = 30, midpointGuarantee = false, guaranteePlans, customNotes = [], customNotesTitle, currency = 'USD', currencyRate = 1, customStripeLinks, customAddendum, customAddendumTitle, customAddendumSubtitle, monthlyBilling = false, discountExpiresAt, signedAgreement, proposalSlug }: { encodedId: string; showTerms?: boolean; guaranteeDays?: number; midpointGuarantee?: boolean; guaranteePlans?: string[]; customNotes?: string[]; customNotesTitle?: string; currency?: 'USD' | 'CAD'; currencyRate?: number; customStripeLinks?: Record<string, string>; customAddendum?: Array<{ title: string; body: string }>; customAddendumTitle?: string; customAddendumSubtitle?: string; monthlyBilling?: boolean; discountExpiresAt?: string; signedAgreement?: { signedAt: string; signatureRequestId: string; minimumTermMonths?: number }; proposalSlug?: string }) {
   const cs = currency === 'CAD' ? 'CA$' : '$';
   const cc = currency;
   const cr = currencyRate;
@@ -200,6 +200,9 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [signingState, setSigningState] = useState<'idle' | 'email' | 'creating' | 'signing' | 'signed'>('idle');
+  const [customerEmail, setCustomerEmail] = useState('');
+  const [signingError, setSigningError] = useState<string | null>(null);
   const proposalRef = useRef<HTMLDivElement>(null);
 
   // Discount expiration logic
@@ -243,6 +246,67 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
     }
     setLoading(false);
   }, [encodedId]);
+
+  const handleSignAgreement = async (stripeUrl: string) => {
+    if (!proposal || !customerEmail) return;
+    setSigningState('creating');
+    setSigningError(null);
+
+    try {
+      const minimumTermMonths = (proposal as any).minimumTermMonths;
+      const pricing = calculatePricing(proposal.selectedAgents, 'monthly', 0, 0, (proposal as any).selectedBundle);
+      const monthlyRate = Math.round(pricing.total);
+      const totalCommitment = monthlyRate * minimumTermMonths;
+
+      const res = await fetch('/api/hellosign/create-signature', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerName: proposal.customerName,
+          companyName: proposal.companyName,
+          selectedAgents: proposal.selectedAgents,
+          monthlyRate,
+          minimumTermMonths,
+          totalCommitment,
+          salesRepName: proposal.salesRepName,
+          salesRepEmail: proposal.salesRepEmail,
+          customerEmail,
+          proposalSlug,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to create signature request');
+
+      if (data.signUrl && data.clientId) {
+        // Embedded signing
+        setSigningState('signing');
+        const HelloSign = (await import('hellosign-embedded')).default;
+        const client = new HelloSign();
+        client.open(data.signUrl, {
+          clientId: data.clientId,
+          skipDomainVerification: process.env.NODE_ENV !== 'production',
+        });
+        client.on('sign', () => {
+          setSigningState('signed');
+          // Redirect to Stripe after short delay
+          setTimeout(() => { window.open(stripeUrl, '_blank'); }, 1500);
+        });
+        client.on('cancel', () => { setSigningState('idle'); });
+        client.on('error', (err: { message?: string }) => {
+          setSigningError(err?.message || 'Signing failed');
+          setSigningState('idle');
+        });
+      } else {
+        // Non-embedded: HelloSign emails the signer directly
+        setSigningState('signed');
+        alert('A signature request has been sent to your email. After signing, return here to proceed to payment.');
+      }
+    } catch (err) {
+      setSigningError(err instanceof Error ? err.message : 'Failed to create agreement');
+      setSigningState('idle');
+    }
+  };
 
   const downloadPDF = async () => {
     if (!proposal) return;
@@ -699,7 +763,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                           
                           <div className="text-center mb-4 mt-1">
                             <h3 className="text-xl font-bold text-gray-900">{getTermDisplayName(option.term)}</h3>
-                            <p className="text-sm text-gray-500">{option.term === 'monthly' ? 'Month-to-month commitment' : `${getTermMonths(option.term)} months`}</p>
+                            <p className="text-sm text-gray-500">{option.term === 'monthly' ? ((proposal as any).minimumTermMonths ? `${(proposal as any).minimumTermMonths}-month minimum commitment` : 'Month-to-month commitment') : `${getTermMonths(option.term)} months`}</p>
                           </div>
 
                           {/* Per-agent breakdown */}
@@ -742,8 +806,11 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
 
                           {/* Upfront total / Monthly billing */}
                           <div className="bg-gray-100 rounded-lg p-4 text-center mt-4">
-                            <p className="text-sm text-gray-500 mb-1">{option.term === 'monthly' ? 'Month-to-Month' : monthlyBilling ? 'Billed Monthly' : 'Total Due Upfront'}</p>
+                            <p className="text-sm text-gray-500 mb-1">{option.term === 'monthly' ? ((proposal as any).minimumTermMonths ? `${(proposal as any).minimumTermMonths}-Month Minimum` : 'Month-to-Month') : monthlyBilling ? 'Billed Monthly' : 'Total Due Upfront'}</p>
                             <p className="text-3xl font-bold text-blue-600">{monthlyBilling || option.term === 'monthly' ? <>{cs}{fp(pricing.total)}<span className="text-base font-normal text-gray-400">/mo</span></> : <>{cs}{fp2(pricing.upfrontTotal)}</>}</p>
+                            {option.term === 'monthly' && (proposal as any).minimumTermMonths && (
+                              <p className="text-xs text-gray-500 mt-1">{(proposal as any).minimumTermMonths}-month commitment · {cs}{fp(pricing.total * (proposal as any).minimumTermMonths)} total</p>
+                            )}
                             {monthlyBilling && option.term !== 'monthly' && (
                               <p className="text-xs text-gray-500 mt-1">{getTermMonths(option.term)}-month commitment</p>
                             )}
@@ -761,24 +828,81 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                           {!(proposal as any).hideCTA && (
                           <div className="mt-auto pt-6">
                             {(() => {
+                              const requiresAgreement = option.term === 'monthly' && (proposal as any).requiresAgreement && (proposal as any).minimumTermMonths;
                               // Use static links for custom overrides and bundles
                               const staticUrl = customStripeLinks?.[option.term]
                                 || ((proposal as any).selectedBundle
                                   ? getBundleStripeLink((proposal as any).selectedBundle, option.term)
                                   : null);
 
+                              const stripeUrl = staticUrl || '#';
+                              const btnClass = `block w-full text-center py-3 px-6 rounded-lg font-semibold text-white transition-colors cursor-pointer ${
+                                isBestValue ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-800 hover:bg-gray-900'
+                              }`;
+
+                              // Monthly with minimum commitment — signing flow
+                              if (requiresAgreement) {
+                                // Already signed — go straight to Stripe
+                                if (signedAgreement) {
+                                  if (staticUrl) {
+                                    return (
+                                      <a href={staticUrl} target="_blank" rel="noopener noreferrer" className={btnClass}>
+                                        Proceed to Payment
+                                      </a>
+                                    );
+                                  }
+                                  return (
+                                    <button onClick={async (e) => {
+                                      const btn = e.currentTarget; btn.textContent = 'Loading...'; btn.disabled = true;
+                                      try {
+                                        const res = await fetch('/api/create-checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agentIds: proposal.selectedAgents, term: option.term }) });
+                                        const data = await res.json();
+                                        if (data.url) window.open(data.url, '_blank');
+                                        else alert('Could not create checkout session.');
+                                      } catch { alert('Could not create checkout session.'); }
+                                      finally { btn.textContent = 'Proceed to Payment'; btn.disabled = false; }
+                                    }} className={btnClass}>Proceed to Payment</button>
+                                  );
+                                }
+
+                                // Email prompt state
+                                if (signingState === 'email') {
+                                  return (
+                                    <div className="space-y-2">
+                                      <input type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)}
+                                        placeholder="Your email address" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                                      <button onClick={() => { if (customerEmail) handleSignAgreement(stripeUrl); }}
+                                        disabled={!customerEmail} className={`${btnClass} disabled:opacity-50`}>
+                                        Continue to Agreement
+                                      </button>
+                                      <button onClick={() => setSigningState('idle')} className="w-full text-sm text-gray-500 hover:text-gray-700">Cancel</button>
+                                      {signingError && <p className="text-red-600 text-xs">{signingError}</p>}
+                                    </div>
+                                  );
+                                }
+
+                                if (signingState === 'creating') {
+                                  return <button disabled className={`${btnClass} opacity-50`}>Preparing Agreement...</button>;
+                                }
+                                if (signingState === 'signing') {
+                                  return <button disabled className={`${btnClass} opacity-50`}>Signing in Progress...</button>;
+                                }
+                                if (signingState === 'signed') {
+                                  return <button disabled className={`${btnClass} bg-green-600`}>✓ Agreement Signed — Redirecting to Payment...</button>;
+                                }
+
+                                // Default: show "Review & Sign Agreement"
+                                return (
+                                  <button onClick={() => setSigningState('email')} className={btnClass}>
+                                    Review &amp; Sign Agreement
+                                  </button>
+                                );
+                              }
+
+                              // Standard flow (non-agreement)
                               if (staticUrl) {
                                 return (
-                                  <a
-                                    href={staticUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className={`block w-full text-center py-3 px-6 rounded-lg font-semibold text-white transition-colors ${
-                                      isBestValue
-                                        ? 'bg-blue-600 hover:bg-blue-700'
-                                        : 'bg-gray-800 hover:bg-gray-900'
-                                    }`}
-                                  >
+                                  <a href={staticUrl} target="_blank" rel="noopener noreferrer" className={btnClass}>
                                     Get Started
                                   </a>
                                 );
@@ -814,11 +938,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                                       btn.disabled = false;
                                     }
                                   }}
-                                  className={`block w-full text-center py-3 px-6 rounded-lg font-semibold text-white transition-colors cursor-pointer ${
-                                    isBestValue
-                                      ? 'bg-blue-600 hover:bg-blue-700'
-                                      : 'bg-gray-800 hover:bg-gray-900'
-                                  }`}
+                                  className={btnClass}
                                 >
                                   Get Started
                                 </button>
