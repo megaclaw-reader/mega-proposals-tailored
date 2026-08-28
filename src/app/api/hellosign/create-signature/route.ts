@@ -59,9 +59,12 @@ export async function POST(request: NextRequest) {
     formData.append('signers[0][email_address]', customerEmail);
     formData.append('signers[0][name]', customerName);
     formData.append('signers[0][order]', '0');
-    formData.append('signers[1][email_address]', salesRepEmail);
-    formData.append('signers[1][name]', salesRepName);
-    formData.append('signers[1][order]', '1');
+    // Only add sales rep as second signer if different from customer
+    if (salesRepEmail && salesRepEmail.toLowerCase() !== customerEmail.toLowerCase()) {
+      formData.append('signers[1][email_address]', salesRepEmail);
+      formData.append('signers[1][name]', salesRepName);
+      formData.append('signers[1][order]', '1');
+    }
     formData.append('signing_redirect_url', redirectUrl);
     // TODO: Switch to '0' once API quota issue resolved
     formData.append('test_mode', '1');
