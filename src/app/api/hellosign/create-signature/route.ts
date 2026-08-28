@@ -6,7 +6,6 @@ import { SERVICE_DESCRIPTIONS } from '@/lib/content';
 import { Agent } from '@/lib/types';
 
 const HELLOSIGN_API_KEY = process.env.HELLOSIGN_API_KEY || '';
-const HELLOSIGN_CLIENT_ID = process.env.HELLOSIGN_CLIENT_ID || '';
 const HELLOSIGN_API_BASE = 'https://api.hellosign.com/v3';
 
 export async function POST(request: NextRequest) {
@@ -15,7 +14,7 @@ export async function POST(request: NextRequest) {
     const {
       customerName, companyName, selectedAgents, monthlyRate,
       minimumTermMonths, totalCommitment, salesRepName,
-      salesRepEmail, customerEmail, proposalSlug,
+      salesRepEmail, customerEmail, proposalSlug, stripeUrl,
     } = body;
 
     if (!customerName || !companyName || !selectedAgents || !monthlyRate || !minimumTermMonths || !customerEmail) {
@@ -32,7 +31,7 @@ export async function POST(request: NextRequest) {
       month: 'long', day: 'numeric', year: 'numeric',
     });
 
-    // Generate PDF
+    // Generate PDF contract
     const pdfBuffer = await renderToBuffer(
       React.createElement(ServiceAgreementPDF, {
         customerName,
@@ -48,7 +47,11 @@ export async function POST(request: NextRequest) {
       }) as any
     );
 
-    // Create HelloSign signature request
+    // Build the redirect URL: after signing → our callback page → Stripe
+    const origin = request.nextUrl.origin;
+    const redirectUrl = `${origin}/api/hellosign/signed-redirect?stripe=${encodeURIComponent(stripeUrl || '')}&slug=${encodeURIComponent(proposalSlug || '')}`;
+
+    // Create HelloSign signature request (non-embedded, redirect-based)
     const formData = new FormData();
     formData.append('title', `MEGA Service Agreement — ${companyName}`);
     formData.append('subject', `Service Agreement for ${companyName}`);
@@ -56,11 +59,11 @@ export async function POST(request: NextRequest) {
     formData.append('signers[0][email_address]', customerEmail);
     formData.append('signers[0][name]', customerName);
     formData.append('signers[0][order]', '0');
-    // Add sales rep as second signer
     formData.append('signers[1][email_address]', salesRepEmail);
     formData.append('signers[1][name]', salesRepName);
     formData.append('signers[1][order]', '1');
-    // TODO: Switch to '0' once HelloSign paid plan is active
+    formData.append('signing_redirect_url', redirectUrl);
+    // TODO: Switch to '0' once API quota issue resolved
     formData.append('test_mode', '1');
 
     // Attach the generated PDF
@@ -73,18 +76,9 @@ export async function POST(request: NextRequest) {
       formData.append('metadata[minimumTermMonths]', String(minimumTermMonths));
     }
 
-    // Use embedded if client_id is available, otherwise regular signature request
-    const endpoint = HELLOSIGN_CLIENT_ID
-      ? `${HELLOSIGN_API_BASE}/signature_request/create_embedded`
-      : `${HELLOSIGN_API_BASE}/signature_request/send`;
-
-    if (HELLOSIGN_CLIENT_ID) {
-      formData.append('client_id', HELLOSIGN_CLIENT_ID);
-    }
-
     const authHeader = 'Basic ' + Buffer.from(HELLOSIGN_API_KEY + ':').toString('base64');
 
-    const hsResponse = await fetch(endpoint, {
+    const hsResponse = await fetch(`${HELLOSIGN_API_BASE}/signature_request/send`, {
       method: 'POST',
       headers: { 'Authorization': authHeader },
       body: formData,
@@ -103,24 +97,12 @@ export async function POST(request: NextRequest) {
     const signatureRequest = hsData.signature_request;
     const signatureRequestId = signatureRequest.signature_request_id;
 
-    // For embedded signing, get the sign URL
-    let signUrl: string | null = null;
-    if (HELLOSIGN_CLIENT_ID && signatureRequest.signatures?.[0]) {
-      const signatureId = signatureRequest.signatures[0].signature_id;
-      const embedRes = await fetch(
-        `${HELLOSIGN_API_BASE}/embedded/sign_url/${signatureId}`,
-        { headers: { 'Authorization': authHeader } }
-      );
-      if (embedRes.ok) {
-        const embedData = await embedRes.json();
-        signUrl = embedData.embedded?.sign_url || null;
-      }
-    }
+    // Get the signing URL from the first signer (the customer)
+    const signingUrl = signatureRequest.signing_url;
 
     return NextResponse.json({
       signatureRequestId,
-      signUrl,
-      clientId: HELLOSIGN_CLIENT_ID || null,
+      signingUrl,
     });
 
   } catch (error) {
