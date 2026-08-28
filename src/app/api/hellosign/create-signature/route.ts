@@ -48,8 +48,10 @@ export async function POST(request: NextRequest) {
 
     // Build redirect URL: after signing → Stripe checkout
     const origin = request.nextUrl.origin;
-    const fallbackUrl = `${origin}/p/${proposalSlug}?signed=true`;
-    const redirectUrl = (stripeUrl && stripeUrl !== '#' && stripeUrl.startsWith('http')) ? stripeUrl : fallbackUrl;
+    const hasStaticStripe = stripeUrl && stripeUrl !== '#' && stripeUrl.startsWith('http');
+    // If no static Stripe link, redirect to our dynamic checkout creator
+    const dynamicCheckoutUrl = `${origin}/api/hellosign/signed-redirect?agents=${encodeURIComponent(JSON.stringify(selectedAgents))}&slug=${encodeURIComponent(proposalSlug || '')}`;
+    const redirectUrl = hasStaticStripe ? stripeUrl : dynamicCheckoutUrl;
 
     // Create non-embedded signature request
     const formData = new FormData();
