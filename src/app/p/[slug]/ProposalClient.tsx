@@ -279,10 +279,25 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to create signature request');
 
-      if (data.signingUrl) {
-        // Redirect to HelloSign signing page
-        // After signing, HelloSign redirects → our callback → Stripe checkout
-        window.location.href = data.signingUrl;
+      if (data.signUrl && data.clientId) {
+        // Embedded signing — opens HelloSign in-page
+        setSigningState('signing');
+        const HelloSign = (await import('hellosign-embedded')).default;
+        const client = new HelloSign();
+        client.open(data.signUrl, {
+          clientId: data.clientId,
+          skipDomainVerification: true,
+        });
+        client.on('sign', () => {
+          setSigningState('signed');
+          // Redirect to Stripe checkout after signing
+          setTimeout(() => { window.location.href = stripeUrl; }, 1500);
+        });
+        client.on('cancel', () => { setSigningState('idle'); });
+        client.on('error', (err: { message?: string }) => {
+          setSigningError(err?.message || 'Signing failed');
+          setSigningState('idle');
+        });
       } else {
         throw new Error('No signing URL returned');
       }

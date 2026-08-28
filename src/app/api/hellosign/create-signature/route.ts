@@ -6,6 +6,7 @@ import { SERVICE_DESCRIPTIONS } from '@/lib/content';
 import { Agent } from '@/lib/types';
 
 const HELLOSIGN_API_KEY = process.env.HELLOSIGN_API_KEY || '';
+const HELLOSIGN_CLIENT_ID = 'efb88771c235c6a5da81a1214e71c0ee';
 const HELLOSIGN_API_BASE = 'https://api.hellosign.com/v3';
 
 export async function POST(request: NextRequest) {
@@ -47,12 +48,9 @@ export async function POST(request: NextRequest) {
       }) as any
     );
 
-    // Build the redirect URL: after signing → our callback page → Stripe
-    const origin = request.nextUrl.origin;
-    const redirectUrl = `${origin}/api/hellosign/signed-redirect?stripe=${encodeURIComponent(stripeUrl || '')}&slug=${encodeURIComponent(proposalSlug || '')}`;
-
-    // Create HelloSign signature request (non-embedded, redirect-based)
+    // Create embedded signature request
     const formData = new FormData();
+    formData.append('client_id', HELLOSIGN_CLIENT_ID);
     formData.append('title', `MEGA Service Agreement — ${companyName}`);
     formData.append('subject', `Service Agreement for ${companyName}`);
     formData.append('message', `Please review and sign the service agreement for your ${minimumTermMonths}-month engagement with MEGA.`);
@@ -65,7 +63,6 @@ export async function POST(request: NextRequest) {
       formData.append('signers[1][name]', salesRepName);
       formData.append('signers[1][order]', '1');
     }
-    formData.append('signing_redirect_url', redirectUrl);
     formData.append('test_mode', '0');
 
     // Attach the generated PDF
@@ -77,10 +74,13 @@ export async function POST(request: NextRequest) {
       formData.append('metadata[proposalSlug]', proposalSlug);
       formData.append('metadata[minimumTermMonths]', String(minimumTermMonths));
     }
+    if (stripeUrl) {
+      formData.append('metadata[stripeUrl]', stripeUrl);
+    }
 
     const authHeader = 'Basic ' + Buffer.from(HELLOSIGN_API_KEY + ':').toString('base64');
 
-    const hsResponse = await fetch(`${HELLOSIGN_API_BASE}/signature_request/send`, {
+    const hsResponse = await fetch(`${HELLOSIGN_API_BASE}/signature_request/create_embedded`, {
       method: 'POST',
       headers: { 'Authorization': authHeader },
       body: formData,
@@ -99,12 +99,25 @@ export async function POST(request: NextRequest) {
     const signatureRequest = hsData.signature_request;
     const signatureRequestId = signatureRequest.signature_request_id;
 
-    // Get the signing URL from the first signer (the customer)
-    const signingUrl = signatureRequest.signing_url;
+    // Get the embedded sign URL for the first signer (customer)
+    const signatureId = signatureRequest.signatures?.[0]?.signature_id;
+    let signUrl: string | null = null;
+
+    if (signatureId) {
+      const embedRes = await fetch(
+        `${HELLOSIGN_API_BASE}/embedded/sign_url/${signatureId}`,
+        { headers: { 'Authorization': authHeader } }
+      );
+      if (embedRes.ok) {
+        const embedData = await embedRes.json();
+        signUrl = embedData.embedded?.sign_url || null;
+      }
+    }
 
     return NextResponse.json({
       signatureRequestId,
-      signingUrl,
+      signUrl,
+      clientId: HELLOSIGN_CLIENT_ID,
     });
 
   } catch (error) {
