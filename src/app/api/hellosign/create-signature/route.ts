@@ -66,8 +66,7 @@ export async function POST(request: NextRequest) {
       formData.append('signers[1][order]', '1');
     }
     formData.append('signing_redirect_url', redirectUrl);
-    // TODO: Switch to '0' once API quota issue resolved
-    formData.append('test_mode', '1');
+    formData.append('test_mode', '0');
 
     // Attach the generated PDF
     const pdfBlob = new Blob([new Uint8Array(pdfBuffer)], { type: 'application/pdf' });
