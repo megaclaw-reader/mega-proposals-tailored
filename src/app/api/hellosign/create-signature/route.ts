@@ -48,7 +48,8 @@ export async function POST(request: NextRequest) {
 
     // Build redirect URL: after signing → Stripe checkout
     const origin = request.nextUrl.origin;
-    const redirectUrl = stripeUrl || `${origin}/p/${proposalSlug}?signed=true`;
+    const fallbackUrl = `${origin}/p/${proposalSlug}?signed=true`;
+    const redirectUrl = (stripeUrl && stripeUrl !== '#' && stripeUrl.startsWith('http')) ? stripeUrl : fallbackUrl;
 
     // Create non-embedded signature request
     const formData = new FormData();
