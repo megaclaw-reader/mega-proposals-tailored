@@ -1115,8 +1115,8 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
               ))}
             </>
           )}
-          {/* Addendum — Money-Back Guarantee */}
-          {showTerms && (() => {
+          {/* Addendum — Money-Back Guarantee or Custom Addendum */}
+          {(showTerms || (customAddendum && customAddendum.length > 0)) && (() => {
             const termNameMap2: Record<string, string> = { monthly: 'Monthly', quarterly: 'Quarterly', bi_annual: 'Bi-Annual', annual: 'Annual' };
             const scopeLabel = guaranteePlans && guaranteePlans.length > 0
               ? `${proposal.companyName}'s ${guaranteePlans.map(p => termNameMap2[p] || p).join(' and ')} plan subscription${guaranteePlans.length > 1 ? 's' : ''}`
