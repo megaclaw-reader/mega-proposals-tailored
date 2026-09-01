@@ -748,6 +748,76 @@ export function ProposalPDF({ proposal, showTerms = false, guaranteeDays = 30, c
           </View>
         </Page>
       )}
+
+      {/* Standalone Signature Page — when no agreementSections exist */}
+      {(!proposal.agreementSections || proposal.agreementSections.length === 0) && (
+        <Page size="LETTER" style={s.page} wrap>
+          <Footer />
+          <Text style={s.secTitle}>Acceptance & Signatures</Text>
+          <View style={s.secBar} />
+          <View style={{ marginTop: 16 }} wrap={false}>
+            <Text style={[s.body, { marginBottom: 20 }]}>
+              By signing below, both parties acknowledge and agree to the terms outlined in this proposal.
+            </Text>
+
+            {/* Client signature */}
+            <View style={{ marginBottom: 28 }}>
+              <Text style={[s.body, { fontWeight: 600, marginBottom: 8 }]}>Client</Text>
+              <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                <Text style={[s.body, { width: 80 }]}>Name:</Text>
+                <View style={{ flex: 1, borderBottomWidth: 0.75, borderBottomColor: G400, paddingBottom: 2 }}>
+                  <Text style={s.body}>{proposal.customerName}</Text>
+                </View>
+              </View>
+              <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                <Text style={[s.body, { width: 80 }]}>Company:</Text>
+                <View style={{ flex: 1, borderBottomWidth: 0.75, borderBottomColor: G400, paddingBottom: 2 }}>
+                  <Text style={s.body}>{proposal.companyName}</Text>
+                </View>
+              </View>
+              <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                <Text style={[s.body, { width: 80 }]}>Signature:</Text>
+                <View style={{ flex: 1, borderBottomWidth: 0.75, borderBottomColor: G400, minHeight: 20 }} />
+              </View>
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={[s.body, { width: 80 }]}>Date:</Text>
+                <View style={{ flex: 1, borderBottomWidth: 0.75, borderBottomColor: G400, minHeight: 16 }} />
+              </View>
+            </View>
+
+            {/* MEGA AI signature */}
+            <View>
+              <Text style={[s.body, { fontWeight: 600, marginBottom: 8 }]}>MEGA AI</Text>
+              <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                <Text style={[s.body, { width: 80 }]}>Name:</Text>
+                <View style={{ flex: 1, borderBottomWidth: 0.75, borderBottomColor: G400, paddingBottom: 2 }}>
+                  <Text style={s.body}>{proposal.salesRepName}</Text>
+                </View>
+              </View>
+              <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                <Text style={[s.body, { width: 80 }]}>Title:</Text>
+                <View style={{ flex: 1, borderBottomWidth: 0.75, borderBottomColor: G400, paddingBottom: 2 }}>
+                  <Text style={s.body}>{proposal.salesRepTitle || 'Account Executive'}</Text>
+                </View>
+              </View>
+              <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                <Text style={[s.body, { width: 80 }]}>Email:</Text>
+                <View style={{ flex: 1, borderBottomWidth: 0.75, borderBottomColor: G400, paddingBottom: 2 }}>
+                  <Text style={s.body}>{proposal.salesRepEmail}</Text>
+                </View>
+              </View>
+              <View style={{ flexDirection: 'row', marginBottom: 6 }}>
+                <Text style={[s.body, { width: 80 }]}>Signature:</Text>
+                <View style={{ flex: 1, borderBottomWidth: 0.75, borderBottomColor: G400, minHeight: 20 }} />
+              </View>
+              <View style={{ flexDirection: 'row' }}>
+                <Text style={[s.body, { width: 80 }]}>Date:</Text>
+                <View style={{ flex: 1, borderBottomWidth: 0.75, borderBottomColor: G400, minHeight: 16 }} />
+              </View>
+            </View>
+          </View>
+        </Page>
+      )}
     </Document>
   );
 }
