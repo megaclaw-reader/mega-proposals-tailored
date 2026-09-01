@@ -1124,19 +1124,14 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                 ? `${proposal.companyName}'s subscription under any selected plan`
                 : `${proposal.companyName}'s ${termNameMap2[proposal.pricing.term] || proposal.pricing.term} plan subscription`;
 
-            // Custom addendum overrides the default hardcoded one
-            if (customAddendum && customAddendum.length > 0) {
+            // Custom addendum WITHOUT money-back guarantee (showTerms is false)
+            if (customAddendum && customAddendum.length > 0 && !showTerms) {
               return (
                 <section data-pdf-block className="border-t-2 border-blue-400 pt-8 mt-12">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">{customAddendumTitle || `Addendum: ${guaranteeDays}-Day Money-Back Guarantee`}</h2>
-                  {customAddendumSubtitle && (
-                    <p className="text-sm text-gray-500 mb-6">{customAddendumSubtitle}</p>
-                  )}
-                  {!customAddendumSubtitle && (
-                    <p className="text-sm text-gray-500 mb-6">
-                      This addendum is specific to {proposal.companyName}&apos;s engagement and supersedes the standard Terms &amp; Conditions where conflicts arise. Full terms available at <a href="https://www.gomega.ai/legal/terms-of-use" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">gomega.ai/legal/terms-of-use</a>.
-                    </p>
-                  )}
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">{customAddendumTitle || 'Addendum'}</h2>
+                  <p className="text-sm text-gray-500 mb-6">
+                    This addendum is specific to {proposal.companyName}&apos;s engagement and supersedes the standard Terms &amp; Conditions where conflicts arise. Full terms available at <a href="https://www.gomega.ai/legal/terms-of-use" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">gomega.ai/legal/terms-of-use</a>.
+                  </p>
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-4 text-sm text-gray-800 leading-relaxed">
                     {customAddendum.map((section, idx) => (
                       <div key={idx}>
@@ -1181,6 +1176,24 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
           </section>
             );
           })()}
+
+          {/* Custom Addendum — shown alongside money-back guarantee when both exist */}
+          {showTerms && customAddendum && customAddendum.length > 0 && (
+            <section data-pdf-block className="border-t-2 border-blue-400 pt-8 mt-12">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">{customAddendumTitle || 'Additional Terms'}</h2>
+              <p className="text-sm text-gray-500 mb-6">
+                This addendum is specific to {proposal.companyName}&apos;s engagement. Full terms available at <a href="https://www.gomega.ai/legal/terms-of-use" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">gomega.ai/legal/terms-of-use</a>.
+              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-4 text-sm text-gray-800 leading-relaxed">
+                {customAddendum.map((section, idx) => (
+                  <div key={idx}>
+                    <h4 className="font-semibold text-gray-900 mb-1">{section.title}</h4>
+                    <p dangerouslySetInnerHTML={{ __html: section.body }} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Addendum — Midpoint Performance Guarantee */}
           {midpointGuarantee && (
