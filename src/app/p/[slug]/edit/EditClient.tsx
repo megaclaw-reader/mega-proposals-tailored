@@ -81,11 +81,19 @@ export default function EditClient({ encodedId, slug, customAddendum: initialAdd
         contractTerm: editedTerms[0]?.term || proposal.contractTerm,
         discountPercentage: editedTerms[0]?.discountPercentage || 0,
         selectedTerms: editedTerms,
+        selectedBundle: (proposal as any).selectedBundle,
         firefliesUrl: proposal.firefliesUrl,
         firefliesInsights: updatedInsights,
         businessContext: proposal.businessContext,
         customExecutiveSummary: editedSummary,
-      });
+        // Preserve all other fields
+        ...(proposal as any).startDate && { startDate: (proposal as any).startDate },
+        ...(proposal as any).packageName && { packageName: (proposal as any).packageName },
+        ...(proposal as any).salesRepTitle && { salesRepTitle: (proposal as any).salesRepTitle },
+        ...(proposal as any).officeAddress && { officeAddress: (proposal as any).officeAddress },
+        ...(proposal as any).legalEntityName && { legalEntityName: (proposal as any).legalEntityName },
+        ...(proposal as any).quoteOptions && { quoteOptions: (proposal as any).quoteOptions },
+      } as any);
 
       const res = await fetch(`/api/proposals/update/${slug}`, {
         method: 'PUT',
