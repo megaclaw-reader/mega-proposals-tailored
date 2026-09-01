@@ -32,10 +32,11 @@ export default async function ProposalSlugPage({
     const blob = blobs.find(b => b.pathname === `proposals/${slug}.json`);
 
     if (blob) {
-      const response = await fetch(blob.url, {
+      const response = await fetch(`${blob.url}?t=${Date.now()}`, {
         headers: {
           Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`,
         },
+        cache: 'no-store',
       });
 
       if (response.ok) {
