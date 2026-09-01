@@ -8,7 +8,7 @@ import { hasAnyDiscount } from '@/lib/stripe-links';
 import { decodeProposal, encodeProposal } from '@/lib/encode';
 import { format } from 'date-fns';
 
-export default function EditClient({ encodedId, slug }: { encodedId: string; slug: string }) {
+export default function EditClient({ encodedId, slug, customAddendum: initialAddendum, customAddendumTitle: initialAddendumTitle }: { encodedId: string; slug: string; customAddendum?: Array<{ title: string; body: string }>; customAddendumTitle?: string }) {
   const [proposal, setProposal] = useState<Proposal | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -18,6 +18,8 @@ export default function EditClient({ encodedId, slug }: { encodedId: string; slu
   const [editedPainPoints, setEditedPainPoints] = useState<string[]>([]);
   const [editedSolutions, setEditedSolutions] = useState<string[]>([]);
   const [editedTerms, setEditedTerms] = useState<TermOption[]>([]);
+  const [addendumSections, setAddendumSections] = useState<Array<{ title: string; body: string }>>(initialAddendum || []);
+  const [addendumTitle, setAddendumTitle] = useState(initialAddendumTitle || 'Addendum');
 
   useEffect(() => {
     const config = decodeProposal(encodedId);
@@ -88,7 +90,11 @@ export default function EditClient({ encodedId, slug }: { encodedId: string; slu
       const res = await fetch(`/api/proposals/update/${slug}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ encodedProposal: newEncoded }),
+        body: JSON.stringify({
+          encodedProposal: newEncoded,
+          customAddendum: addendumSections.length > 0 ? addendumSections : undefined,
+          customAddendumTitle: addendumSections.length > 0 ? addendumTitle : undefined,
+        }),
       });
 
       if (res.ok) {
@@ -327,6 +333,75 @@ export default function EditClient({ encodedId, slug }: { encodedId: string; slu
                 );
               })}
             </div>
+          </section>
+
+          {/* Addendum Editor */}
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-2xl font-bold text-gray-900">Addendum</h2>
+              <button
+                onClick={() => setAddendumSections([...addendumSections, { title: '', body: '' }])}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                + Add Section
+              </button>
+            </div>
+            <p className="text-sm text-amber-600 font-medium mb-4">✏️ Add custom terms, guarantees, or special conditions. These appear at the bottom of the proposal.</p>
+            
+            {addendumSections.length === 0 ? (
+              <div className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                <p className="text-gray-500">No addendum sections yet. Click &quot;+ Add Section&quot; to add custom terms.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {addendumSections.map((section, idx) => (
+                  <div key={idx} className="bg-white border-2 border-amber-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-xs font-bold text-amber-600">Section {idx + 1}</span>
+                      <button
+                        onClick={() => {
+                          const updated = addendumSections.filter((_, i) => i !== idx);
+                          setAddendumSections(updated);
+                        }}
+                        className="text-red-500 hover:text-red-700 text-sm font-medium"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-600 mb-1">Title</label>
+                        <input
+                          type="text"
+                          value={section.title}
+                          onChange={(e) => {
+                            const updated = [...addendumSections];
+                            updated[idx] = { ...updated[idx], title: e.target.value };
+                            setAddendumSections(updated);
+                          }}
+                          placeholder="e.g., Price-Lock Guarantee"
+                          className="w-full border border-amber-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-600 mb-1">Body</label>
+                        <textarea
+                          value={section.body}
+                          onChange={(e) => {
+                            const updated = [...addendumSections];
+                            updated[idx] = { ...updated[idx], body: e.target.value };
+                            setAddendumSections(updated);
+                          }}
+                          placeholder="Enter the full text of this addendum section..."
+                          rows={4}
+                          className="w-full border border-amber-300 rounded-lg px-3 py-2 text-sm focus:border-amber-500 focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
         </div>
       </div>

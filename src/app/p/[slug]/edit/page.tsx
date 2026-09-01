@@ -9,6 +9,8 @@ export default async function EditProposalPage({
 }) {
   const { slug } = await params;
   let encodedProposal: string | null = null;
+  let customAddendum: Array<{ title: string; body: string }> | undefined;
+  let customAddendumTitle: string | undefined;
 
   try {
     const { blobs } = await list({ prefix: `proposals/${slug}.json` });
@@ -24,6 +26,8 @@ export default async function EditProposalPage({
       if (response.ok) {
         const data = await response.json();
         encodedProposal = data.encodedProposal || null;
+        customAddendum = data.customAddendum || undefined;
+        customAddendumTitle = data.customAddendumTitle || undefined;
       }
     }
   } catch (error) {
@@ -34,5 +38,5 @@ export default async function EditProposalPage({
     notFound();
   }
 
-  return <EditClient encodedId={encodedProposal} slug={slug} />;
+  return <EditClient encodedId={encodedProposal} slug={slug} customAddendum={customAddendum} customAddendumTitle={customAddendumTitle} />;
 }
