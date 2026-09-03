@@ -258,7 +258,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
       const monthlyRate = Math.round(pricing.total);
       const totalCommitment = monthlyRate * minimumTermMonths;
 
-      const res = await fetch('/api/hellosign/create-signature', {
+      const res = await fetch('/api/onespan/create-signature', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -280,8 +280,8 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
       if (!res.ok) throw new Error(data.error || 'Failed to create signature request');
 
       if (data.signingUrl) {
-        // Redirect to HelloSign signing page
-        // signing_redirect_url is set to Stripe checkout — after signing, HelloSign sends them there
+        // Redirect to OneSpan signing page
+        // After signing, OneSpan's handOver setting redirects them to Stripe checkout
         window.location.href = data.signingUrl;
       } else {
         throw new Error('No signing URL returned');
