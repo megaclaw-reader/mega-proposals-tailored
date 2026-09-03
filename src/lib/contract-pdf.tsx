@@ -194,25 +194,24 @@ export function ServiceAgreementPDF({
           <Text style={s.p}>The Parties have executed this Agreement as of the Effective Date.</Text>
 
           <View style={s.sigRow}>
+            {/* Provider — pre-signed */}
             <View style={s.sigBox}>
               <Text style={s.sigParty}>Provider</Text>
               <Text style={[s.sigVal, { fontFamily: 'Helvetica-Bold' }]}>X25Z Media LLC dba MEGA</Text>
-              <View style={s.sigLine} />
-              <Text style={s.sigLabel}>Authorized Signature</Text>
-              <Text style={s.sigVal}>{salesRepName}</Text>
-              <Text style={s.sigLabel}>Title: Account Executive</Text>
-              <View style={s.dateLine} />
-              <Text style={s.sigLabel}>Date</Text>
+              <Text style={[s.sigVal, { marginTop: 8 }]}>{salesRepName}</Text>
+              <Text style={s.sigLabel}>Account Executive</Text>
+              <Text style={[s.sigLabel, { marginTop: 4 }]}>Date: {effectiveDate}</Text>
             </View>
+
+            {/* Client — e-signature lands here */}
             <View style={s.sigBox}>
               <Text style={s.sigParty}>Client</Text>
               <Text style={[s.sigVal, { fontFamily: 'Helvetica-Bold' }]}>{companyName}</Text>
-              <View style={s.sigLine} />
-              <Text style={s.sigLabel}>Authorized Signature</Text>
-              <Text style={s.sigVal}>{customerName}</Text>
-              <Text style={s.sigLabel}>Title: ___________________________</Text>
-              <View style={s.dateLine} />
-              <Text style={s.sigLabel}>Date</Text>
+              <Text style={[s.sigLabel, { marginTop: 6 }]}>{customerName} · {customerEmail}</Text>
+              {/* Clean open area for OneSpan e-signature stamp */}
+              <View style={{ height: 70, marginTop: 10, borderWidth: 1, borderColor: BORDER, borderRadius: 3, borderStyle: 'dashed', justifyContent: 'center', alignItems: 'center' }}>
+                <Text style={{ fontSize: 7, color: LGRAY }}>E-Signature</Text>
+              </View>
             </View>
           </View>
         </View>
