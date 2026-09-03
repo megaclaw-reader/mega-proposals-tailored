@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Proposal, ContractTerm, TermOption, PricingBreakdown, BUNDLE_DEFINITIONS, QuoteOption, Agent, Bundle } from '@/lib/types';
 import { calculatePricing, formatPrice, getTermDisplayName, getTermMonths } from '@/lib/pricing';
 import { getServiceScope, getExecutiveSummary, SERVICE_DESCRIPTIONS } from '@/lib/content';
-import { hasAnyDiscount, getBundleStripeLink, isBundle3 } from '@/lib/stripe-links';
+import { hasAnyDiscount, getBundleStripeLink, getStripeLink, isBundle3 } from '@/lib/stripe-links';
 import { decodeProposal } from '@/lib/encode';
 import { format } from 'date-fns';
 
@@ -813,11 +813,12 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                           <div className="mt-auto pt-6">
                             {(() => {
                               const requiresAgreement = option.term === 'monthly' && (proposal as any).requiresAgreement && (proposal as any).minimumTermMonths;
-                              // Use static links for custom overrides and bundles
+                              // Use static links: custom overrides → bundles → agent combo lookup
                               const staticUrl = customStripeLinks?.[option.term]
                                 || ((proposal as any).selectedBundle
                                   ? getBundleStripeLink((proposal as any).selectedBundle, option.term)
-                                  : null);
+                                  : null)
+                                || getStripeLink(proposal.selectedAgents, option.term);
 
                               const stripeUrl = staticUrl || '#';
                               const btnClass = `block w-full text-center py-3 px-6 rounded-lg font-semibold text-white transition-colors cursor-pointer ${
