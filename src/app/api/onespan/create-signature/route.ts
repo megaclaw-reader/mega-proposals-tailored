@@ -24,7 +24,7 @@ async function getOAuthToken(): Promise<string> {
     throw new Error(`OneSpan OAuth failed: ${res.status} ${err}`);
   }
   const data = await res.json();
-  return data.access_token || data.accessToken;
+  return data.access_token;
 }
 
 export async function POST(request: NextRequest) {
@@ -79,77 +79,134 @@ export async function POST(request: NextRequest) {
     const firstName = nameParts[0] || customerName;
     const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : customerName;
 
-    // Create package with document
-    const packagePayload = JSON.stringify({
-      name: `MEGA Service Agreement — ${companyName}`,
-      description: `Service agreement for ${companyName} — ${minimumTermMonths}-month engagement`,
-      roles: [{
-        id: 'signer1',
-        type: 'SIGNER',
-        signers: [{
-          email: customerEmail,
-          firstName,
-          lastName,
-          company: companyName,
-        }],
-      }],
-      documents: [{
-        name: 'Service Agreement',
-        id: 'doc1',
-        approvals: [{
-          id: 'approval1',
-          role: 'signer1',
-          fields: [{
-            type: 'SIGNATURE',
-            subtype: 'FULLNAME',
-            page: 0,
-            top: 75,
-            left: 55,
-            width: 200,
-            height: 50,
-          }],
-        }],
-      }],
-      status: 'SENT',
-      settings: {
-        ceremony: {
-          handOver: {
-            href: redirectUrl,
-            text: 'Proceed to Payment',
-            title: 'Agreement Signed Successfully',
-          },
-        },
-      },
-    });
-
-    const formData = new FormData();
-    formData.append('payload', new Blob([packagePayload], { type: 'application/json' }));
-    const pdfBlob = new Blob([new Uint8Array(pdfBuffer)], { type: 'application/pdf' });
-    formData.append('file', pdfBlob, `MEGA_Agreement_${companyName.replace(/\s+/g, '_')}.pdf`);
-
+    // Step 1: Create package as DRAFT
     const pkgRes = await fetch(`${ONESPAN_BASE_URL}/api/packages`, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}` },
-      body: formData,
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: JSON.stringify({
+        name: `MEGA Service Agreement — ${companyName}`,
+        description: `Service agreement for ${companyName} — ${minimumTermMonths}-month engagement`,
+        roles: [{
+          id: 'signer1',
+          type: 'SIGNER',
+          signers: [{
+            email: customerEmail,
+            firstName,
+            lastName,
+            company: companyName,
+          }],
+        }],
+        settings: {
+          ceremony: {
+            handOver: {
+              href: redirectUrl,
+              text: 'Proceed to Payment',
+              title: 'Agreement Signed Successfully',
+            },
+          },
+        },
+      }),
     });
 
     if (!pkgRes.ok) {
       const errText = await pkgRes.text();
       console.error('OneSpan create package error:', errText);
-      return NextResponse.json({ error: `OneSpan API error: ${pkgRes.status}` }, { status: 500 });
+      return NextResponse.json({ error: `OneSpan create package failed: ${pkgRes.status}` }, { status: 500 });
     }
 
     const pkgData = await pkgRes.json();
     const packageId = pkgData.id;
+    const encodedPackageId = encodeURIComponent(packageId);
 
-    // Get signer authentication token
+    // Step 2: Upload PDF document to the package
+    const docPayload = JSON.stringify({ name: 'Service Agreement' });
+    const formData = new FormData();
+    formData.append('payload', new Blob([docPayload], { type: 'application/json' }));
+    formData.append('file', new Blob([new Uint8Array(pdfBuffer)], { type: 'application/pdf' }),
+      `MEGA_Agreement_${companyName.replace(/\s+/g, '_')}.pdf`);
+
+    const docRes = await fetch(`${ONESPAN_BASE_URL}/api/packages/${encodedPackageId}/documents`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+      body: formData,
+    });
+
+    if (!docRes.ok) {
+      const errText = await docRes.text();
+      console.error('OneSpan upload doc error:', errText);
+      return NextResponse.json({ error: `OneSpan document upload failed: ${docRes.status}` }, { status: 500 });
+    }
+
+    const docData = await docRes.json();
+    const documentId = docData.id;
+
+    // Step 3: Add signature approval field to the document
+    const approvalRes = await fetch(
+      `${ONESPAN_BASE_URL}/api/packages/${encodedPackageId}/documents/${documentId}/approvals`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          role: 'signer1',
+          fields: [{
+            type: 'SIGNATURE',
+            subtype: 'FULLNAME',
+            page: 0,
+            top: 600,
+            left: 55,
+            width: 200,
+            height: 50,
+          }],
+        }),
+      }
+    );
+
+    if (!approvalRes.ok) {
+      const errText = await approvalRes.text();
+      console.error('OneSpan approval error:', errText);
+      // Non-fatal — continue anyway
+    }
+
+    // Step 4: Send the package (DRAFT → SENT)
+    const sendRes = await fetch(`${ONESPAN_BASE_URL}/api/packages/${encodedPackageId}`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ status: 'SENT' }),
+    });
+
+    if (!sendRes.ok) {
+      const errText = await sendRes.text();
+      console.error('OneSpan send package error:', errText);
+      return NextResponse.json({ error: `OneSpan send failed: ${sendRes.status}` }, { status: 500 });
+    }
+
+    // Step 5: Get the actual signer ID from roles
+    const rolesRes = await fetch(`${ONESPAN_BASE_URL}/api/packages/${encodedPackageId}/roles`, {
+      headers: { 'Authorization': `Bearer ${token}`, 'Accept': 'application/json' },
+    });
+    const rolesData = await rolesRes.json();
+    const signerRole = rolesData.results?.find((r: any) => r.id === 'signer1');
+    const signerId = signerRole?.signers?.[0]?.id || 'signer1';
+
+    // Step 6: Get single-use signer authentication token
     const authRes = await fetch(`${ONESPAN_BASE_URL}/api/authenticationTokens/signer/singleUse`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ packageId, signerId: 'signer1' }),
+      body: JSON.stringify({ packageId, signerId }),
     });
 
     if (!authRes.ok) {
@@ -162,15 +219,12 @@ export async function POST(request: NextRequest) {
     const signerToken = authData.value;
     const signingUrl = `${ONESPAN_BASE_URL}/access?sessionToken=${signerToken}`;
 
-    return NextResponse.json({
-      packageId,
-      signingUrl,
-    });
+    return NextResponse.json({ packageId, signingUrl });
 
   } catch (error) {
     console.error('Create signature error:', error);
     return NextResponse.json(
-      { error: 'Failed to create signature request' },
+      { error: 'Failed to create signature request: ' + (error instanceof Error ? error.message : String(error)) },
       { status: 500 }
     );
   }
