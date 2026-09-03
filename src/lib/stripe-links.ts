@@ -20,7 +20,7 @@ const STRIPE_LINKS: Record<string, Record<string, string>> = {
     annual: 'https://buy.stripe.com/00weVd5BF7aFaCffUjbbG3c',
   },
   seo: {
-    monthly: 'https://buy.stripe.com/8x2bJ12pt52xbGj6jJbbG3r',
+    monthly: 'https://checkout.stripe.com/c/pay/cs_live_b1eRlSZZLdFcBlRec2eBWWs2h0IF9Za39aOqYM0NG4jochwEQhJ3Om0oVB#fidnandhYHdWcXxpYCc%2FJ3dqcGthJykndnBndmZ3bHVxbGprUGtsdHBga2B2dkBrZGdpYGEnP2NkaXZgKSdicGRmZGhqaWBTZHdsZGtxJz8nZmprcXdqaScpJ2R1bE5gfCc%2FJ3VuWmlsc2BaMDRKfEldbkB9PUxqdXx0MmBSa3FGb09IbVBqYk98cGhnVVxKcW1EMj1KQXc1NkdsNjZRfExkQEZpYU5iYm1xT3N%2FVjcwX3VMR2NWNHZxcFB0Sk5LanwxY3M1NTV1cEduaWpsJyknY3dqaFZgd3Ngdyc%2FcXdwYCknZ2RmbmJ3anBrYUZqaWp3Jz8nJmNhY2FjYScpJ2lkfGpwcVF8dWAnPydocGlxbFpscWBoJyknYGtkZ2lgVWlkZmBtamlhYHd2Jz9xd3BgeCUl',
     quarterly: 'https://buy.stripe.com/bJe00j0hlcuZ8u7dMbbbG37',
     bi_annual: 'https://buy.stripe.com/6oUfZhaVZ52xdOr37xbbG38',
     annual: 'https://buy.stripe.com/5kQdR96FJ52x9ybfUjbbG39',
