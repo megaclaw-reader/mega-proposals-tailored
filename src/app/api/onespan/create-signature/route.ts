@@ -159,7 +159,9 @@ export async function POST(request: NextRequest) {
           fields: [{
             type: 'SIGNATURE',
             subtype: 'FULLNAME',
-            page: 2,
+            // Place on last page at client signature line
+            // docData.pages gives us the page count
+            page: (docData.pages?.length || 3) - 1,
             top: 560,
             left: 380,
             width: 200,
