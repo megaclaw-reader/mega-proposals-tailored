@@ -191,7 +191,7 @@ function MultiOptionQuotes({ quoteOptions, proposal, cs, fp, fp2, customStripeLi
   );
 }
 
-export default function ProposalClient({ encodedId, showTerms = false, guaranteeDays = 30, midpointGuarantee = false, guaranteePlans, customNotes = [], customNotesTitle, currency = 'USD', currencyRate = 1, customStripeLinks, customAddendum, customAddendumTitle, customAddendumSubtitle, monthlyBilling = false, discountExpiresAt, signedAgreement, proposalSlug }: { encodedId: string; showTerms?: boolean; guaranteeDays?: number; midpointGuarantee?: boolean; guaranteePlans?: string[]; customNotes?: string[]; customNotesTitle?: string; currency?: 'USD' | 'CAD'; currencyRate?: number; customStripeLinks?: Record<string, string>; customAddendum?: Array<{ title: string; body: string }>; customAddendumTitle?: string; customAddendumSubtitle?: string; monthlyBilling?: boolean; discountExpiresAt?: string; signedAgreement?: { signedAt: string; signatureRequestId: string; minimumTermMonths?: number }; proposalSlug?: string }) {
+export default function ProposalClient({ encodedId, showTerms = false, guaranteeDays = 30, midpointGuarantee = false, guaranteePlans, customNotes = [], customNotesTitle, currency = 'USD', currencyRate = 1, customStripeLinks, customAddendum, customAddendumTitle, customAddendumSubtitle, monthlyBilling = false, discountExpiresAt, signedAgreement, isSigned = false, proposalSlug }: { encodedId: string; showTerms?: boolean; guaranteeDays?: number; midpointGuarantee?: boolean; guaranteePlans?: string[]; customNotes?: string[]; customNotesTitle?: string; currency?: 'USD' | 'CAD'; currencyRate?: number; customStripeLinks?: Record<string, string>; customAddendum?: Array<{ title: string; body: string }>; customAddendumTitle?: string; customAddendumSubtitle?: string; monthlyBilling?: boolean; discountExpiresAt?: string; signedAgreement?: { signedAt: string; signatureRequestId: string; minimumTermMonths?: number }; isSigned?: boolean; proposalSlug?: string }) {
   const cs = currency === 'CAD' ? 'CA$' : '$';
   const cc = currency;
   const cr = currencyRate;
@@ -828,7 +828,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                               // Monthly with minimum commitment — signing flow
                               if (requiresAgreement) {
                                 // Already signed — go straight to Stripe
-                                if (signedAgreement) {
+                                if (signedAgreement || isSigned) {
                                   if (staticUrl) {
                                     return (
                                       <a href={staticUrl} target="_blank" rel="noopener noreferrer" className={btnClass}>

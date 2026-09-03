@@ -26,6 +26,7 @@ export default async function ProposalSlugPage({
   let monthlyBilling = false;
   let discountExpiresAt: string | undefined;
   let signedAgreement: { signedAt: string; signatureRequestId: string; minimumTermMonths?: number } | undefined;
+  let isSigned = false;
 
   try {
     const { blobs } = await list({ prefix: `proposals/${slug}.json` });
@@ -57,6 +58,7 @@ export default async function ProposalSlugPage({
         monthlyBilling = data.monthlyBilling === true;
         discountExpiresAt = data.discountExpiresAt || undefined;
         signedAgreement = data.signedAgreement || (data.signed ? { signedAt: data.signedAt || new Date().toISOString(), signatureRequestId: 'onespan' } : undefined);
+        isSigned = !!(data.signed || data.signedAgreement);
       }
     }
   } catch (error) {
@@ -67,5 +69,5 @@ export default async function ProposalSlugPage({
     notFound();
   }
 
-  return <ProposalClient encodedId={encodedProposal} showTerms={showTerms} guaranteeDays={guaranteeDays} midpointGuarantee={midpointGuarantee} guaranteePlans={guaranteePlans} customNotes={customNotes} customNotesTitle={customNotesTitle} currency={currency} currencyRate={currencyRate} customStripeLinks={customStripeLinks} customAddendum={customAddendum} customAddendumTitle={customAddendumTitle} customAddendumSubtitle={customAddendumSubtitle} monthlyBilling={monthlyBilling} discountExpiresAt={discountExpiresAt} signedAgreement={signedAgreement} proposalSlug={slug} />;
+  return <ProposalClient encodedId={encodedProposal} showTerms={showTerms} guaranteeDays={guaranteeDays} midpointGuarantee={midpointGuarantee} guaranteePlans={guaranteePlans} customNotes={customNotes} customNotesTitle={customNotesTitle} currency={currency} currencyRate={currencyRate} customStripeLinks={customStripeLinks} customAddendum={customAddendum} customAddendumTitle={customAddendumTitle} customAddendumSubtitle={customAddendumSubtitle} monthlyBilling={monthlyBilling} discountExpiresAt={discountExpiresAt} signedAgreement={signedAgreement} isSigned={isSigned} proposalSlug={slug} />;
 }
