@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
             },
             {
               type: 'INPUT',
-              subtype: 'DATESTAMP',
+              subtype: 'LABEL',
               binding: '{approval.signed}',
               page: (docData.pages?.length || 3) - 1,
               top: 605,
