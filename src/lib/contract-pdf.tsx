@@ -6,7 +6,7 @@ import fs from 'fs';
 /* ─── Logo (embedded as base64 for cross-env compat) ─── */
 let LOGO_SRC: string;
 try {
-  const logoPath = path.join(process.cwd(), 'public', 'mega-logo-cs.png');
+  const logoPath = path.join(process.cwd(), 'public', 'mega-wordmark-blue.png');
   const buf = fs.readFileSync(logoPath);
   LOGO_SRC = `data:image/png;base64,${buf.toString('base64')}`;
 } catch {
@@ -24,7 +24,7 @@ const s = StyleSheet.create({
   page: { paddingTop: 45, paddingBottom: 60, paddingHorizontal: 50, fontSize: 8.5, fontFamily: 'Helvetica', lineHeight: 1.5, color: GRAY },
   /* Header */
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16, paddingBottom: 10, borderBottomWidth: 2, borderBottomColor: BRAND },
-  logo: { width: 38, height: 38, objectFit: 'contain' },
+  logo: { width: 90, height: 35, objectFit: 'contain' },
   docTitle: { fontSize: 16, fontFamily: 'Helvetica-Bold', color: DARK },
   docSub: { fontSize: 8, color: LGRAY, marginTop: 2 },
   /* Parties */
