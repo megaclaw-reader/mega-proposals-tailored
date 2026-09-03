@@ -140,53 +140,53 @@ export function ServiceAgreementPDF({
         <Text style={s.p}><Text style={s.b}>3.3</Text> Provider may adjust fees with 30 days&apos; written notice before any Renewal Term. Client may terminate if it does not agree to adjusted fees.</Text>
 
         {/* 4 */}
-        <Text style={s.sec}>4. Client Obligations</Text>
-        <Text style={s.p}>Client shall: (a) provide timely access to accounts, platforms, and materials necessary for the Services; (b) designate a primary contact authorized to make decisions; (c) respond to reasonable requests within 5 business days; (d) maintain backups of its data and assets; and (e) ensure materials provided do not infringe third-party rights.</Text>
+        <View wrap={false}><Text style={s.sec}>4. Client Obligations</Text>
+        <Text style={s.p}>Client shall: (a) provide timely access to accounts, platforms, and materials necessary for the Services; (b) designate a primary contact authorized to make decisions; (c) respond to reasonable requests within 5 business days; (d) maintain backups of its data and assets; and (e) ensure materials provided do not infringe third-party rights.</Text></View>
 
         {/* 5 */}
-        <Text style={s.sec}>5. Intellectual Property</Text>
-        <Text style={s.p}><Text style={s.b}>5.1</Text> Client retains all rights in materials and content provided to Provider. <Text style={s.b}>5.2</Text> Upon full payment, Client owns all deliverables created by Provider for Client. <Text style={s.b}>5.3</Text> Provider retains rights in its proprietary tools, AI models, software, and methodologies.</Text>
+        <View wrap={false}><Text style={s.sec}>5. Intellectual Property</Text>
+        <Text style={s.p}><Text style={s.b}>5.1</Text> Client retains all rights in materials and content provided to Provider. <Text style={s.b}>5.2</Text> Upon full payment, Client owns all deliverables created by Provider for Client. <Text style={s.b}>5.3</Text> Provider retains rights in its proprietary tools, AI models, software, and methodologies.</Text></View>
 
         {/* 6 */}
-        <Text style={s.sec}>6. Confidentiality</Text>
-        <Text style={s.p}>Each Party shall hold in confidence all non-public information disclosed by the other Party and use it solely for purposes of this Agreement. This obligation survives for 2 years after termination. Exceptions: (a) publicly available information; (b) information known prior to disclosure; (c) independently developed information.</Text>
+        <View wrap={false}><Text style={s.sec}>6. Confidentiality</Text>
+        <Text style={s.p}>Each Party shall hold in confidence all non-public information disclosed by the other Party and use it solely for purposes of this Agreement. This obligation survives for 2 years after termination. Exceptions: (a) publicly available information; (b) information known prior to disclosure; (c) independently developed information.</Text></View>
 
         {/* 7 */}
-        <Text style={s.sec}>7. Data Protection</Text>
-        <Text style={s.p}>Provider shall maintain commercially reasonable safeguards to protect Client data against unauthorized access, disclosure, or destruction, and shall promptly notify Client of any confirmed breach. Provider processes Client data solely for performing the Services and in compliance with applicable data protection laws.</Text>
+        <View wrap={false}><Text style={s.sec}>7. Data Protection</Text>
+        <Text style={s.p}>Provider shall maintain commercially reasonable safeguards to protect Client data against unauthorized access, disclosure, or destruction, and shall promptly notify Client of any confirmed breach. Provider processes Client data solely for performing the Services and in compliance with applicable data protection laws.</Text></View>
 
         {/* 8 */}
-        <Text style={s.sec}>8. Warranties</Text>
+        <View wrap={false}><Text style={s.sec}>8. Warranties</Text>
         <Text style={s.p}><Text style={s.b}>8.1</Text> Each Party warrants it has legal authority to enter into this Agreement. <Text style={s.b}>8.2</Text> Provider warrants Services shall be performed in a professional manner consistent with industry standards.</Text>
-        <Text style={[s.p, { fontSize: 7.5 }]}>8.3 EXCEPT AS EXPRESSLY SET FORTH HEREIN, PROVIDER MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. PROVIDER DOES NOT GUARANTEE SPECIFIC MARKETING RESULTS, RANKINGS, OR ROI.</Text>
+        <Text style={[s.p, { fontSize: 7.5 }]}>8.3 EXCEPT AS EXPRESSLY SET FORTH HEREIN, PROVIDER MAKES NO WARRANTIES, EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. PROVIDER DOES NOT GUARANTEE SPECIFIC MARKETING RESULTS, RANKINGS, OR ROI.</Text></View>
 
         {/* 9 */}
-        <Text style={s.sec}>9. Limitation of Liability</Text>
-        <Text style={[s.p, { fontSize: 7.5 }]}>PROVIDER&apos;S AGGREGATE LIABILITY SHALL NOT EXCEED FEES PAID DURING THE 3 MONTHS PRECEDING THE CLAIM. NEITHER PARTY SHALL BE LIABLE FOR INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOST PROFITS, REVENUE, OR DATA.</Text>
+        <View wrap={false}><Text style={s.sec}>9. Limitation of Liability</Text>
+        <Text style={[s.p, { fontSize: 7.5 }]}>PROVIDER&apos;S AGGREGATE LIABILITY SHALL NOT EXCEED FEES PAID DURING THE 3 MONTHS PRECEDING THE CLAIM. NEITHER PARTY SHALL BE LIABLE FOR INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOST PROFITS, REVENUE, OR DATA.</Text></View>
 
         {/* 10 */}
-        <Text style={s.sec}>10. Indemnification</Text>
-        <Text style={s.p}>Each Party shall indemnify and hold harmless the other from third-party claims arising from (a) breach of this Agreement or (b) gross negligence or willful misconduct.</Text>
+        <View wrap={false}><Text style={s.sec}>10. Indemnification</Text>
+        <Text style={s.p}>Each Party shall indemnify and hold harmless the other from third-party claims arising from (a) breach of this Agreement or (b) gross negligence or willful misconduct.</Text></View>
 
         {/* 11 */}
-        <Text style={s.sec}>11. Non-Solicitation</Text>
-        <Text style={s.p}>During the term and for 12 months after termination, neither Party shall solicit or hire employees or contractors of the other Party involved in this Agreement without prior written consent.</Text>
+        <View wrap={false}><Text style={s.sec}>11. Non-Solicitation</Text>
+        <Text style={s.p}>During the term and for 12 months after termination, neither Party shall solicit or hire employees or contractors of the other Party involved in this Agreement without prior written consent.</Text></View>
 
         {/* 12 */}
-        <Text style={s.sec}>12. Publicity</Text>
-        <Text style={s.p}>Neither Party shall use the other&apos;s name, logo, or trademarks in marketing materials without prior written consent.</Text>
+        <View wrap={false}><Text style={s.sec}>12. Publicity</Text>
+        <Text style={s.p}>Neither Party shall use the other&apos;s name, logo, or trademarks in marketing materials without prior written consent.</Text></View>
 
         {/* 13 */}
-        <Text style={s.sec}>13. Force Majeure</Text>
-        <Text style={s.p}>Neither Party is liable for delays caused by events beyond reasonable control, including natural disasters, war, pandemic, government action, or infrastructure failures.</Text>
+        <View wrap={false}><Text style={s.sec}>13. Force Majeure</Text>
+        <Text style={s.p}>Neither Party is liable for delays caused by events beyond reasonable control, including natural disasters, war, pandemic, government action, or infrastructure failures.</Text></View>
 
         {/* 14 */}
-        <Text style={s.sec}>14. General Provisions</Text>
-        <Text style={s.p}><Text style={s.b}>14.1 Amendments.</Text> No modification is effective unless in writing and signed by both Parties. <Text style={s.b}>14.2 Assignment.</Text> Neither Party may assign without consent, except Provider may assign in connection with a merger or acquisition. <Text style={s.b}>14.3 Severability.</Text> If any provision is unenforceable, the remainder continues in effect. <Text style={s.b}>14.4 Governing Law.</Text> Governed by the laws of Delaware. Disputes resolved by binding arbitration under AAA rules.</Text>
+        <View wrap={false}><Text style={s.sec}>14. General Provisions</Text>
+        <Text style={s.p}><Text style={s.b}>14.1 Amendments.</Text> No modification is effective unless in writing and signed by both Parties. <Text style={s.b}>14.2 Assignment.</Text> Neither Party may assign without consent, except Provider may assign in connection with a merger or acquisition. <Text style={s.b}>14.3 Severability.</Text> If any provision is unenforceable, the remainder continues in effect. <Text style={s.b}>14.4 Governing Law.</Text> Governed by the laws of Delaware. Disputes resolved by binding arbitration under AAA rules.</Text></View>
 
         {/* 15 */}
-        <Text style={s.sec}>15. Entire Agreement</Text>
-        <Text style={s.p}>This Agreement constitutes the entire understanding between the Parties and supersedes all prior agreements, proposals, and communications.</Text>
+        <View wrap={false}><Text style={s.sec}>15. Entire Agreement</Text>
+        <Text style={s.p}>This Agreement constitutes the entire understanding between the Parties and supersedes all prior agreements, proposals, and communications.</Text></View>
 
         {/* ─── SIGNATURES ─── */}
         <View style={s.sigSection} wrap={false}>
