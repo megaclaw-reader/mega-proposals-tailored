@@ -56,7 +56,7 @@ export default async function ProposalSlugPage({
         customAddendumSubtitle = data.customAddendumSubtitle || undefined;
         monthlyBilling = data.monthlyBilling === true;
         discountExpiresAt = data.discountExpiresAt || undefined;
-        signedAgreement = data.signedAgreement || (data.signed ? { signedAt: data.signedAt || new Date().toISOString(), signatureRequestId: 'onespan', minimumTermMonths: undefined } : undefined);
+        signedAgreement = data.signedAgreement || (data.signed ? { signedAt: data.signedAt || new Date().toISOString(), signatureRequestId: 'onespan' } : undefined);
       }
     }
   } catch (error) {
