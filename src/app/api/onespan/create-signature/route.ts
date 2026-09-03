@@ -69,10 +69,9 @@ export async function POST(request: NextRequest) {
     const token = await getOAuthToken();
 
     // Determine redirect URL after signing
-    const hasStaticStripe = stripeUrl && stripeUrl !== '#' && stripeUrl.startsWith('http');
+    // Route through our signed-redirect endpoint to mark proposal as signed + redirect to Stripe
     const origin = request.nextUrl.origin;
-    const dynamicCheckoutUrl = `${origin}/api/hellosign/signed-redirect?agents=${encodeURIComponent(JSON.stringify(selectedAgents))}&slug=${encodeURIComponent(proposalSlug || '')}`;
-    const redirectUrl = hasStaticStripe ? stripeUrl : dynamicCheckoutUrl;
+    const redirectUrl = `${origin}/api/onespan/signed-redirect?agents=${encodeURIComponent(JSON.stringify(selectedAgents))}&slug=${encodeURIComponent(proposalSlug || '')}&stripeUrl=${encodeURIComponent(stripeUrl || '')}`;
 
     // Split customer name into first/last
     const nameParts = customerName.trim().split(/\s+/);
@@ -156,17 +155,27 @@ export async function POST(request: NextRequest) {
         },
         body: JSON.stringify({
           role: 'signer1',
-          fields: [{
-            type: 'SIGNATURE',
-            subtype: 'FULLNAME',
-            // Place on last page at client signature line
-            // docData.pages gives us the page count
-            page: (docData.pages?.length || 3) - 1,
-            top: 560,
-            left: 380,
-            width: 200,
-            height: 50,
-          }],
+          fields: [
+            {
+              type: 'SIGNATURE',
+              subtype: 'FULLNAME',
+              page: (docData.pages?.length || 3) - 1,
+              top: 545,
+              left: 380,
+              width: 200,
+              height: 50,
+            },
+            {
+              type: 'INPUT',
+              subtype: 'DATESTAMP',
+              binding: '{approval.signed}',
+              page: (docData.pages?.length || 3) - 1,
+              top: 605,
+              left: 380,
+              width: 200,
+              height: 20,
+            },
+          ],
         }),
       }
     );

@@ -6,7 +6,7 @@ import fs from 'fs';
 /* ─── Logo (embedded as base64 for cross-env compat) ─── */
 let LOGO_SRC: string;
 try {
-  const logoPath = path.join(process.cwd(), 'public', 'mega-wordmark-blue.png');
+  const logoPath = path.join(process.cwd(), 'public', 'mega-wordmark-clean.png');
   const buf = fs.readFileSync(logoPath);
   LOGO_SRC = `data:image/png;base64,${buf.toString('base64')}`;
 } catch {
