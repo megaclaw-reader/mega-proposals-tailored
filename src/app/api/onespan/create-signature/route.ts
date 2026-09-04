@@ -4,6 +4,7 @@ import React from 'react';
 import { ServiceAgreementPDF } from '@/lib/contract-pdf';
 import { SERVICE_DESCRIPTIONS } from '@/lib/content';
 import { Agent } from '@/lib/types';
+import { list, put, del } from '@vercel/blob';
 
 const ONESPAN_CLIENT_ID = process.env.ONESPAN_CLIENT_ID || '';
 const ONESPAN_API_KEY = process.env.ONESPAN_API_KEY || '';
@@ -229,6 +230,42 @@ export async function POST(request: NextRequest) {
     const authData = await authRes.json();
     const signerToken = authData.value;
     const signingUrl = `${ONESPAN_BASE_URL}/access?sessionToken=${signerToken}`;
+
+    // Store signing metadata in proposal blob for post-signing notification
+    if (proposalSlug) {
+      try {
+        const { blobs } = await list({ prefix: `proposals/${proposalSlug}.json` });
+        const blob = blobs.find(b => b.pathname === `proposals/${proposalSlug}.json`);
+        if (blob) {
+          const blobRes = await fetch(blob.url, {
+            headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}` },
+          });
+          const blobData = await blobRes.json();
+          await del(blob.url);
+          await put(`proposals/${proposalSlug}.json`, JSON.stringify({
+            ...blobData,
+            onespan: {
+              packageId,
+              documentId,
+              customerName,
+              companyName,
+              salesRepName,
+              salesRepEmail,
+              customerEmail,
+              monthlyRate,
+              minimumTermMonths,
+              selectedAgents,
+            },
+          }), {
+            access: 'private',
+            contentType: 'application/json',
+            addRandomSuffix: false,
+          });
+        }
+      } catch (err) {
+        console.error('Failed to store signing metadata:', err);
+      }
+    }
 
     return NextResponse.json({ packageId, signingUrl });
 
