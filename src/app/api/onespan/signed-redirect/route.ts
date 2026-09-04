@@ -55,7 +55,7 @@ export async function GET(request: NextRequest) {
       const agentIds = agents.map(a => AGENT_MAP[a] || a).filter(Boolean);
 
       if (agentIds.length > 0) {
-        const checkoutRes = await fetch('https://www.gomega.ai/checkout', {
+        const checkoutRes = await fetch('https://www.gomega.ai/api/create-checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ agentIds, cycle: 'monthly' }),
