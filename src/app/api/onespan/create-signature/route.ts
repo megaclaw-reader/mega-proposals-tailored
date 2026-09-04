@@ -90,6 +90,12 @@ export async function POST(request: NextRequest) {
       body: JSON.stringify({
         name: `MEGA Service Agreement — ${companyName}`,
         description: `Service agreement for ${companyName} — ${minimumTermMonths}-month engagement`,
+        sender: {
+          firstName: 'MEGA',
+          lastName: 'AI',
+          email: 'contracts@gomega.ai',
+          company: 'Mega',
+        },
         roles: [{
           id: 'signer1',
           type: 'SIGNER',
