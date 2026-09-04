@@ -135,6 +135,12 @@ export function ServiceAgreementPDF({
           <View style={[s.tRow, s.tRowAlt]}><Text style={s.tLabel}>Total Minimum Commitment</Text><Text style={s.tVal}>{fc(totalCommitment)}</Text></View>
           <View style={s.tRow}><Text style={s.tLabel}>Billing</Text><Text style={s.tVal}>Monthly, in advance</Text></View>
         </View>
+        {/* Discount clause — prominent box */}
+        <View style={{ backgroundColor: '#EEF2FF', borderWidth: 1, borderColor: '#C7D2FE', borderRadius: 3, padding: 8, marginBottom: 8 }}>
+          <Text style={[s.p, { fontFamily: 'Helvetica-Bold', color: DARK, fontSize: 9, marginBottom: 2 }]}>Promotional Pricing</Text>
+          <Text style={[s.p, { marginBottom: 0 }]}>Any promotional discounts, credits, or adjusted pricing offered at the time of this Agreement shall be honored for the duration of the Initial Term and any applicable Renewal Terms. The final monthly charge reflected on the associated payment page shall constitute the agreed-upon rate between the Parties.</Text>
+        </View>
+
         <Text style={s.p}><Text style={s.b}>3.1</Text> All invoices are due upon receipt. Fees exclude applicable taxes, which are Client&apos;s responsibility.</Text>
         <Text style={s.p}><Text style={s.b}>3.2</Text> Late payments bear interest at the lesser of 1.5%/month or the maximum rate permitted by law. Provider may suspend Services after 5 business days of non-payment with written notice.</Text>
         <Text style={s.p}><Text style={s.b}>3.3</Text> Provider may adjust fees with 30 days&apos; written notice before any Renewal Term. Client may terminate if it does not agree to adjusted fees.</Text>
