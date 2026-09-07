@@ -55,6 +55,16 @@ async function downloadSignedPdf(packageId: string, documentId: string): Promise
   }
 }
 
+async function getOrOpenDM(userId: string): Promise<string> {
+  const res = await fetch('https://slack.com/api/conversations.open', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${SLACK_BOT_TOKEN}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ users: userId }),
+  });
+  const data = await res.json();
+  return data.ok ? data.channel.id : userId;
+}
+
 async function sendSlackDM(
   userId: string,
   companyName: string,
@@ -73,30 +83,46 @@ async function sendSlackDM(
     `• *Commitment:* ${minimumTermMonths} months\n\n` +
     `The signed agreement is attached below. 🔽`;
 
-  if (pdfBuffer) {
-    // Upload file to Slack with message
-    const form = new FormData();
-    form.append('token', SLACK_BOT_TOKEN);
-    form.append('channels', userId);
-    form.append('initial_comment', message);
-    form.append('filename', pdfFilename);
-    form.append('filetype', 'pdf');
-    form.append('file', new Blob([new Uint8Array(pdfBuffer)], { type: 'application/pdf' }), pdfFilename);
+  const dmChannelId = await getOrOpenDM(userId);
 
-    await fetch('https://slack.com/api/files.upload', {
+  if (pdfBuffer) {
+    // Step 1: Get upload URL
+    const urlRes = await fetch('https://slack.com/api/files.getUploadURLExternal', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${SLACK_BOT_TOKEN}` },
-      body: form,
+      headers: { Authorization: `Bearer ${SLACK_BOT_TOKEN}`, 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ filename: pdfFilename, length: String(pdfBuffer.length) }),
+    });
+    const urlData = await urlRes.json();
+    if (!urlData.ok) {
+      console.error('Slack getUploadURL failed:', urlData.error);
+      // Fall back to text-only message
+      await fetch('https://slack.com/api/chat.postMessage', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${SLACK_BOT_TOKEN}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ channel: dmChannelId, text: message }),
+      });
+      return;
+    }
+
+    // Step 2: Upload file content
+    await fetch(urlData.upload_url, { method: 'POST', body: pdfBuffer });
+
+    // Step 3: Complete upload and share
+    await fetch('https://slack.com/api/files.completeUploadExternal', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${SLACK_BOT_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        files: [{ id: urlData.file_id, title: pdfFilename }],
+        channel_id: dmChannelId,
+        initial_comment: message,
+      }),
     });
   } else {
     // Send just the message without PDF
     await fetch('https://slack.com/api/chat.postMessage', {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${SLACK_BOT_TOKEN}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ channel: userId, text: message }),
+      headers: { Authorization: `Bearer ${SLACK_BOT_TOKEN}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ channel: dmChannelId, text: message }),
     });
   }
 }
