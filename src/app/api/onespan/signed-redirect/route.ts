@@ -137,20 +137,17 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Send signed agreement to sales rep via Slack (non-blocking)
+  // Send signed agreement to sales rep via Slack (MUST await before redirect on serverless)
   if (onespan) {
-    (async () => {
-      try {
-        const { packageId, documentId, companyName, customerName, salesRepEmail,
-                monthlyRate, minimumTermMonths, selectedAgents } = onespan;
+    try {
+      const { packageId, documentId, companyName, customerName, salesRepEmail,
+              monthlyRate, minimumTermMonths, selectedAgents } = onespan;
 
-        // Find rep's Slack user ID
-        const slackUserId = await getSlackUserId(salesRepEmail);
-        if (!slackUserId) {
-          console.error('Could not find Slack user for:', salesRepEmail);
-          return;
-        }
-
+      // Find rep's Slack user ID
+      const slackUserId = await getSlackUserId(salesRepEmail);
+      if (!slackUserId) {
+        console.error('Could not find Slack user for:', salesRepEmail);
+      } else {
         // Download signed PDF from OneSpan
         let pdfBuffer: Buffer | null = null;
         if (packageId && documentId) {
@@ -169,10 +166,10 @@ export async function GET(request: NextRequest) {
           pdfBuffer,
           filename,
         );
-      } catch (err) {
-        console.error('Failed to send Slack notification:', err);
       }
-    })();
+    } catch (err) {
+      console.error('Failed to send Slack notification:', err);
+    }
   }
 
   // Resolve Stripe checkout URL
