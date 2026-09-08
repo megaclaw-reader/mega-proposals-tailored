@@ -10,7 +10,7 @@ const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || '';
 // Map our agent IDs to gomega.ai agent IDs
 const AGENT_MAP: Record<string, string> = {
   seo: 'seo',
-  paid_ads: 'paid_ads',
+  paid_ads: 'ads',
   crm: 'crm',
   website: 'website',
 };
@@ -203,21 +203,30 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(stripeUrlParam);
   }
 
-  // Redirect to client-side checkout page (gomega.ai/api/create-checkout requires browser context)
+  // Create Stripe Checkout Session via gomega.ai
   if (agentsParam) {
     try {
       const agents = JSON.parse(agentsParam) as Agent[];
       const agentIds = agents.map(a => AGENT_MAP[a] || a).filter(Boolean);
 
       if (agentIds.length > 0) {
-        const checkoutUrl = new URL('/checkout', origin);
-        checkoutUrl.searchParams.set('agents', agentIds.join(','));
-        checkoutUrl.searchParams.set('cycle', 'monthly');
-        if (slug) checkoutUrl.searchParams.set('slug', slug);
-        return NextResponse.redirect(checkoutUrl.toString());
+        const checkoutRes = await fetch('https://www.gomega.ai/api/create-checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ agentIds, cycle: 'monthly' }),
+        });
+
+        if (checkoutRes.ok) {
+          const checkoutData = await checkoutRes.json();
+          if (checkoutData.url) {
+            return NextResponse.redirect(checkoutData.url);
+          }
+        }
+        const errText = await checkoutRes.text().catch(() => '');
+        console.error('gomega.ai checkout failed:', checkoutRes.status, errText);
       }
     } catch (err) {
-      console.error('Checkout redirect failed:', err);
+      console.error('Checkout session creation failed:', err);
     }
   }
 
