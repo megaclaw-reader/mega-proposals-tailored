@@ -813,14 +813,12 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                           <div className="mt-auto pt-6">
                             {(() => {
                               const requiresAgreement = option.term === 'monthly' && (proposal as any).requiresAgreement && (proposal as any).minimumTermMonths;
-                              // Use static links: custom overrides → dynamic checkout fallback
-                              // Note: buy.stripe.com links are dead — only checkout.stripe.com links work
-                              const rawUrl = customStripeLinks?.[option.term]
+                              // Use static links: custom overrides → bundles → agent combo → dynamic fallback
+                              const staticUrl = customStripeLinks?.[option.term]
                                 || ((proposal as any).selectedBundle
                                   ? getBundleStripeLink((proposal as any).selectedBundle, option.term)
                                   : null)
                                 || getStripeLink(proposal.selectedAgents, option.term);
-                              const staticUrl = rawUrl && !rawUrl.includes('buy.stripe.com') ? rawUrl : null;
 
                               const stripeUrl = staticUrl || '#';
                               const btnClass = `block w-full text-center py-3 px-6 rounded-lg font-semibold text-white transition-colors cursor-pointer ${

@@ -198,12 +198,12 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Resolve Stripe checkout URL
-  if (stripeUrlParam && stripeUrlParam.includes('checkout.stripe.com/c/pay/cs_') && stripeUrlParam.startsWith('http')) {
+  // Resolve Stripe checkout URL (buy.stripe.com or checkout.stripe.com)
+  if (stripeUrlParam && (stripeUrlParam.includes('stripe.com')) && stripeUrlParam.startsWith('http')) {
     return NextResponse.redirect(stripeUrlParam);
   }
 
-  // Create Stripe Checkout Session via gomega.ai
+  // Create Stripe Checkout Session via gomega.ai (à la carte fallback)
   if (agentsParam) {
     try {
       const agents = JSON.parse(agentsParam) as Agent[];
