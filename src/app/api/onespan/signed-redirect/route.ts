@@ -105,7 +105,7 @@ async function sendSlackDM(
     }
 
     // Step 2: Upload file content
-    await fetch(urlData.upload_url, { method: 'POST', body: pdfBuffer });
+    await fetch(urlData.upload_url, { method: 'POST', body: new Uint8Array(pdfBuffer) });
 
     // Step 3: Complete upload and share
     await fetch('https://slack.com/api/files.completeUploadExternal', {
@@ -203,28 +203,21 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(stripeUrlParam);
   }
 
+  // Redirect to client-side checkout page (gomega.ai/api/create-checkout requires browser context)
   if (agentsParam) {
     try {
       const agents = JSON.parse(agentsParam) as Agent[];
       const agentIds = agents.map(a => AGENT_MAP[a] || a).filter(Boolean);
 
       if (agentIds.length > 0) {
-        const checkoutRes = await fetch('https://www.gomega.ai/api/create-checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ agentIds, cycle: 'monthly' }),
-        });
-
-        if (checkoutRes.ok) {
-          const checkoutData = await checkoutRes.json();
-          if (checkoutData.url) {
-            return NextResponse.redirect(checkoutData.url);
-          }
-        }
-        console.error('gomega.ai checkout failed:', checkoutRes.status);
+        const checkoutUrl = new URL('/checkout', origin);
+        checkoutUrl.searchParams.set('agents', agentIds.join(','));
+        checkoutUrl.searchParams.set('cycle', 'monthly');
+        if (slug) checkoutUrl.searchParams.set('slug', slug);
+        return NextResponse.redirect(checkoutUrl.toString());
       }
     } catch (err) {
-      console.error('Checkout session creation failed:', err);
+      console.error('Checkout redirect failed:', err);
     }
   }
 
