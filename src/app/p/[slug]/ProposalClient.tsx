@@ -812,6 +812,23 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                           {!(proposal as any).hideCTA && (
                           <div className="mt-auto pt-6">
                             {(() => {
+                              // Contact mode: show "Contact [Name]" instead of checkout
+                              const contactMode = (proposal as any).contactMode;
+                              if (contactMode) {
+                                const contactName = contactMode.name || 'your MEGA representative';
+                                const contactEmail = contactMode.email;
+                                const subject = encodeURIComponent(`${proposal.companyName} — Ready to Get Started`);
+                                const body = encodeURIComponent(`Hi ${contactName.split(' ')[0]},\n\nI've reviewed the proposal and I'm ready to move forward.\n\nBest regards,\n${proposal.customerName}`);
+                                return (
+                                  <a href={`mailto:${contactEmail}?subject=${subject}&body=${body}`}
+                                    className={`block w-full text-center py-3 px-6 rounded-lg font-semibold text-white transition-colors cursor-pointer ${
+                                      isBestValue ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-800 hover:bg-gray-900'
+                                    }`}>
+                                    Contact {contactName}
+                                  </a>
+                                );
+                              }
+
                               const requiresAgreement = option.term === 'monthly' && (proposal as any).requiresAgreement && (proposal as any).minimumTermMonths;
                               // Use static links: custom overrides → bundles → agent combo → dynamic fallback
                               const staticUrl = customStripeLinks?.[option.term]

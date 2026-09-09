@@ -60,6 +60,10 @@ export function encodeProposal(config: Omit<ProposalConfig, 'id' | 'createdAt'>)
     payload.hcta = true;
   }
 
+  if ((config as any).contactMode) {
+    payload.ctm = (config as any).contactMode;
+  }
+
   if ((config as any).weeklyMeetings) {
     payload.wm = true;
   }
@@ -171,6 +175,7 @@ export function decodeProposal(encoded: string): ProposalConfig | null {
       customMonthlyPrice: payload.cmp || undefined,
       customStripeLink: payload.csl || undefined,
       hideCTA: payload.hcta || false,
+      contactMode: payload.ctm || undefined,
       weeklyMeetings: payload.wm || false,
       customAgentPrices: payload.cap || undefined,
       investmentNote: payload.invn || undefined,
