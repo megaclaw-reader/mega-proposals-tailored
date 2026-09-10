@@ -108,23 +108,23 @@ const STRIPE_LINKS: Record<string, Record<string, string>> = {
  * Stripe checkout links for predefined bundles.
  */
 const BUNDLE_STRIPE_LINKS: Record<Bundle, Record<string, string>> = {
-  convert: {
-    monthly: 'https://buy.stripe.com/00w3cv4xB66B11FgYnbbG2R',
-    quarterly: 'https://buy.stripe.com/aFa9AT7JNgLf11FgYnbbG2S',
-    bi_annual: 'https://buy.stripe.com/eVqcN5c030MhcKn6jJbbG2T',
-    annual: 'https://buy.stripe.com/eVq7sLe8bdz3eSveQfbbG2U',
+  starter: {
+    monthly: 'https://buy.stripe.com/fZu4gz4xB3YteSv37xbbG3G',
+    quarterly: 'https://buy.stripe.com/3cI5kD2ptdz34dR7nNbbG3F',
+    bi_annual: 'https://buy.stripe.com/cNieVde8bcuZ8u75fFbbG3H',
+    annual: 'https://buy.stripe.com/fZu4gz5BF3YtfWz4bBbbG3J',
   },
   grow: {
-    monthly: 'https://buy.stripe.com/3cI5kDc039iNh0DgYnbbG2V',
-    quarterly: 'https://buy.stripe.com/8x2bJ1fcf8eJ25J6jJbbG2W',
-    bi_annual: 'https://buy.stripe.com/00w9ATd4766B9ybfUjbbG2X',
+    monthly: 'https://buy.stripe.com/8x26oH2ptbqVdOrbE3bbG3B',
+    quarterly: 'https://buy.stripe.com/dRm14nd473Yth0DbE3bbG3C',
+    bi_annual: '', // TBD — waiting on Stripe link from Julien
     annual: 'https://buy.stripe.com/7sYeVde8b3Yt8u737xbbG2Y',
   },
   grow_faster: {
     monthly: 'https://buy.stripe.com/fZufZh0hl52xcKneQfbbG2Z',
     quarterly: 'https://buy.stripe.com/8x2bJ15BFgLf25J6jJbbG30',
     bi_annual: 'https://buy.stripe.com/9B6fZhe8bamR39NbE3bbG31',
-    annual: 'https://buy.stripe.com/7sYbJ1fcfgLffWz23tbbG32',
+    annual: 'https://buy.stripe.com/9B6eVd2ptdz3dOrdMbbbG3E',
   },
   grow_faster_ecom: {
     monthly: 'https://buy.stripe.com/3cI14nc03eD725J23tbbG3w',

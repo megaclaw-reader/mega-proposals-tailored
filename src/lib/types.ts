@@ -1,12 +1,12 @@
 export type Agent = 'seo' | 'paid_ads' | 'website' | 'crm';
 
-export type Bundle = 'convert' | 'grow' | 'grow_faster' | 'grow_faster_ecom';
+export type Bundle = 'starter' | 'grow' | 'grow_faster' | 'grow_faster_ecom';
 
 export const BUNDLE_DEFINITIONS: Record<Bundle, { name: string; agents: Agent[]; description: string }> = {
-  convert: {
-    name: 'Convert',
-    agents: ['crm', 'website'],
-    description: 'Conversion Agent + Website Agent',
+  starter: {
+    name: 'Starter',
+    agents: ['seo', 'website'],
+    description: 'SEO & GEO Agent + Website Agent',
   },
   grow: {
     name: 'Grow',

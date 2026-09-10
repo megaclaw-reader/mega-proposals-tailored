@@ -621,8 +621,8 @@ export default function CreateProposal() {
               <label className="block text-sm font-medium text-gray-700 mb-3">Quick Select a Bundle</label>
               <div className="grid grid-cols-3 gap-3 mb-4">
                 {((formData.template === 'ecom'
-                  ? ['convert', 'grow', 'grow_faster_ecom']
-                  : ['convert', 'grow', 'grow_faster']) as Bundle[]).map(bundle => {
+                  ? ['starter', 'grow', 'grow_faster_ecom']
+                  : ['starter', 'grow', 'grow_faster']) as Bundle[]).map(bundle => {
                   const def = BUNDLE_DEFINITIONS[bundle];
                   const isSelected = formData.selectedBundle === bundle;
                   return (
@@ -769,7 +769,7 @@ export default function CreateProposal() {
                           }));
                         }} className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
                           <option value="">No bundle (à la carte)</option>
-                          {(['convert', 'grow', 'grow_faster', 'grow_faster_ecom'] as Bundle[]).map(b => (
+                          {(['starter', 'grow', 'grow_faster', 'grow_faster_ecom'] as Bundle[]).map(b => (
                             <option key={b} value={b}>{BUNDLE_DEFINITIONS[b].name} — {BUNDLE_DEFINITIONS[b].description}</option>
                           ))}
                         </select>
