@@ -117,7 +117,7 @@ const BUNDLE_STRIPE_LINKS: Record<Bundle, Record<string, string>> = {
   grow: {
     monthly: 'https://buy.stripe.com/8x26oH2ptbqVdOrbE3bbG3B',
     quarterly: 'https://buy.stripe.com/dRm14nd473Yth0DbE3bbG3C',
-    bi_annual: '', // TBD — waiting on Stripe link from Julien
+    bi_annual: 'https://buy.stripe.com/3cI3cv4xBcuZeSvazZbbG3D',
     annual: 'https://buy.stripe.com/7sYeVde8b3Yt8u737xbbG2Y',
   },
   grow_faster: {
