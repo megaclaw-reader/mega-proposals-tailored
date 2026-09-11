@@ -57,7 +57,7 @@ function MultiOptionQuotes({ quoteOptions, proposal, cs, fp, fp2, customStripeLi
               <div className="text-sm font-semibold text-gray-500 mb-3">{getTermDisplayName(termOpt.term)}</div>
               <div className="text-4xl font-extrabold text-gray-900">{cs}{fp(pricing.total)}<span className="text-base font-normal text-gray-400">/mo</span></div>
               <div className="text-sm text-gray-400 mt-1 mb-4">
-                {termOpt.term === 'monthly' ? 'Month-to-month' : `${cs}${fp2(pricing.upfrontTotal)} billed ${termOpt.term === 'quarterly' ? 'every 3 months' : termOpt.term === 'bi_annual' ? 'every 6 months' : 'annually'}`}
+                {termOpt.term === 'monthly' ? ((proposal as any).minimumTermMonths ? `${(proposal as any).minimumTermMonths}-month minimum commitment` : 'Month-to-month') : `${cs}${fp2(pricing.upfrontTotal)} billed ${termOpt.term === 'quarterly' ? 'every 3 months' : termOpt.term === 'bi_annual' ? 'every 6 months' : 'annually'}`}
               </div>
               {yearlySavings > 0 && (
                 <div className="inline-block text-xs font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-md mb-4">
@@ -1318,7 +1318,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                 </ul>
                 <h4 className="font-semibold text-gray-800 mb-1">4.2 Monthly Subscriptions</h4>
                 <ul className="list-disc ml-5 mb-3 space-y-1">
-                  <li>Monthly subscriptions are month-to-month commitments that auto-renew unless canceled with at least 30 days&apos; prior written notice.</li>
+                  <li>{(proposal as any).minimumTermMonths ? `Monthly subscriptions require a ${(proposal as any).minimumTermMonths}-month minimum commitment. After the initial ${(proposal as any).minimumTermMonths}-month period, the subscription continues month-to-month and may be canceled with at least 30 days' prior written notice at no additional cost or obligation.` : `Monthly subscriptions are month-to-month commitments that auto-renew unless canceled with at least 30 days' prior written notice.`}</li>
                   <li>If your payment method is declined, you remain fully liable for all unpaid months.</li>
                 </ul>
                 <h4 className="font-semibold text-gray-800 mb-1">4.3 Annual Subscriptions</h4>

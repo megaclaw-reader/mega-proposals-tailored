@@ -494,7 +494,7 @@ export function ProposalPDF({ proposal, showTerms = false, guaranteeDays = 30, c
                 {!best && !isSingleTerm && <View style={{ height: 17 }} />}
 
                 <Text style={s.pTermName}>{getTermDisplayName(option.term)}</Text>
-                <Text style={s.pTermMonths}>{option.term === 'monthly' ? 'Month-to-month commitment' : `${getTermMonths(option.term)} months`}</Text>
+                <Text style={s.pTermMonths}>{option.term === 'monthly' ? ((proposal as any).minimumTermMonths ? `${(proposal as any).minimumTermMonths}-month minimum commitment` : 'Month-to-month commitment') : `${getTermMonths(option.term)} months`}</Text>
 
                 {((proposal as any).selectedBundle || (proposal as any).packageName) ? (
                   pricing.agents.map((ag, i) => (
@@ -528,7 +528,7 @@ export function ProposalPDF({ proposal, showTerms = false, guaranteeDays = 30, c
                 </View>
 
                 <View style={s.pUpBox}>
-                  <Text style={s.pUpLabel}>{option.term === 'monthly' ? 'Month-to-Month' : 'Total Due Upfront'}</Text>
+                  <Text style={s.pUpLabel}>{option.term === 'monthly' ? ((proposal as any).minimumTermMonths ? `${(proposal as any).minimumTermMonths}-Month Minimum` : 'Month-to-Month') : 'Total Due Upfront'}</Text>
                   <Text style={s.pUpVal}>${Math.round(pricing.upfrontTotal).toLocaleString()}{option.term === 'monthly' ? '/mo' : ''}</Text>
                   {(option.discountPercentage > 0 || (option.discountDollar || 0) > 0) ? (
                     <Text style={s.pDisc}>{option.discountPercentage > 0 ? `${option.discountPercentage}%` : ''}{option.discountPercentage > 0 && (option.discountDollar || 0) > 0 ? ' + ' : ''}{(option.discountDollar || 0) > 0 ? `$${option.discountDollar}/mo` : ''} discount applied</Text>

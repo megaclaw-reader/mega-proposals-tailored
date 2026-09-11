@@ -134,8 +134,8 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
               "Program and launch location-based landing pages",
               "Optimize internal linking structure site-wide",
               "Weekly Google My Business posts and local SEO boost",
-              "Add comprehensive schema markup implementation",
-              "Page speed optimization and performance tuning"
+              "Launch high-quality backlink acquisition campaigns",
+              "Local citation building and directory submissions"
             ]
           },
           {
@@ -145,8 +145,8 @@ export function getServiceScope(agent: Agent, template: Template): ServiceConten
               "Generate 20-25 high-authority pages",
               "Rollout programmatic landing pages at scale",
               "Refresh and update older content for relevance",
-              "Launch high-quality backlink acquisition campaigns",
-              "Local citation building and directory submissions",
+              "Add comprehensive schema markup implementation",
+              "Page speed optimization and performance tuning",
               "Conversion rate optimization review and implementation",
               "AI search crawlability and optimization setup"
             ]
