@@ -77,8 +77,9 @@ Return a JSON object with these fields:
    - Use their actual words/situations when possible ("struggling to get leads from their website" not "digital presence challenges")
    - Include specific numbers they mentioned (revenue, lead volume, team size, budget, etc.)
    - Reference their specific industry, market, or competitive situation
-   - Only include challenges solvable by: ${selectedServices}
+   - **CRITICAL: ONLY include challenges that can be directly solved by the selected services: ${selectedServices}. If a pain point requires a service NOT in that list (e.g. CRM/Conversion Agent, Paid Ads, etc.), DO NOT include it — not even as a "noted for reference" item. Every pain point MUST have a real, actionable solution using ONLY the selected services. If you can only find 1-2 pain points solvable by the selected services, that's fine — return fewer items rather than including unsolvable ones.**
    - BAD: "Difficulty generating qualified leads online" 
+   - BAD: "Since no selected services are in scope to address [X]..." (NEVER generate this — if you can't solve it, don't list the pain point)
    - GOOD: "Currently getting ~20 leads/month from their website but only 3-4 are qualified — spending time on tire-kickers who aren't ready to buy"
 
 2. "megaSolutions" (array of 3-5 strings) — How we specifically solve each pain point. Rules:
@@ -184,6 +185,26 @@ Respond with ONLY the JSON object.`;
     }
 
     const insights: FirefliesInsights = JSON.parse(jsonMatch[0]);
+
+    // POST-GENERATION VALIDATION: Remove cop-out solutions (e.g. "no selected services in scope")
+    // These happen when Claude generates pain points about unselected services
+    {
+      const copOutPattern = /no selected services|not in scope|noted for (internal )?reference only|outside the scope|not included in.*selected/i;
+      const cleanPairs: { pain: string; solution: string }[] = [];
+      for (let i = 0; i < insights.painPoints.length; i++) {
+        const solution = insights.megaSolutions[i] || '';
+        if (copOutPattern.test(solution)) {
+          console.warn(`[SCRUB] Removed cop-out pair ${i}: pain="${insights.painPoints[i].substring(0, 60)}..." solution="${solution.substring(0, 80)}..."`);
+          continue;
+        }
+        cleanPairs.push({ pain: insights.painPoints[i], solution });
+      }
+      if (cleanPairs.length < insights.painPoints.length) {
+        console.warn(`[SCRUB] Removed ${insights.painPoints.length - cleanPairs.length} cop-out pairs (${cleanPairs.length} remaining)`);
+        insights.painPoints = cleanPairs.map(p => p.pain);
+        insights.megaSolutions = cleanPairs.map(p => p.solution);
+      }
+    }
 
     // POST-GENERATION VALIDATION: Strip any references to unselected services
     // This is a hard safety net — even if the AI ignores instructions, we catch it here
