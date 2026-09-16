@@ -57,7 +57,7 @@ export default function CreateProposal() {
     { label: '', agents: [], bundle: undefined, recommended: false, termOptions: { annual: { selected: true, discount: '', discountType: 'percent' }, bi_annual: { selected: false, discount: '', discountType: 'percent' }, quarterly: { selected: false, discount: '', discountType: 'percent' }, monthly: { selected: false, discount: '', discountType: 'percent' } } },
     { label: '', agents: [], bundle: undefined, recommended: false, termOptions: { annual: { selected: true, discount: '', discountType: 'percent' }, bi_annual: { selected: false, discount: '', discountType: 'percent' }, quarterly: { selected: false, discount: '', discountType: 'percent' }, monthly: { selected: false, discount: '', discountType: 'percent' } } },
   ]);
-  const [guarantee, setGuarantee] = useState<'none' | '30' | '60'>('none');
+  const [guarantee, setGuarantee] = useState<'none' | '30' | '60'>('none'); // '30' now means "30 days live + 7-day grace"
   const [midTermReview, setMidTermReview] = useState(false);
   const [discountExpiresAt, setDiscountExpiresAt] = useState('');
   const [minimumCommitment, setMinimumCommitment] = useState<3 | 6 | 12 | null>(null);
@@ -845,18 +845,18 @@ export default function CreateProposal() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Money-Back Guarantee</label>
               <div className="flex gap-4">
-                {(['none', '30', '60'] as const).map((opt) => (
+                {(['none', '30'] as const).map((opt) => (
                   <label key={opt} className="flex items-center gap-2 cursor-pointer">
                     <input type="radio" name="guarantee" value={opt} checked={guarantee === opt}
                       onChange={() => setGuarantee(opt)}
                       className="text-blue-600 focus:ring-blue-500" />
                     <span className="text-sm text-gray-700">
-                      {opt === 'none' ? 'None' : `${opt}-Day`}
+                      {opt === 'none' ? 'None' : 'Yes'}
                     </span>
                   </label>
                 ))}
               </div>
-              <p className="text-xs text-gray-500 mt-1">Adds a money-back guarantee badge and legal addendum to the proposal.</p>
+              <p className="text-xs text-gray-500 mt-1">Adds a money-back guarantee (30 days live + 7-day grace period) badge and legal addendum.</p>
             </div>
 
             {/* Mid-Term Review */}

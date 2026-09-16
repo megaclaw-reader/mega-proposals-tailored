@@ -1003,9 +1003,9 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                   <div className="bg-green-50 border border-green-200 rounded-lg p-5 flex items-start">
                     <span className="text-2xl mr-3 flex-shrink-0">🛡️</span>
                     <div>
-                      <h4 className="font-semibold text-green-900 mb-1">{guaranteeDays}-Day Money-Back Guarantee{guaranteePlans ? ` — ${guaranteePlans.map(p => termNameMap[p] || p).join(' & ')} Plans` : ''}</h4>
+                      <h4 className="font-semibold text-green-900 mb-1">Money-Back Guarantee{guaranteePlans ? ` — ${guaranteePlans.map(p => termNameMap[p] || p).join(' & ')} Plans` : ''}</h4>
                       <p className="text-green-800 text-sm leading-relaxed">
-                        We are offering a {guaranteeDays}-day money-back guarantee on {planLabel}. If you&apos;re not happy with the performance in the first {guaranteeDays === 30 ? 'month' : `${guaranteeDays} days`}, we&apos;re happy to issue a full refund.{planRestriction} See the formal addendum below for full details — this guarantee is legally binding and supersedes our standard refund policy.
+                        We are offering a money-back guarantee on {planLabel}. After 30 days of all your agents being live, you&apos;ll have a 7-day window to decide if MEGA is the right fit. If you&apos;re not satisfied with performance, we&apos;ll issue a full refund — no questions asked.{planRestriction} See the formal addendum below for full details — this guarantee is legally binding and supersedes our standard refund policy.
                       </p>
                     </div>
                   </div>
@@ -1164,7 +1164,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
 
             return (
           <section data-pdf-block className="border-t-2 border-blue-400 pt-8 mt-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Addendum: {guaranteeDays}-Day Money-Back Guarantee{guaranteePlans ? ` — ${guaranteePlans.map(p => termNameMap2[p] || p).join(' & ')} Plans` : ''}</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Addendum: Money-Back Guarantee{guaranteePlans ? ` — ${guaranteePlans.map(p => termNameMap2[p] || p).join(' & ')} Plans` : ''}</h2>
             <p className="text-sm text-gray-500 mb-6">
               This addendum is specific to {proposal.companyName}&apos;s engagement and supersedes the standard Terms &amp; Conditions where conflicts arise — specifically Section 4.4 (Refund &amp; Credit Policy). Full terms available at <a href="https://www.gomega.ai/legal/terms-of-use" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">gomega.ai/legal/terms-of-use</a>.
             </p>
@@ -1172,15 +1172,15 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 space-y-4 text-sm text-gray-800 leading-relaxed">
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">1. Scope</h4>
-                <p>The {guaranteeDays}-Day Money-Back Guarantee applies to {scopeLabel}. This guarantee overrides Section 4.4 of the standard Terms of Use for this account.</p>
+                <p>The Money-Back Guarantee applies to {scopeLabel}. This guarantee overrides Section 4.4 of the standard Terms of Use for this account.</p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">2. Guarantee Window</h4>
-                <p>The {guaranteeDays}-day guarantee period begins on the date onboarding is complete (not the signing date or payment date). The onboarding completion date will be confirmed in writing by your account manager.</p>
+                <p>The guarantee period begins once all purchased agents are fully live and operational. After 30 days of all agents being live, you will have a 7-day grace period (days 31–37) during which you may exercise the guarantee. The &quot;go-live&quot; date will be confirmed in writing by your account manager.</p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">3. How to Invoke</h4>
-                <p>To request a refund under this guarantee, send a written request to <a href="mailto:agents@gomega.ai" className="text-blue-600 underline">agents@gomega.ai</a> within {guaranteeDays} days of the campaign launch date. No reason is required — if you&apos;re not satisfied with performance, the guarantee applies.</p>
+                <p>To request a refund under this guarantee, send a written request to <a href="mailto:agents@gomega.ai" className="text-blue-600 underline">agents@gomega.ai</a> during the 7-day grace period (days 31–37 after all agents go live). No reason is required — if you&apos;re not satisfied with performance, the guarantee applies.</p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">4. Refund Amount &amp; Timeline</h4>

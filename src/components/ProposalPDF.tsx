@@ -582,7 +582,7 @@ export function ProposalPDF({ proposal, showTerms = false, guaranteeDays = 30, c
       {showTerms && (
         <Page size="LETTER" style={s.page} wrap>
           <Footer />
-          <Text style={s.secTitle}>{customAddendumTitle || `Addendum: ${guaranteeDays}-Day Money-Back Guarantee`}</Text>
+          <Text style={s.secTitle}>{customAddendumTitle || `Addendum: Money-Back Guarantee`}</Text>
           <View style={s.secBar} />
           <Text style={[s.body, { color: '#6b7280', marginBottom: 14, fontSize: 8 }]}>
             This addendum is specific to {proposal.companyName}&apos;s engagement and supersedes the standard Terms &amp; Conditions where conflicts arise. Full terms available at gomega.ai/legal/terms-of-use.
@@ -599,15 +599,15 @@ export function ProposalPDF({ proposal, showTerms = false, guaranteeDays = 30, c
               <>
                 <View style={{ marginBottom: 10 }}>
                   <Text style={[s.body, { fontWeight: 600, marginBottom: 3 }]}>1. Scope</Text>
-                  <Text style={s.body}>The {guaranteeDays}-Day Money-Back Guarantee applies to {proposal.companyName}&apos;s subscription. This guarantee overrides Section 4.4 of the standard Terms of Use for this account.</Text>
+                  <Text style={s.body}>The Money-Back Guarantee applies to {proposal.companyName}&apos;s subscription. This guarantee overrides Section 4.4 of the standard Terms of Use for this account.</Text>
                 </View>
                 <View style={{ marginBottom: 10 }}>
                   <Text style={[s.body, { fontWeight: 600, marginBottom: 3 }]}>2. Guarantee Window</Text>
-                  <Text style={s.body}>The {guaranteeDays}-day guarantee period begins on the date onboarding is complete (not the signing date or payment date). The onboarding completion date will be confirmed in writing by your account manager.</Text>
+                  <Text style={s.body}>The guarantee period begins once all purchased agents are fully live and operational. After 30 days of all agents being live, you will have a 7-day grace period (days 31–37) during which you may exercise the guarantee. The go-live date will be confirmed in writing by your account manager.</Text>
                 </View>
                 <View style={{ marginBottom: 10 }}>
                   <Text style={[s.body, { fontWeight: 600, marginBottom: 3 }]}>3. How to Invoke</Text>
-                  <Text style={s.body}>To request a refund under this guarantee, send a written request to agents@gomega.ai within {guaranteeDays} days of the campaign launch date. No reason is required — if you&apos;re not satisfied with performance, the guarantee applies.</Text>
+                  <Text style={s.body}>To request a refund under this guarantee, send a written request to agents@gomega.ai during the 7-day grace period (days 31–37 after all agents go live). No reason is required — if you&apos;re not satisfied with performance, the guarantee applies.</Text>
                 </View>
                 <View style={{ marginBottom: 10 }}>
                   <Text style={[s.body, { fontWeight: 600, marginBottom: 3 }]}>4. Refund Amount &amp; Timeline</Text>
