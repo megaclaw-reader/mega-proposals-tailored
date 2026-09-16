@@ -222,6 +222,7 @@ export default function CreateProposal() {
           const allSummaries: { title: string; summary: string; source: 'fireflies' | 'justcall' }[] = [];
 
           // Fetch Fireflies transcripts
+          const fetchErrors: string[] = [];
           for (let i = 0; i < firefliesEntries.length; i++) {
             const entry = firefliesEntries[i];
             if (!entry.url.includes('fireflies.ai')) continue;
@@ -236,8 +237,19 @@ export default function CreateProposal() {
               });
               if (fetchRes.ok) {
                 const data = await fetchRes.json();
-                allSummaries.push({ ...data, source: 'fireflies' });
-                setFirefliesEntries(prev => prev.map((e, idx) => idx === i ? { ...e, status: 'fetched', data } : e));
+                if (data.summary) {
+                  allSummaries.push({ ...data, source: 'fireflies' });
+                  setFirefliesEntries(prev => prev.map((e, idx) => idx === i ? { ...e, status: 'fetched', data } : e));
+                } else {
+                  const errMsg = 'Transcript fetched but has no summary yet — it may still be processing.';
+                  fetchErrors.push(errMsg);
+                  setFirefliesEntries(prev => prev.map((e, idx) => idx === i ? { ...e, status: 'error', error: errMsg } : e));
+                }
+              } else {
+                const errData = await fetchRes.json().catch(() => ({ error: 'Failed to fetch' }));
+                const errMsg = errData.error || `HTTP ${fetchRes.status}`;
+                fetchErrors.push(errMsg);
+                setFirefliesEntries(prev => prev.map((e, idx) => idx === i ? { ...e, status: 'error', error: errMsg } : e));
               }
             }
           }
@@ -259,8 +271,26 @@ export default function CreateProposal() {
                 const data = await fetchRes.json();
                 allSummaries.push({ ...data, source: 'justcall' });
                 setJustcallEntries(prev => prev.map((e, idx) => idx === i ? { ...e, status: 'fetched', data } : e));
+              } else {
+                const errData = await fetchRes.json().catch(() => ({ error: 'Failed to fetch' }));
+                fetchErrors.push(errData.error || `HTTP ${fetchRes.status}`);
+                setJustcallEntries(prev => prev.map((e, idx) => idx === i ? { ...e, status: 'error', error: errData.error || 'Failed to fetch' } : e));
               }
             }
+          }
+
+          // If ALL transcript fetches failed, alert the user
+          if (fetchErrors.length > 0 && allSummaries.length === 0) {
+            const shouldContinue = window.confirm(
+              `⚠️ Could not fetch any transcripts:\n\n${fetchErrors.join('\n')}\n\nCommon causes:\n• The meeting is still processing (wait a few minutes and retry)\n• The link is from a different Fireflies workspace\n• The transcript was deleted\n\nClick OK to create the proposal without tailored insights, or Cancel to go back and fix the links.`
+            );
+            if (!shouldContinue) {
+              setIsSubmitting(false);
+              setAnalysisStatus('idle');
+              return;
+            }
+          } else if (fetchErrors.length > 0) {
+            alert(`⚠️ ${fetchErrors.length} transcript(s) could not be fetched:\n\n${fetchErrors.join('\n')}\n\nThe remaining ${allSummaries.length} transcript(s) will be used.`);
           }
 
           // Step 2: Combine all summaries and analyze
