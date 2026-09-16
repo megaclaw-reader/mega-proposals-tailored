@@ -6,11 +6,11 @@ import { Agent, Bundle, ContractTerm, PricingBreakdown } from './types';
  * This ensures our proposal numbers match checkout exactly.
  */
 const STRIPE_UPFRONT_TOTALS: Record<string, Record<string, number>> = {
-  seo: { monthly: 999, quarterly: 2397, bi_annual: 4554, annual: 8148 },
+  seo: { monthly: 999, quarterly: 2547, bi_annual: 4554, annual: 8148 },
   paid_ads: { monthly: 1799, quarterly: 4797, bi_annual: 9114, annual: 16308 },
-  seo_paid_combo: { monthly: 2798, quarterly: 7194, bi_annual: 13668, annual: 24456 },
+  seo_paid_combo: { monthly: 2798, quarterly: 7344, bi_annual: 13668, annual: 24456 },
   website: { monthly: 499, quarterly: 1197, bi_annual: 2274, annual: 4068 },
-  crm: { monthly: 999, quarterly: 2397, bi_annual: 4554, annual: 8148 },
+  crm: { monthly: 999, quarterly: 2547, bi_annual: 4554, annual: 8148 },
 };
 
 /**
