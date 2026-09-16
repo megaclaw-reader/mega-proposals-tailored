@@ -845,18 +845,18 @@ export default function CreateProposal() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Money-Back Guarantee</label>
               <div className="flex gap-4">
-                {(['none', '30'] as const).map((opt) => (
+                {(['none', '30', '60'] as const).map((opt) => (
                   <label key={opt} className="flex items-center gap-2 cursor-pointer">
                     <input type="radio" name="guarantee" value={opt} checked={guarantee === opt}
                       onChange={() => setGuarantee(opt)}
                       className="text-blue-600 focus:ring-blue-500" />
                     <span className="text-sm text-gray-700">
-                      {opt === 'none' ? 'None' : 'Yes'}
+                      {opt === 'none' ? 'None' : `${opt} Days`}
                     </span>
                   </label>
                 ))}
               </div>
-              <p className="text-xs text-gray-500 mt-1">Adds a money-back guarantee (30 days live + 7-day grace period) badge and legal addendum.</p>
+              <p className="text-xs text-gray-500 mt-1">Adds a money-back guarantee (X days live + 7-day grace period) badge and legal addendum.</p>
             </div>
 
             {/* Mid-Term Review */}

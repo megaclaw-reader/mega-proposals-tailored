@@ -1005,7 +1005,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                     <div>
                       <h4 className="font-semibold text-green-900 mb-1">Money-Back Guarantee{guaranteePlans ? ` — ${guaranteePlans.map(p => termNameMap[p] || p).join(' & ')} Plans` : ''}</h4>
                       <p className="text-green-800 text-sm leading-relaxed">
-                        We are offering a money-back guarantee on {planLabel}. After 30 days of all your agents being live, you&apos;ll have a 7-day window to decide if MEGA is the right fit. If you&apos;re not satisfied with performance, we&apos;ll issue a full refund — no questions asked.{planRestriction} See the formal addendum below for full details — this guarantee is legally binding and supersedes our standard refund policy.
+                        We are offering a money-back guarantee on {planLabel}. After {guaranteeDays} days of all your agents being live, you&apos;ll have a 7-day window to decide if MEGA is the right fit. If you&apos;re not satisfied with performance, we&apos;ll issue a full refund — no questions asked.{planRestriction} See the formal addendum below for full details — this guarantee is legally binding and supersedes our standard refund policy.
                       </p>
                     </div>
                   </div>
@@ -1176,11 +1176,11 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">2. Guarantee Window</h4>
-                <p>The guarantee period begins once all purchased agents are fully live and operational. After 30 days of all agents being live, you will have a 7-day grace period (days 31–37) during which you may exercise the guarantee. The &quot;go-live&quot; date will be confirmed in writing by your account manager.</p>
+                <p>The guarantee period begins once all purchased agents are fully live and operational. After {guaranteeDays} days of all agents being live, you will have a 7-day grace period (days {guaranteeDays + 1}–{guaranteeDays + 7}) during which you may exercise the guarantee. The &quot;go-live&quot; date will be confirmed in writing by your account manager.</p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">3. How to Invoke</h4>
-                <p>To request a refund under this guarantee, send a written request to <a href="mailto:agents@gomega.ai" className="text-blue-600 underline">agents@gomega.ai</a> during the 7-day grace period (days 31–37 after all agents go live). No reason is required — if you&apos;re not satisfied with performance, the guarantee applies.</p>
+                <p>To request a refund under this guarantee, send a written request to <a href="mailto:agents@gomega.ai" className="text-blue-600 underline">agents@gomega.ai</a> during the 7-day grace period (days {guaranteeDays + 1}–{guaranteeDays + 7} after all agents go live). No reason is required — if you&apos;re not satisfied with performance, the guarantee applies.</p>
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900 mb-1">4. Refund Amount &amp; Timeline</h4>

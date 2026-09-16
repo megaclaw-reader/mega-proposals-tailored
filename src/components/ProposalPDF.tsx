@@ -603,11 +603,11 @@ export function ProposalPDF({ proposal, showTerms = false, guaranteeDays = 30, c
                 </View>
                 <View style={{ marginBottom: 10 }}>
                   <Text style={[s.body, { fontWeight: 600, marginBottom: 3 }]}>2. Guarantee Window</Text>
-                  <Text style={s.body}>The guarantee period begins once all purchased agents are fully live and operational. After 30 days of all agents being live, you will have a 7-day grace period (days 31–37) during which you may exercise the guarantee. The go-live date will be confirmed in writing by your account manager.</Text>
+                  <Text style={s.body}>The guarantee period begins once all purchased agents are fully live and operational. After {guaranteeDays} days of all agents being live, you will have a 7-day grace period (days {guaranteeDays + 1}–{guaranteeDays + 7}) during which you may exercise the guarantee. The go-live date will be confirmed in writing by your account manager.</Text>
                 </View>
                 <View style={{ marginBottom: 10 }}>
                   <Text style={[s.body, { fontWeight: 600, marginBottom: 3 }]}>3. How to Invoke</Text>
-                  <Text style={s.body}>To request a refund under this guarantee, send a written request to agents@gomega.ai during the 7-day grace period (days 31–37 after all agents go live). No reason is required — if you&apos;re not satisfied with performance, the guarantee applies.</Text>
+                  <Text style={s.body}>To request a refund under this guarantee, send a written request to agents@gomega.ai during the 7-day grace period (days {guaranteeDays + 1}–{guaranteeDays + 7} after all agents go live). No reason is required — if you&apos;re not satisfied with performance, the guarantee applies.</Text>
                 </View>
                 <View style={{ marginBottom: 10 }}>
                   <Text style={[s.body, { fontWeight: 600, marginBottom: 3 }]}>4. Refund Amount &amp; Timeline</Text>
