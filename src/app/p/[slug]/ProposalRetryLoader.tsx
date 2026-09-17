@@ -3,33 +3,42 @@
 import { useEffect, useState } from 'react';
 
 /**
- * When a proposal page SSR can't find the blob (eventual consistency),
- * this client component retries by reloading the page up to 5 times
- * over ~10 seconds before showing a real 404.
+ * When SSR can't find the blob (eventual consistency after creation),
+ * this polls a lightweight API to check if the blob exists yet,
+ * then reloads the page once it's ready.
  */
 export default function ProposalRetryLoader({ slug }: { slug: string }) {
-  const [attempt, setAttempt] = useState(0);
   const [failed, setFailed] = useState(false);
-  const maxAttempts = 5;
-  const delayMs = 2000;
 
   useEffect(() => {
-    if (attempt >= maxAttempts) {
-      setFailed(true);
-      return;
+    let cancelled = false;
+    const maxAttempts = 10;
+    const delayMs = 1500;
+
+    async function poll() {
+      for (let i = 0; i < maxAttempts; i++) {
+        if (cancelled) return;
+        await new Promise(r => setTimeout(r, delayMs));
+        if (cancelled) return;
+
+        try {
+          const res = await fetch(`/api/proposals/check/${slug}`, { cache: 'no-store' });
+          if (res.ok) {
+            // Blob is now consistent — reload to get the full SSR page
+            window.location.reload();
+            return;
+          }
+        } catch {
+          // keep trying
+        }
+      }
+
+      if (!cancelled) setFailed(true);
     }
 
-    const timer = setTimeout(() => {
-      // Reload the page — Next.js will re-run the server component
-      // and if the blob is now consistent, it'll render the proposal
-      window.location.reload();
-    }, delayMs);
-
-    setAttempt(prev => prev + 1);
-
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    poll();
+    return () => { cancelled = true; };
+  }, [slug]);
 
   if (failed) {
     return (
