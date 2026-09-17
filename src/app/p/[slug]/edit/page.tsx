@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { list } from '@vercel/blob';
+import { list, head } from '@vercel/blob';
 import EditClient from './EditClient';
 
 export default async function EditProposalPage({
@@ -13,14 +13,27 @@ export default async function EditProposalPage({
   let customAddendumTitle: string | undefined;
 
   try {
-    const { blobs } = await list({ prefix: `proposals/${slug}.json` });
-    const blob = blobs.find(b => b.pathname === `proposals/${slug}.json`);
+    const blobPath = `proposals/${slug}.json`;
+    const token = process.env.BLOB_READ_WRITE_TOKEN || '';
 
-    if (blob) {
-      const response = await fetch(blob.url, {
-        headers: {
-          Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}`,
-        },
+    // Try head() first for consistent reads, fall back to list()
+    let blobUrl: string | null = null;
+    try {
+      const meta = await head(blobPath);
+      if (meta?.url) blobUrl = meta.url;
+    } catch {
+      // head() throws if blob doesn't exist
+    }
+    if (!blobUrl) {
+      const { blobs } = await list({ prefix: blobPath });
+      const blob = blobs.find(b => b.pathname === blobPath);
+      if (blob) blobUrl = blob.url;
+    }
+
+    if (blobUrl) {
+      const response = await fetch(`${blobUrl}?t=${Date.now()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store',
       });
 
       if (response.ok) {
