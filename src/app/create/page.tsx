@@ -337,17 +337,48 @@ export default function CreateProposal() {
               }
             }
             clearTimeout(analyzeTimeout);
-            if (analyzeRes.ok) {
-              const { insights } = await analyzeRes.json();
-              // Only use insights if they actually contain content (not empty fallback)
-              if (insights && insights.painPoints?.length > 0 && insights.summary) {
-                firefliesInsights = insights;
-                setAnalysisStatus('done');
-              } else {
-                console.warn('Analysis returned empty insights — transcript may not have been processed');
-                setAnalysisStatus('error');
-                alert('⚠️ The transcript was fetched but the AI analysis returned empty results. The proposal will be created without tailored insights. Try creating it again — this is usually a one-time issue.');
+            // Helper: check if analysis response has real content
+            const parseInsights = async (res: Response) => {
+              if (!res.ok) return null;
+              const { insights } = await res.json();
+              return (insights && insights.painPoints?.length > 0 && insights.summary) ? insights : null;
+            };
+
+            let parsedInsights = await parseInsights(analyzeRes);
+
+            // Auto-retry once if first attempt returned empty (transient API issue)
+            if (!parsedInsights && analyzeRes.ok) {
+              console.warn('First analysis attempt returned empty — retrying automatically...');
+              try {
+                const retryController = new AbortController();
+                const retryTimeout = setTimeout(() => retryController.abort(), 55000);
+                const retryRes = await fetch('/api/analyze-transcript', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  signal: retryController.signal,
+                  body: JSON.stringify({
+                    transcriptSummary: combinedSummary,
+                    meetingTitle: combinedTitle,
+                    companyName: formData.companyName,
+                    sourceType,
+                    selectedAgents: formData.selectedAgents,
+                    template: formData.template,
+                  }),
+                });
+                clearTimeout(retryTimeout);
+                parsedInsights = await parseInsights(retryRes);
+              } catch (retryErr) {
+                console.warn('Retry also failed:', retryErr);
               }
+            }
+
+            if (parsedInsights) {
+              firefliesInsights = parsedInsights;
+              setAnalysisStatus('done');
+            } else if (analyzeRes.ok) {
+              console.warn('Analysis returned empty insights after retry');
+              setAnalysisStatus('error');
+              alert('⚠️ The transcript was fetched but the AI analysis returned empty results. The proposal will be created without tailored insights. Try creating it again — this is usually a one-time issue.');
             } else {
               const errData = await analyzeRes.json().catch(() => ({ error: `HTTP ${analyzeRes.status}` }));
               console.error('Analyze transcript failed:', errData);
