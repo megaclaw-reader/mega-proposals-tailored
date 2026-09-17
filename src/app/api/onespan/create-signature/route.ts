@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
       customerName, companyName, selectedAgents, monthlyRate,
       minimumTermMonths, totalCommitment, salesRepName,
       salesRepEmail, customerEmail, proposalSlug, stripeUrl,
+      contractTerm, monthlyBilling,
     } = body;
 
     if (!customerName || !companyName || !selectedAgents || !monthlyRate || !minimumTermMonths || !customerEmail) {
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
     // Determine redirect URL after signing
     // Route through our signed-redirect endpoint to mark proposal as signed + redirect to Stripe
     const origin = request.nextUrl.origin;
-    const redirectUrl = `${origin}/api/onespan/signed-redirect?agents=${encodeURIComponent(JSON.stringify(selectedAgents))}&slug=${encodeURIComponent(proposalSlug || '')}&stripeUrl=${encodeURIComponent(stripeUrl || '')}`;
+    const redirectUrl = `${origin}/api/onespan/signed-redirect?agents=${encodeURIComponent(JSON.stringify(selectedAgents))}&slug=${encodeURIComponent(proposalSlug || '')}&stripeUrl=${encodeURIComponent(stripeUrl || '')}&term=${encodeURIComponent(contractTerm || 'monthly')}`;
 
     // Split customer name into first/last
     const nameParts = customerName.trim().split(/\s+/);

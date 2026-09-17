@@ -131,6 +131,7 @@ export async function GET(request: NextRequest) {
   const slug = request.nextUrl.searchParams.get('slug');
   const agentsParam = request.nextUrl.searchParams.get('agents');
   const stripeUrlParam = request.nextUrl.searchParams.get('stripeUrl');
+  const termParam = request.nextUrl.searchParams.get('term') || 'monthly';
   const origin = request.nextUrl.origin;
 
   let onespan: any = null;
@@ -213,7 +214,7 @@ export async function GET(request: NextRequest) {
         const checkoutRes = await fetch('https://www.gomega.ai/api/create-checkout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ agentIds, cycle: 'monthly' }),
+          body: JSON.stringify({ agentIds, cycle: termParam }),
         });
 
         if (checkoutRes.ok) {
