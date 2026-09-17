@@ -118,11 +118,16 @@ Respond with ONLY the JSON object.`;
     let data: any = null;
     let lastError = '';
 
+    const startTime = Date.now();
     for (const model of models) {
-      for (let attempt = 0; attempt < 3; attempt++) {
+      for (let attempt = 0; attempt < 2; attempt++) {
+        // Bail if we're running low on time (Vercel kills at 60s)
+        if (Date.now() - startTime > 45000) {
+          console.warn('Aborting retries — approaching 60s function timeout');
+          break;
+        }
         if (attempt > 0) {
-          // Wait before retry: 2s, 5s
-          await new Promise(r => setTimeout(r, attempt === 1 ? 2000 : 5000));
+          await new Promise(r => setTimeout(r, 2000));
         }
 
         const response = await fetch('https://api.anthropic.com/v1/messages', {
