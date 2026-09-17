@@ -9,7 +9,7 @@ import { decodeProposal } from '@/lib/encode';
 import { format } from 'date-fns';
 
 /* ─── Multi-Option Quote Comparison Component ─── */
-function MultiOptionQuotes({ quoteOptions, proposal, cs, fp, fp2, customStripeLinks, discountExpired = false }: {
+function MultiOptionQuotes({ quoteOptions, proposal, cs, fp, fp2, customStripeLinks, discountExpired = false, signedAgreement, isSigned = false, signingState = 'idle', setSigningState, customerEmail, setCustomerEmail, signingError, handleSignAgreement, monthlyBilling = false }: {
   quoteOptions: QuoteOption[];
   proposal: Proposal;
   cs: string;
@@ -17,6 +17,15 @@ function MultiOptionQuotes({ quoteOptions, proposal, cs, fp, fp2, customStripeLi
   fp2: (n: number) => string;
   customStripeLinks?: Record<string, string>;
   discountExpired?: boolean;
+  signedAgreement?: { signedAt: string; signatureRequestId: string; minimumTermMonths?: number };
+  isSigned?: boolean;
+  signingState?: string;
+  setSigningState?: (state: any) => void;
+  customerEmail?: string;
+  setCustomerEmail?: (email: string) => void;
+  signingError?: string | null;
+  handleSignAgreement?: (stripeUrl: string, term?: string, termDiscount?: number, termDiscountDollar?: number) => void;
+  monthlyBilling?: boolean;
 }) {
   const [activeTab, setActiveTab] = useState(() => {
     const recIdx = quoteOptions.findIndex(o => o.recommended);
@@ -64,38 +73,52 @@ function MultiOptionQuotes({ quoteOptions, proposal, cs, fp, fp2, customStripeLi
                   Save {cs}{fp(yearlySavings)}/yr vs {getTermDisplayName(shortestPricing.option.term).toLowerCase()}
                 </div>
               )}
-              {/* CTA */}
+              {/* CTA — all proposals go through OneSpan signing */}
               {!(proposal as any).hideCTA && (() => {
                 const staticUrl = customStripeLinks?.[termOpt.term]
                   || (opt.bundle ? getBundleStripeLink(opt.bundle, termOpt.term) : null);
-                if (staticUrl) {
+                const stripeUrl = staticUrl || '#';
+                const btnClass = `block w-full py-3 rounded-lg font-semibold text-white transition-colors cursor-pointer ${isBestValue ? 'bg-[#2454FF] hover:bg-blue-700' : 'bg-gray-800 hover:bg-gray-900'}`;
+
+                // Already signed — go to payment
+                if (signedAgreement || isSigned) {
+                  if (staticUrl) {
+                    return <a href={staticUrl} target="_blank" rel="noopener noreferrer" className={btnClass}>Proceed to Payment</a>;
+                  }
                   return (
-                    <a href={staticUrl} target="_blank" rel="noopener noreferrer"
-                      className={`block w-full py-3 rounded-lg font-semibold text-white transition-colors ${isBestValue ? 'bg-[#2454FF] hover:bg-blue-700' : 'bg-gray-800 hover:bg-gray-900'}`}>
-                      Get Started
-                    </a>
-                  );
-                }
-                return (
-                  <button
-                    onClick={async (e) => {
-                      const btn = e.currentTarget;
-                      btn.textContent = 'Loading...'; btn.disabled = true;
+                    <button onClick={async (e) => {
+                      const btn = e.currentTarget; btn.textContent = 'Loading...'; btn.disabled = true;
                       try {
-                        const res = await fetch('/api/create-checkout', {
-                          method: 'POST', headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ agentIds: opt.agents, term: termOpt.term }),
-                        });
+                        const res = await fetch('/api/create-checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agentIds: opt.agents, term: termOpt.term }) });
                         const data = await res.json();
                         if (data.url) window.open(data.url, '_blank');
-                        else alert('Could not create checkout session. Please contact us.');
-                      } catch { alert('Could not create checkout session. Please contact us.'); }
-                      finally { btn.textContent = 'Get Started'; btn.disabled = false; }
-                    }}
-                    className={`block w-full py-3 rounded-lg font-semibold text-white transition-colors cursor-pointer ${isBestValue ? 'bg-[#2454FF] hover:bg-blue-700' : 'bg-gray-800 hover:bg-gray-900'}`}>
-                    Get Started
-                  </button>
-                );
+                        else alert('Could not create checkout session.');
+                      } catch { alert('Could not create checkout session.'); }
+                      finally { btn.textContent = 'Proceed to Payment'; btn.disabled = false; }
+                    }} className={btnClass}>Proceed to Payment</button>
+                  );
+                }
+
+                // Signing flow states
+                if (signingState === 'email') {
+                  return (
+                    <div className="space-y-2">
+                      <input type="email" value={customerEmail || ''} onChange={(e) => setCustomerEmail?.(e.target.value)}
+                        placeholder="Your email address" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                      <button onClick={() => { if (customerEmail) handleSignAgreement?.(stripeUrl, termOpt.term, termOpt.discountPercentage || 0, termOpt.discountDollar || 0); }}
+                        disabled={!customerEmail} className={`${btnClass} disabled:opacity-50`}>
+                        Continue to Agreement
+                      </button>
+                      <button onClick={() => setSigningState?.('idle')} className="w-full text-sm text-gray-500 hover:text-gray-700">Cancel</button>
+                      {signingError && <p className="text-red-600 text-xs">{signingError}</p>}
+                    </div>
+                  );
+                }
+                if (signingState === 'creating') return <button disabled className={`${btnClass} opacity-50`}>Preparing Agreement...</button>;
+                if (signingState === 'signing') return <button disabled className={`${btnClass} opacity-50`}>Signing in Progress...</button>;
+                if (signingState === 'signed') return <button disabled className={`${btnClass} bg-green-600`}>✓ Agreement Signed — Redirecting to Payment...</button>;
+
+                return <button onClick={() => setSigningState?.('email')} className={btnClass}>Review &amp; Sign Agreement</button>;
               })()}
             </div>
           );
@@ -247,16 +270,19 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
     setLoading(false);
   }, [encodedId]);
 
-  const handleSignAgreement = async (stripeUrl: string) => {
+  const handleSignAgreement = async (stripeUrl: string, term?: string, termDiscount?: number, termDiscountDollar?: number) => {
     if (!proposal || !customerEmail) return;
     setSigningState('creating');
     setSigningError(null);
 
     try {
-      const minimumTermMonths = (proposal as any).minimumTermMonths;
-      const pricing = calculatePricing(proposal.selectedAgents, 'monthly', 0, 0, (proposal as any).selectedBundle);
+      // Determine the contract term and calculate pricing accordingly
+      const contractTerm = term || 'monthly';
+      const termMonthsMap: Record<string, number> = { monthly: 1, quarterly: 3, bi_annual: 6, annual: 12 };
+      const minimumTermMonths = (proposal as any).minimumTermMonths || termMonthsMap[contractTerm] || 1;
+      const pricing = calculatePricing(proposal.selectedAgents, contractTerm as any, termDiscount || 0, termDiscountDollar || 0, (proposal as any).selectedBundle);
       const monthlyRate = Math.round(pricing.total);
-      const totalCommitment = monthlyRate * minimumTermMonths;
+      const totalCommitment = monthlyBilling ? monthlyRate * minimumTermMonths : Math.round(pricing.upfrontTotal);
 
       const res = await fetch('/api/onespan/create-signature', {
         method: 'POST',
@@ -268,6 +294,8 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
           monthlyRate,
           minimumTermMonths,
           totalCommitment,
+          contractTerm,
+          monthlyBilling,
           salesRepName: proposal.salesRepName,
           salesRepEmail: proposal.salesRepEmail,
           customerEmail,
@@ -636,7 +664,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
             {(() => {
               const quoteOptions: QuoteOption[] | undefined = (proposal as any).quoteOptions;
               if (quoteOptions && quoteOptions.length >= 2) {
-                return <MultiOptionQuotes quoteOptions={quoteOptions} proposal={proposal} cs={cs} fp={fp} fp2={fp2} customStripeLinks={customStripeLinks} discountExpired={discountExpired} />;
+                return <MultiOptionQuotes quoteOptions={quoteOptions} proposal={proposal} cs={cs} fp={fp} fp2={fp2} customStripeLinks={customStripeLinks} discountExpired={discountExpired} signedAgreement={signedAgreement} isSigned={isSigned} signingState={signingState} setSigningState={setSigningState} customerEmail={customerEmail} setCustomerEmail={setCustomerEmail} signingError={signingError} handleSignAgreement={handleSignAgreement} monthlyBilling={monthlyBilling} />;
               }
               return null;
             })()}
@@ -829,7 +857,10 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                                 );
                               }
 
-                              const requiresAgreement = option.term === 'monthly' && (proposal as any).requiresAgreement && (proposal as any).minimumTermMonths;
+                              // All proposals go through OneSpan signing before checkout.
+                              // Monthly plans with minimum commitment get explicit commitment language,
+                              // but every term type requires e-signature.
+                              const requiresAgreement = true;
                               // Use static links: custom overrides → bundles → agent combo → dynamic fallback
                               const staticUrl = customStripeLinks?.[option.term]
                                 || ((proposal as any).selectedBundle
@@ -873,7 +904,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                                     <div className="space-y-2">
                                       <input type="email" value={customerEmail} onChange={(e) => setCustomerEmail(e.target.value)}
                                         placeholder="Your email address" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                                      <button onClick={() => { if (customerEmail) handleSignAgreement(stripeUrl); }}
+                                      <button onClick={() => { if (customerEmail) handleSignAgreement(stripeUrl, option.term, option.discountPercentage, option.discountDollar); }}
                                         disabled={!customerEmail} className={`${btnClass} disabled:opacity-50`}>
                                         Continue to Agreement
                                       </button>
