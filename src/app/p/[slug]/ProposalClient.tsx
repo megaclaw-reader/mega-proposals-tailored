@@ -73,52 +73,38 @@ function MultiOptionQuotes({ quoteOptions, proposal, cs, fp, fp2, customStripeLi
                   Save {cs}{fp(yearlySavings)}/yr vs {getTermDisplayName(shortestPricing.option.term).toLowerCase()}
                 </div>
               )}
-              {/* CTA — all proposals go through OneSpan signing */}
+              {/* CTA */}
               {!(proposal as any).hideCTA && (() => {
                 const staticUrl = customStripeLinks?.[termOpt.term]
                   || (opt.bundle ? getBundleStripeLink(opt.bundle, termOpt.term) : null);
-                const stripeUrl = staticUrl || '#';
-                const btnClass = `block w-full py-3 rounded-lg font-semibold text-white transition-colors cursor-pointer ${isBestValue ? 'bg-[#2454FF] hover:bg-blue-700' : 'bg-gray-800 hover:bg-gray-900'}`;
-
-                // Already signed — go to payment
-                if (signedAgreement || isSigned) {
-                  if (staticUrl) {
-                    return <a href={staticUrl} target="_blank" rel="noopener noreferrer" className={btnClass}>Proceed to Payment</a>;
-                  }
+                if (staticUrl) {
                   return (
-                    <button onClick={async (e) => {
-                      const btn = e.currentTarget; btn.textContent = 'Loading...'; btn.disabled = true;
+                    <a href={staticUrl} target="_blank" rel="noopener noreferrer"
+                      className={`block w-full py-3 rounded-lg font-semibold text-white transition-colors ${isBestValue ? 'bg-[#2454FF] hover:bg-blue-700' : 'bg-gray-800 hover:bg-gray-900'}`}>
+                      Get Started
+                    </a>
+                  );
+                }
+                return (
+                  <button
+                    onClick={async (e) => {
+                      const btn = e.currentTarget;
+                      btn.textContent = 'Loading...'; btn.disabled = true;
                       try {
-                        const res = await fetch('/api/create-checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agentIds: opt.agents, term: termOpt.term }) });
+                        const res = await fetch('/api/create-checkout', {
+                          method: 'POST', headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ agentIds: opt.agents, term: termOpt.term }),
+                        });
                         const data = await res.json();
                         if (data.url) window.open(data.url, '_blank');
-                        else alert('Could not create checkout session.');
-                      } catch { alert('Could not create checkout session.'); }
-                      finally { btn.textContent = 'Proceed to Payment'; btn.disabled = false; }
-                    }} className={btnClass}>Proceed to Payment</button>
-                  );
-                }
-
-                // Signing flow states
-                if (signingState === 'email') {
-                  return (
-                    <div className="space-y-2">
-                      <input type="email" value={customerEmail || ''} onChange={(e) => setCustomerEmail?.(e.target.value)}
-                        placeholder="Your email address" className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                      <button onClick={() => { if (customerEmail) handleSignAgreement?.(stripeUrl, termOpt.term, termOpt.discountPercentage || 0, termOpt.discountDollar || 0); }}
-                        disabled={!customerEmail} className={`${btnClass} disabled:opacity-50`}>
-                        Continue to Agreement
-                      </button>
-                      <button onClick={() => setSigningState?.('idle')} className="w-full text-sm text-gray-500 hover:text-gray-700">Cancel</button>
-                      {signingError && <p className="text-red-600 text-xs">{signingError}</p>}
-                    </div>
-                  );
-                }
-                if (signingState === 'creating') return <button disabled className={`${btnClass} opacity-50`}>Preparing Agreement...</button>;
-                if (signingState === 'signing') return <button disabled className={`${btnClass} opacity-50`}>Signing in Progress...</button>;
-                if (signingState === 'signed') return <button disabled className={`${btnClass} bg-green-600`}>✓ Agreement Signed — Redirecting to Payment...</button>;
-
-                return <button onClick={() => setSigningState?.('email')} className={btnClass}>Review &amp; Sign Agreement</button>;
+                        else alert('Could not create checkout session. Please contact us.');
+                      } catch { alert('Could not create checkout session. Please contact us.'); }
+                      finally { btn.textContent = 'Get Started'; btn.disabled = false; }
+                    }}
+                    className={`block w-full py-3 rounded-lg font-semibold text-white transition-colors cursor-pointer ${isBestValue ? 'bg-[#2454FF] hover:bg-blue-700' : 'bg-gray-800 hover:bg-gray-900'}`}>
+                    Get Started
+                  </button>
+                );
               })()}
             </div>
           );
@@ -857,10 +843,8 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                                 );
                               }
 
-                              // All proposals go through OneSpan signing before checkout.
-                              // Monthly plans with minimum commitment get explicit commitment language,
-                              // but every term type requires e-signature.
-                              const requiresAgreement = true;
+                              // OneSpan signing ONLY for monthly plans with a minimum commitment
+                              const requiresAgreement = option.term === 'monthly' && (proposal as any).requiresAgreement && (proposal as any).minimumTermMonths;
                               // Use static links: custom overrides → bundles → agent combo → dynamic fallback
                               const staticUrl = customStripeLinks?.[option.term]
                                 || ((proposal as any).selectedBundle
