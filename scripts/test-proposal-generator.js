@@ -256,8 +256,10 @@ async function testPricingConsistency() {
     }
     
     for (const [term, months] of Object.entries(termMonths)) {
-      const stripeVal = stripeAgentMatch[1].match(new RegExp(`${term}:\\s*(\\d+)`));
-      const tableVal = tableAgentMatch[1].match(new RegExp(`${term}:\\s*(\\d+)`));
+      // Use word boundary or comma/space before term to avoid bi_annual matching annual
+      const termPattern = term === 'annual' ? `(?<!_)${term}` : term;
+      const stripeVal = stripeAgentMatch[1].match(new RegExp(`${termPattern}:\\s*(\\d+)`));
+      const tableVal = tableAgentMatch[1].match(new RegExp(`${termPattern}:\\s*(\\d+)`));
       
       if (!stripeVal || !tableVal) continue;
       
