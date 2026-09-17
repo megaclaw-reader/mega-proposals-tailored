@@ -1,6 +1,6 @@
-import { notFound } from 'next/navigation';
 import { list, head } from '@vercel/blob';
 import ProposalClient from './ProposalClient';
+import ProposalRetryLoader from './ProposalRetryLoader';
 
 export const dynamic = 'force-dynamic';
 
@@ -98,7 +98,10 @@ export default async function ProposalSlugPage({
   }
 
   if (!encodedProposal) {
-    notFound();
+    // Instead of hard 404, render a client-side retry loader.
+    // Vercel Blob has eventual consistency — newly created proposals
+    // may not be readable for a few seconds after creation.
+    return <ProposalRetryLoader slug={slug} />;
   }
 
   return <ProposalClient encodedId={encodedProposal} showTerms={showTerms} guaranteeDays={guaranteeDays} midpointGuarantee={midpointGuarantee} guaranteePlans={guaranteePlans} customNotes={customNotes} customNotesTitle={customNotesTitle} currency={currency} currencyRate={currencyRate} customStripeLinks={customStripeLinks} customAddendum={customAddendum} customAddendumTitle={customAddendumTitle} customAddendumSubtitle={customAddendumSubtitle} monthlyBilling={monthlyBilling} discountExpiresAt={discountExpiresAt} signedAgreement={signedAgreement} isSigned={isSigned} proposalSlug={slug} />;
