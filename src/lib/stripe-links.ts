@@ -137,11 +137,19 @@ const BUNDLE_STRIPE_LINKS: Record<Bundle, Record<string, string>> = {
 /**
  * Get the Stripe checkout link for a predefined bundle and term.
  */
-export function getBundleStripeLink(bundle: Bundle, term: ContractTerm): string | null {
+export function getBundleStripeLink(_bundle: Bundle, _term: ContractTerm): string | null {
+  // Static Payment Links are disabled — all checkout goes through dynamic sessions
+  // via POST /api/create-checkout → gomega.ai/api/create-checkout
+  return null;
+}
+
+/* DISABLED — static links are dead
+function getBundleStripeLinkOld(bundle: Bundle, term: ContractTerm): string | null {
   const termLinks = BUNDLE_STRIPE_LINKS[bundle];
   if (!termLinks) return null;
   return termLinks[term] || null;
 }
+*/
 
 /**
  * Build a sorted combo key from selected agents.
@@ -162,11 +170,9 @@ export function isBundle3(agents: Agent[]): boolean {
  * Get the Stripe checkout link for a given agent combo and term.
  * Returns null if no matching link exists.
  */
-export function getStripeLink(agents: Agent[], term: ContractTerm): string | null {
-  const key = getComboKey(agents);
-  const termLinks = STRIPE_LINKS[key];
-  if (!termLinks) return null;
-  return termLinks[term] || null;
+export function getStripeLink(_agents: Agent[], _term: ContractTerm): string | null {
+  // Static Payment Links are disabled — all checkout goes through dynamic sessions
+  return null;
 }
 
 /**
