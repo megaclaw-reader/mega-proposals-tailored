@@ -578,8 +578,8 @@ export function ProposalPDF({ proposal, showTerms = false, guaranteeDays = 30, c
         </View>
       </Page>
 
-      {/* ===== MONEY-BACK GUARANTEE ADDENDUM ===== */}
-      {showTerms && (
+      {/* ===== ADDENDUM (Money-Back Guarantee or Custom) ===== */}
+      {(showTerms || (customAddendum && customAddendum.length > 0)) && (
         <Page size="LETTER" style={s.page} wrap>
           <Footer />
           <Text style={s.secTitle}>{customAddendumTitle || `Addendum: Money-Back Guarantee`}</Text>
