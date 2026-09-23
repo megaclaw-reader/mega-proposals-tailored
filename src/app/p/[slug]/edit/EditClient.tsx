@@ -93,6 +93,13 @@ export default function EditClient({ encodedId, slug, customAddendum: initialAdd
         ...(proposal as any).officeAddress && { officeAddress: (proposal as any).officeAddress },
         ...(proposal as any).legalEntityName && { legalEntityName: (proposal as any).legalEntityName },
         ...(proposal as any).quoteOptions && { quoteOptions: (proposal as any).quoteOptions },
+        // Preserve signing/pricing/contact fields
+        ...(proposal as any).requiresAgreement && { requiresAgreement: (proposal as any).requiresAgreement },
+        ...(proposal as any).minimumTermMonths && { minimumTermMonths: (proposal as any).minimumTermMonths },
+        ...(proposal as any).customMonthlyPrice && { customMonthlyPrice: (proposal as any).customMonthlyPrice },
+        ...(proposal as any).contactMode && { contactMode: (proposal as any).contactMode },
+        ...(proposal as any).weeklyMeetings && { weeklyMeetings: (proposal as any).weeklyMeetings },
+        ...(proposal as any).hideCTA !== undefined && { hideCTA: (proposal as any).hideCTA },
       } as any);
 
       const res = await fetch(`/api/proposals/update/${slug}`, {
