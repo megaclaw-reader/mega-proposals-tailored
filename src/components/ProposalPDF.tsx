@@ -302,6 +302,17 @@ export function ProposalPDF({ proposal, showTerms = false, guaranteeDays = 30, c
       ? proposal.selectedTerms
       : [{ term: proposal.contractTerm, discountPercentage: proposal.discountPercentage || 0 }];
 
+  // For multi-quote proposals, union all agents across options for service descriptions
+  const pdfQuoteOptions = (proposal as any).quoteOptions as Array<{ agents: string[] }> | undefined;
+  const displayAgents: Agent[] = (() => {
+    if (!pdfQuoteOptions || pdfQuoteOptions.length < 2) return proposal.selectedAgents as Agent[];
+    const allAgents = new Set<string>(proposal.selectedAgents);
+    for (const opt of pdfQuoteOptions) {
+      for (const a of opt.agents) allAgents.add(a);
+    }
+    return (['seo', 'paid_ads', 'crm', 'website'] as Agent[]).filter(a => allAgents.has(a));
+  })();
+
   const rawCustomPrice = (proposal as any).customMonthlyPrice as number | Record<string, number> | undefined;
   const customAgentPrices = (proposal as any).customAgentPrices as Record<string, number> | undefined;
 
@@ -399,14 +410,14 @@ export function ProposalPDF({ proposal, showTerms = false, guaranteeDays = 30, c
         <Text style={s.secTitle}>Executive Summary</Text>
         <View style={s.secBar} />
         <Text style={[s.body, { marginBottom: 18 }]}>
-          {proposal.customExecutiveSummary || getExecutiveSummary(proposal.template, proposal.selectedAgents)}
+          {proposal.customExecutiveSummary || getExecutiveSummary(proposal.template, displayAgents)}
         </Text>
 
         {/* Your Services */}
         <Text style={s.secTitle}>Your Services</Text>
         <View style={s.secBar} />
         <View style={s.svcRow}>
-          {proposal.selectedAgents.map(agent => (
+          {displayAgents.map(agent => (
             <View key={agent} style={s.svcCard}>
               <View style={s.svcIconWrap}>
                 <Text style={s.svcIcon}>{AGENT_ICON_LABELS[agent] || 'AI'}</Text>
@@ -465,12 +476,12 @@ export function ProposalPDF({ proposal, showTerms = false, guaranteeDays = 30, c
       {/* ===== SERVICE SCOPES — single wrapping page ===== */}
       <Page size="LETTER" style={s.page} wrap>
         <Footer />
-        {proposal.selectedAgents.map((agent, idx) => (
+        {displayAgents.map((agent, idx) => (
           <ServiceScope
             key={agent}
             agent={agent}
             template={proposal.template}
-            isLast={idx === proposal.selectedAgents.length - 1}
+            isLast={idx === displayAgents.length - 1}
           />
         ))}
       </Page>

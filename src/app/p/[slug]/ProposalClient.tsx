@@ -352,6 +352,19 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
     );
   }
 
+  // For multi-quote proposals, compute the union of all agents across all options
+  // so that service descriptions cover every agent mentioned in ANY option
+  const quoteOptions: QuoteOption[] | undefined = (proposal as any).quoteOptions;
+  const displayAgents = (() => {
+    if (!quoteOptions || quoteOptions.length < 2) return proposal.selectedAgents;
+    const allAgents = new Set<string>(proposal.selectedAgents);
+    for (const opt of quoteOptions) {
+      for (const a of opt.agents) allAgents.add(a);
+    }
+    const order: Agent[] = ['seo', 'paid_ads', 'crm', 'website'];
+    return order.filter(a => allAgents.has(a));
+  })();
+
   // Calculate pricing for different terms for the investment summary
   return (
     <div className="min-h-screen bg-gray-50">
@@ -481,8 +494,8 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Executive Summary</h2>
             <p className="text-gray-700 leading-relaxed text-lg">
               {proposal.firefliesInsights 
-                ? proposal.customExecutiveSummary || `Based on our discussion, we understand ${proposal.companyName} is looking to optimize their marketing approach and address specific challenges. ${getExecutiveSummary(proposal.template, proposal.selectedAgents)}`
-                : proposal.customExecutiveSummary || getExecutiveSummary(proposal.template, proposal.selectedAgents)
+                ? proposal.customExecutiveSummary || `Based on our discussion, we understand ${proposal.companyName} is looking to optimize their marketing approach and address specific challenges. ${getExecutiveSummary(proposal.template, displayAgents as any)}`
+                : proposal.customExecutiveSummary || getExecutiveSummary(proposal.template, displayAgents as any)
               }
             </p>
           </section>
@@ -491,7 +504,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
           <section data-pdf-block>
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Your Services</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {proposal.selectedAgents.map((agent) => (
+              {displayAgents.map((agent) => (
                 <div key={agent} className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
                   <div className="mb-4">
                     <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-700`}>
@@ -533,8 +546,8 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
           )}
 
           {/* Service Scope Sections */}
-          {proposal.selectedAgents.map((agent) => {
-            const serviceContent = getServiceScope(agent, proposal.template);
+          {displayAgents.map((agent) => {
+            const serviceContent = getServiceScope(agent as any, proposal.template);
             const categories = serviceContent.categories || [];
             
             return (

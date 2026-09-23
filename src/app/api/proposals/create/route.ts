@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       encodedProposal,
       companyName,
       createdAt: new Date().toISOString(),
-      ...(guaranteeDays && { showTerms: true, guaranteeDays }),
+      ...(guaranteeDays && { showTerms: true, guaranteeDays, guaranteePlans: ['quarterly', 'bi_annual', 'annual'] }),
       ...(midpointGuarantee && { midpointGuarantee: true }),
       ...(discountExpiresAt && { discountExpiresAt }),
       ...(monthlyBilling && { monthlyBilling: true }),
