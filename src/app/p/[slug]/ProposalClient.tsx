@@ -872,7 +872,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                                     <button onClick={async (e) => {
                                       const btn = e.currentTarget; btn.textContent = 'Loading...'; btn.disabled = true;
                                       try {
-                                        const res = await fetch('/api/create-checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agentIds: proposal.selectedAgents, term: option.term }) });
+                                        const res = await fetch('/api/create-checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agentIds: proposal.selectedAgents, term: monthlyBilling ? 'monthly' : option.term }) });
                                         const data = await res.json();
                                         if (data.url) window.open(data.url, '_blank');
                                         else alert('Could not create checkout session.');
@@ -939,7 +939,7 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                                         headers: { 'Content-Type': 'application/json' },
                                         body: JSON.stringify({
                                           agentIds: proposal.selectedAgents,
-                                          term: option.term,
+                                          term: monthlyBilling ? 'monthly' : option.term,
                                         }),
                                       });
                                       const data = await res.json();
