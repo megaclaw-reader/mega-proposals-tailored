@@ -71,36 +71,45 @@ export default function EditClient({ encodedId, slug, customAddendum: initialAdd
         megaSolutions: editedSolutions,
       } : undefined;
 
-      const newEncoded = encodeProposal({
-        customerName: proposal.customerName,
-        companyName: proposal.companyName,
-        template: proposal.template,
-        selectedAgents: proposal.selectedAgents,
-        salesRepName: proposal.salesRepName,
-        salesRepEmail: proposal.salesRepEmail,
-        contractTerm: editedTerms[0]?.term || proposal.contractTerm,
-        discountPercentage: editedTerms[0]?.discountPercentage || 0,
-        selectedTerms: editedTerms,
-        selectedBundle: (proposal as any).selectedBundle,
-        firefliesUrl: proposal.firefliesUrl,
-        firefliesInsights: updatedInsights,
-        businessContext: proposal.businessContext,
-        customExecutiveSummary: editedSummary,
-        // Preserve all other fields
-        ...(proposal as any).startDate && { startDate: (proposal as any).startDate },
-        ...(proposal as any).packageName && { packageName: (proposal as any).packageName },
-        ...(proposal as any).salesRepTitle && { salesRepTitle: (proposal as any).salesRepTitle },
-        ...(proposal as any).officeAddress && { officeAddress: (proposal as any).officeAddress },
-        ...(proposal as any).legalEntityName && { legalEntityName: (proposal as any).legalEntityName },
-        ...(proposal as any).quoteOptions && { quoteOptions: (proposal as any).quoteOptions },
-        // Preserve signing/pricing/contact fields
-        ...(proposal as any).requiresAgreement && { requiresAgreement: (proposal as any).requiresAgreement },
-        ...(proposal as any).minimumTermMonths && { minimumTermMonths: (proposal as any).minimumTermMonths },
-        ...(proposal as any).customMonthlyPrice && { customMonthlyPrice: (proposal as any).customMonthlyPrice },
-        ...(proposal as any).contactMode && { contactMode: (proposal as any).contactMode },
-        ...(proposal as any).weeklyMeetings && { weeklyMeetings: (proposal as any).weeklyMeetings },
-        ...(proposal as any).hideCTA !== undefined && { hideCTA: (proposal as any).hideCTA },
-      } as any);
+      // CRITICAL: Patch the original raw payload instead of rebuilding from scratch.
+      // This preserves ALL original fields (ra, mtm, cmp, ctm, hcta, wm, cap, etc.)
+      // and only overwrites the fields the user actually edited.
+      const base64 = encodedId.replace(/-/g, '+').replace(/_/g, '/');
+      let originalPayload: Record<string, unknown>;
+      if (typeof window !== 'undefined') {
+        const binary = atob(base64);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+        originalPayload = JSON.parse(new TextDecoder().decode(bytes));
+      } else {
+        originalPayload = JSON.parse(Buffer.from(base64, 'base64').toString('utf-8'));
+      }
+
+      // Only patch what was edited — everything else stays exactly as-is
+      if (updatedInsights) {
+        originalPayload.fi = updatedInsights;
+      }
+      if (editedSummary !== proposal.customExecutiveSummary) {
+        originalPayload.ces = editedSummary || undefined;
+      }
+      // Patch terms if edited
+      originalPayload.st = editedTerms.map(t => ({
+        t: t.term,
+        d: t.discountPercentage || 0,
+        dd: t.discountDollar || 0,
+      }));
+
+      // Re-encode from the patched original
+      const json = JSON.stringify(originalPayload);
+      let newEncoded: string;
+      if (typeof window !== 'undefined') {
+        const bytes = new TextEncoder().encode(json);
+        let binary = '';
+        for (const b of bytes) binary += String.fromCharCode(b);
+        newEncoded = btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      } else {
+        newEncoded = Buffer.from(json).toString('base64url');
+      }
 
       const res = await fetch(`/api/proposals/update/${slug}`, {
         method: 'PUT',
