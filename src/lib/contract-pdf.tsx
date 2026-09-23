@@ -133,7 +133,7 @@ export function ServiceAgreementPDF({
           <View style={[s.tRow, s.tRowAlt]}><Text style={s.tLabel}>Monthly Service Fee</Text><Text style={s.tVal}>{fc(monthlyRate)}/month</Text></View>
           <View style={s.tRow}><Text style={s.tLabel}>Minimum Commitment</Text><Text style={s.tVal}>{minimumTermMonths} months</Text></View>
           <View style={[s.tRow, s.tRowAlt]}><Text style={s.tLabel}>Total Minimum Commitment</Text><Text style={s.tVal}>{fc(totalCommitment)}</Text></View>
-          <View style={s.tRow}><Text style={s.tLabel}>Billing</Text><Text style={s.tVal}>Monthly, in advance</Text></View>
+          <View style={s.tRow}><Text style={s.tLabel}>Billing</Text><Text style={s.tVal}>Monthly</Text></View>
         </View>
         {/* Discount clause — prominent box */}
         <View style={{ backgroundColor: '#EEF2FF', borderWidth: 1, borderColor: '#C7D2FE', borderRadius: 3, padding: 8, marginBottom: 8 }}>
