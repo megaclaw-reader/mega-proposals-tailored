@@ -101,7 +101,8 @@ export async function POST(request: NextRequest) {
       encodedProposal,
       companyName,
       createdAt: new Date().toISOString(),
-      // Money-back guarantee and midpoint guarantee REMOVED — Julien directive Sep 23 2026
+      ...(guaranteeDays && { showTerms: true, guaranteeDays, guaranteePlans: ['quarterly', 'bi_annual', 'annual'] }),
+      ...(midpointGuarantee && { midpointGuarantee: true }),
       ...(discountExpiresAt && { discountExpiresAt }),
       ...(monthlyBilling && { monthlyBilling: true }),
     }), {
