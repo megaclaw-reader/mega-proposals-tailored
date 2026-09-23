@@ -843,8 +843,12 @@ export default function ProposalClient({ encodedId, showTerms = false, guarantee
                                 );
                               }
 
-                              // OneSpan signing ONLY for monthly plans with a minimum commitment
-                              const requiresAgreement = option.term === 'monthly' && (proposal as any).requiresAgreement && (proposal as any).minimumTermMonths;
+                              // OneSpan signing for monthly plans with a minimum commitment
+                              // Also triggers for monthlyBilling proposals (quarterly/bi-annual billed monthly = monthly with commitment)
+                              const requiresAgreement = (
+                                (option.term === 'monthly' && (proposal as any).requiresAgreement && (proposal as any).minimumTermMonths)
+                                || (monthlyBilling && option.term !== 'annual')
+                              );
                               // Use static links: custom overrides → bundles → agent combo → dynamic fallback
                               const staticUrl = customStripeLinks?.[option.term]
                                 || ((proposal as any).selectedBundle
