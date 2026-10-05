@@ -110,20 +110,20 @@ const STRIPE_LINKS: Record<string, Record<string, string>> = {
 const BUNDLE_STRIPE_LINKS: Record<Bundle, Record<string, string>> = {
   starter: {
     monthly: 'https://buy.stripe.com/fZu4gz4xB3YteSv37xbbG3G',
-    quarterly: 'https://buy.stripe.com/3cI5kD2ptdz34dR7nNbbG3F',
-    bi_annual: 'https://buy.stripe.com/cNieVde8bcuZ8u75fFbbG3H',
+    quarterly: 'https://buy.stripe.com/fZu00j5BF2Up39N0ZpbbG3Q',
+    bi_annual: 'https://buy.stripe.com/dRm00j8NR52xh0D4bBbbG3R',
     annual: 'https://buy.stripe.com/fZu4gz5BF3YtfWz4bBbbG3J',
   },
   grow: {
     monthly: 'https://buy.stripe.com/8x26oH2ptbqVdOrbE3bbG3B',
-    quarterly: 'https://buy.stripe.com/dRm14nd473Yth0DbE3bbG3C',
-    bi_annual: 'https://buy.stripe.com/3cI3cv4xBcuZeSvazZbbG3D',
+    quarterly: 'https://buy.stripe.com/eVq4gzc037aF8u737xbbG3S',
+    bi_annual: 'https://buy.stripe.com/5kQ14n4xBdz38u70ZpbbG3T',
     annual: 'https://buy.stripe.com/7sYeVde8b3Yt8u737xbbG2Y',
   },
   grow_faster: {
     monthly: 'https://buy.stripe.com/fZufZh0hl52xcKneQfbbG2Z',
-    quarterly: 'https://buy.stripe.com/8x2bJ15BFgLf25J6jJbbG30',
-    bi_annual: 'https://buy.stripe.com/9B6fZhe8bamR39NbE3bbG31',
+    quarterly: 'https://buy.stripe.com/fZu6oHggjgLf7q3cI7bbG3U',
+    bi_annual: 'https://buy.stripe.com/9B66oH5BFcuZ8u79vVbbG3V',
     annual: 'https://buy.stripe.com/9B6eVd2ptdz3dOrdMbbbG3E',
   },
   grow_faster_ecom: {

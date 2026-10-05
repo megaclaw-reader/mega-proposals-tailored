@@ -18,9 +18,9 @@ const STRIPE_UPFRONT_TOTALS: Record<string, Record<string, number>> = {
  * When a bundle is selected, we show the bundle price (not individual agent sum).
  */
 const BUNDLE_PRICING: Record<string, Record<ContractTerm, number>> = {
-  starter: { monthly: 1199, quarterly: 999, bi_annual: 949, annual: 849 },
-  grow: { monthly: 1549, quarterly: 1299, bi_annual: 1249, annual: 1099 },
-  grow_faster: { monthly: 2399, quarterly: 1999, bi_annual: 1899, annual: 1699 },
+  starter: { monthly: 1199, quarterly: 998, bi_annual: 795, annual: 849 },
+  grow: { monthly: 1549, quarterly: 1328, bi_annual: 1165, annual: 1099 },
+  grow_faster: { monthly: 2399, quarterly: 1998, bi_annual: 1665, annual: 1699 },
   grow_faster_ecom: { monthly: 2399, quarterly: 1999, bi_annual: 1899, annual: 1679 },
 };
 
